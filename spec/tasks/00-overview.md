@@ -2,67 +2,77 @@
 
 This document provides an overview of all tasks needed to implement the WhatsApp Agent System as described in the PRD.
 
+## Core Principles
+
+1. **Test-Driven Development**: Every task includes tests that must pass before moving to the next task
+2. **UV for Python**: All Python dependencies managed with UV
+3. **CI/CD First**: GitHub Actions must pass for every task before proceeding
+4. **Incremental Progress**: Each task produces working, tested code
+
 ## Task Categories
 
 ### 1. Project Setup & Scaffolding
-- 01-project-setup.md - Initialize project structure, create directories, setup git
+- 01-project-setup.md - Initialize project with UV, tests, and CI/CD
 
 ### 2. Backend Implementation (Python FastAPI)
-- 02-backend-structure.md - Create backend directory structure following plumbing+intelligence pattern
-- 03-backend-models.md - Implement database models (SQLAlchemy) and Pydantic schemas
-- 04-backend-adapters.md - Implement adapters for external services (WhatsApp, OpenAI, DB)
-- 05-backend-services.md - Implement core business logic services
-- 06-backend-api.md - Implement FastAPI endpoints (surface layer)
-- 07-backend-auth.md - Implement authentication and security
+- 02-backend-structure.md - Core backend structure with tests
+- 03-backend-models.md - Database models and schemas with tests
+- 04-backend-adapters.md - External service adapters with tests
+- 05-backend-services.md - Business logic services with tests
+- 06-backend-api.md - API endpoints with tests
+- 07-backend-auth.md - Authentication implementation with tests
 
 ### 3. Frontend Implementation (Vue.js)
-- 08-frontend-structure.md - Create Vue.js project structure
-- 09-frontend-auth.md - Implement login and authentication flow
-- 10-frontend-sessions.md - Implement session management UI
-- 11-frontend-chat.md - Implement chat/message viewer
-- 12-frontend-commands.md - Implement agent command UI
+- 08-frontend-structure.md - Vue.js setup with tests
+- 09-frontend-auth.md - Login flow with tests
+- 10-frontend-sessions.md - Session management UI with tests
+- 11-frontend-chat.md - Chat interface with tests
+- 12-frontend-commands.md - Agent commands UI with tests
 
 ### 4. WhatsApp Bridge Integration
-- 13-whatsapp-bridge.md - Set up and configure zapw (Node.js Baileys service)
-- 14-webhook-integration.md - Implement webhook handling between services
+- 13-whatsapp-bridge.md - Zapw integration with tests
+- 14-webhook-integration.md - Webhook handling with tests
 
 ### 5. OpenAI Integration
-- 15-openai-integration.md - Implement LLM integration with function calling
-- 16-agent-memory.md - Implement vector store for agent memory
+- 15-openai-integration.md - LLM integration with tests
+- 16-agent-memory.md - Vector store with tests
 
 ### 6. Infrastructure & DevOps
-- 17-docker-setup.md - Create Dockerfiles and docker-compose.yml
-- 18-database-setup.md - Set up PostgreSQL with migrations
-- 19-ci-cd-pipeline.md - Configure GitHub Actions for CI/CD
+- 17-docker-setup.md - Docker configuration with tests
+- 18-database-setup.md - PostgreSQL migrations with tests
+- 19-redis-setup.md - Redis/queue setup with tests
 
-### 7. Testing
-- 20-backend-tests.md - Implement backend unit and integration tests
-- 21-frontend-tests.md - Implement frontend unit and E2E tests
-- 22-load-testing.md - Implement load testing strategy
+### 7. Integration Testing
+- 20-integration-tests.md - End-to-end tests
+- 21-load-testing.md - Performance tests
 
 ### 8. Documentation & Deployment
-- 23-api-documentation.md - Generate API documentation
-- 24-deployment-guide.md - Create deployment instructions
+- 22-api-documentation.md - OpenAPI docs
+- 23-deployment-guide.md - Production deployment
 
 ## Implementation Order
 
-1. Project Setup (Task 01)
-2. Backend Structure & Models (Tasks 02-03)
-3. Database Setup (Task 18)
-4. Backend Adapters & Services (Tasks 04-05)
-5. Backend API & Auth (Tasks 06-07)
-6. WhatsApp Bridge Integration (Tasks 13-14)
-7. OpenAI Integration (Tasks 15-16)
-8. Frontend Implementation (Tasks 08-12)
-9. Docker Setup (Task 17)
-10. Testing (Tasks 20-22)
-11. CI/CD Pipeline (Task 19)
-12. Documentation (Tasks 23-24)
+1. **Foundation** (Tasks 01-02): Project setup, CI/CD, basic backend
+2. **Data Layer** (Task 03): Models and database schema
+3. **Backend Core** (Tasks 04-07): Services, adapters, API, auth
+4. **External Integrations** (Tasks 13-16): WhatsApp, OpenAI
+5. **Frontend** (Tasks 08-12): UI implementation
+6. **Infrastructure** (Tasks 17-19): Docker, database, Redis
+7. **Quality** (Tasks 20-21): Integration and load tests
+8. **Release** (Tasks 22-23): Documentation and deployment
 
-## Success Criteria
+## Testing Requirements
 
-Each task should result in:
-1. Working code that follows the architecture guidelines
-2. Tests for the implemented functionality
-3. Updated progress.log
-4. Git commit with clear message
+Each task must include:
+1. Unit tests for all new code
+2. Tests must pass locally before committing
+3. Tests must pass in GitHub Actions before proceeding
+4. Minimum 80% code coverage for each module
+5. Integration tests where components interact
+
+## Success Metrics
+
+- All tests passing in CI/CD
+- Code coverage above 80%
+- No linting errors
+- Working application at each stage

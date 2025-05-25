@@ -8,19 +8,17 @@
 - [x] Created CLAUDE.md with development guidelines
 - [x] Created spec/tasks directory structure
 - [x] Created comprehensive task breakdown (00-overview.md)
-- [x] Created Task 01: Project Setup specification
-- [x] Created Task 02: Backend Structure specification
-- [x] Created Task 03: Backend Models specification
-- [x] Created Task 04: Backend Adapters specification
-- [x] Created Task 05: Backend Services specification
+- [x] Revised Task 01: Project Setup with UV and tests
+- [x] Revised Task 02: Backend Structure with comprehensive tests
+- [x] Updated overview with test-driven approach
 
 ### In Progress
-- [ ] Creating remaining task specifications
+- [ ] Implementing Task 01: Project setup
 
 ### Next Steps
-- [ ] Create Task 06: Backend API endpoints
-- [ ] Create Task 07: Backend Authentication
-- [ ] Create Frontend task specifications (08-12)
-- [ ] Create Infrastructure task specifications (13-19)
-- [ ] Create Testing and Documentation specifications (20-24)
-- [ ] Begin implementation starting with Task 01
+- [ ] Create project structure according to Task 01
+- [ ] Set up UV for Python dependencies
+- [ ] Create initial tests
+- [ ] Configure GitHub Actions
+- [ ] Ensure tests pass locally and in CI
+- [ ] Continue with Task 02 only after Task 01 is complete
