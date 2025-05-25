@@ -19,6 +19,7 @@
 - [x] Created Task 08: Frontend Structure with Vue.js and tests
 - [x] Created Task 13: WhatsApp Bridge integration
 - [x] Created Task 17: Docker setup and orchestration
+- [x] Created architecture.md with Mermaid diagrams
 
 ### In Progress
 - [ ] Creating remaining task specifications
@@ -31,3 +32,10 @@
 - [ ] Create Task 20-23: Testing, documentation, and deployment
 - [ ] Review all tasks for completeness
 - [ ] Begin implementation with Task 01
+
+### Architecture Insights
+- System follows microservices architecture with 3 main components
+- Strict separation of plumbing (infrastructure) from intelligence (business logic)
+- Comprehensive security measures including JWT, rate limiting, and account lockout
+- Docker-based deployment with health monitoring
+- Test-driven development approach throughout
