@@ -11,7 +11,7 @@ Zapa is a WhatsApp Agent System that integrates WhatsApp messaging with AI-power
 - **Admin Frontend (Vue.js)**: Web interface for managing agents
 - **PostgreSQL Database**: Central data storage
 - **Redis/RabbitMQ (Optional)**: Message queue for async processing
-- **OpenAI API**: LLM service for agent intelligence
+- **LLM Providers**: OpenAI, Anthropic, or Google (user-configurable) for agent intelligence
 
 ## Architecture Philosophy
 
@@ -130,12 +130,12 @@ backend/app/
 1. WhatsApp message arrives at Node.js Bridge
 2. Bridge sends webhook to Backend `/webhooks/whatsapp`
 3. Backend processes message in MessageService
-4. If AI response needed, AgentService calls OpenAI with function definitions
+4. If AI response needed, AgentService calls user's configured LLM provider with function definitions
 5. Response sent back via Bridge REST API
 
-### OpenAI Function Calling
+### LLM Function Calling
 
-The system uses OpenAI's function calling for agent commands:
+The system uses function calling (supported by all providers) for agent commands:
 - `summarize_chat(last_n: int)` - Summarizes recent messages
 - `extract_tasks()` - Extracts to-do items from conversation
 - `search_messages(query: str)` - Semantic search in chat history
@@ -144,11 +144,11 @@ The system uses OpenAI's function calling for agent commands:
 
 ### Backend
 - `DATABASE_URL`: PostgreSQL connection string
-- `OPENAI_API_KEY`: OpenAI API key
 - `WHATSAPP_API_URL`: WhatsApp Bridge service URL
 - `WHATSAPP_API_KEY`: Shared secret for Bridge authentication
 - `ADMIN_TOKEN_SECRET`: JWT signing secret
 - `REDIS_URL`: Redis connection (if using)
+- `ENCRYPTION_KEY`: Key for encrypting user API keys in database
 
 ### WhatsApp Bridge
 - `PORT`: Service port (default 3000)

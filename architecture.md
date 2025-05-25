@@ -219,6 +219,7 @@ erDiagram
     SESSION ||--o{ MESSAGE : contains
     USER ||--o{ AUTH_CODE : receives
     USER ||--o{ MESSAGE : owns
+    USER ||--o{ LLM_CONFIG : configures
     
     USER {
         int id PK
@@ -265,6 +266,17 @@ erDiagram
         datetime expires_at
         datetime created_at
     }
+    
+    LLM_CONFIG {
+        int id PK
+        int user_id FK
+        string provider "openai|anthropic|google"
+        string api_key_encrypted
+        json model_settings "model, temperature, max_tokens, etc"
+        boolean is_active
+        datetime created_at
+        datetime updated_at
+    }
 ```
 
 ## Technology Stack
@@ -277,6 +289,7 @@ erDiagram
 - **Package Manager**: UV
 - **Testing**: Pytest + pytest-asyncio
 - **Migration**: Alembic
+- **LLM Providers**: OpenAI, Anthropic, Google (Gemini)
 
 ### Frontend Stack
 - **Framework**: Vue 3 (Composition API)
@@ -408,6 +421,59 @@ graph TB
     style ADMIN fill:#6f9,stroke:#333,stroke-width:2px
 ```
 
+## LLM Provider Architecture
+
+```mermaid
+graph TB
+    subgraph "Service Layer"
+        AS[Agent Service]
+    end
+    
+    subgraph "LLM Adapter Layer"
+        LA[LLM Adapter Interface]
+        OA[OpenAI Adapter]
+        AA[Anthropic Adapter]
+        GA[Google Adapter]
+    end
+    
+    subgraph "Provider APIs"
+        OPENAI[OpenAI API]
+        ANTHROPIC[Anthropic API]
+        GOOGLE[Google AI API]
+    end
+    
+    AS --> LA
+    LA --> OA
+    LA --> AA
+    LA --> GA
+    
+    OA --> OPENAI
+    AA --> ANTHROPIC
+    GA --> GOOGLE
+    
+    style LA fill:#ff9,stroke:#333,stroke-width:4px
+    style AS fill:#9f9,stroke:#333,stroke-width:2px
+```
+
+### LLM Adapter Interface
+```python
+class LLMAdapter(ABC):
+    @abstractmethod
+    async def complete(self, messages: List[Message], **kwargs) -> str:
+        """Generate completion from messages"""
+        pass
+    
+    @abstractmethod
+    async def complete_with_functions(
+        self, 
+        messages: List[Message], 
+        functions: List[FunctionDef],
+        **kwargs
+    ) -> Union[str, FunctionCall]:
+        """Generate completion with function calling support"""
+        pass
+```
+
 ## Key Design Decisions
 
 ### 1. Separated Public/Private Services
@@ -435,6 +501,12 @@ graph TB
 - Single main WhatsApp number acts as the service
 - Admin connects this number via QR code in private interface
 - All user authentication codes sent from this number
+
+### 6. Multi-Provider LLM Support
+- Users can choose between OpenAI, Anthropic, or Google as their LLM provider
+- API keys stored encrypted in database per user
+- Unified adapter interface allows seamless provider switching
+- Each provider's specific features (function calling, tokens, models) normalized through adapters
 
 ## Message Storage Strategy
 
