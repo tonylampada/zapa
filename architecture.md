@@ -179,7 +179,41 @@ sequenceDiagram
     PublicUI->>User: Show dashboard
 ```
 
-### Message Processing Flow
+### Main User Interaction Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant WhatsApp
+    participant Bridge
+    participant PrivateAPI
+    participant LLM
+    participant Database
+    
+    User->>WhatsApp: Send message to main number
+    WhatsApp->>Bridge: Message received
+    Bridge->>PrivateAPI: Webhook: message.received
+    PrivateAPI->>Database: Store message
+    PrivateAPI->>PrivateAPI: Load user's LLM config
+    PrivateAPI->>Database: Fetch user's message history
+    
+    PrivateAPI->>LLM: Send message + context + tools
+    Note over LLM: Tools available:<br/>- search_messages<br/>- summarize_chat<br/>- extract_tasks<br/>- get_conversation_stats
+    
+    alt LLM needs message history
+        LLM->>PrivateAPI: Tool call: search_messages
+        PrivateAPI->>Database: Query messages
+        PrivateAPI-->>LLM: Return results
+    end
+    
+    LLM-->>PrivateAPI: Generated response
+    PrivateAPI->>Bridge: Send response
+    Bridge->>WhatsApp: Deliver to user
+    WhatsApp->>User: Receive response
+    PrivateAPI->>Database: Store assistant message
+```
+
+### Message Storage Flow
 
 ```mermaid
 sequenceDiagram
@@ -472,6 +506,32 @@ class LLMAdapter(ABC):
     ) -> Union[str, FunctionCall]:
         """Generate completion with function calling support"""
         pass
+```
+
+### LLM Tools for Message History
+
+The LLM has access to these tools when processing user messages:
+
+```python
+# Search through user's message history
+def search_messages(query: str, limit: int = 10) -> List[Message]:
+    """Semantic search through conversation history"""
+    
+# Get recent messages
+def get_recent_messages(count: int = 20) -> List[Message]:
+    """Retrieve the N most recent messages"""
+    
+# Summarize conversation
+def summarize_chat(last_n: int = 50) -> str:
+    """Generate a summary of recent messages"""
+    
+# Extract action items
+def extract_tasks() -> List[str]:
+    """Extract to-do items from conversation"""
+    
+# Get conversation statistics
+def get_conversation_stats() -> Dict:
+    """Get stats like message count, date range, etc."""
 ```
 
 ## Key Design Decisions

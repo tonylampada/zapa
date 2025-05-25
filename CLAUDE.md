@@ -127,18 +127,26 @@ backend/app/
 
 ### Message Processing Flow
 
-1. WhatsApp message arrives at Node.js Bridge
-2. Bridge sends webhook to Backend `/webhooks/whatsapp`
-3. Backend processes message in MessageService
-4. If AI response needed, AgentService calls user's configured LLM provider with function definitions
-5. Response sent back via Bridge REST API
+1. User sends WhatsApp message to main service number
+2. Message arrives at Node.js Bridge
+3. Bridge sends webhook to Backend `/webhooks/whatsapp`
+4. Backend stores message and loads user's LLM configuration
+5. AgentService calls user's configured LLM provider with:
+   - The user's message
+   - Recent conversation context
+   - Tools to access full message history
+6. LLM processes message and may use tools to search/analyze conversation history
+7. Generated response sent back via Bridge REST API to user
+8. Assistant's response stored in database
 
 ### LLM Function Calling
 
 The system uses function calling (supported by all providers) for agent commands:
-- `summarize_chat(last_n: int)` - Summarizes recent messages
-- `extract_tasks()` - Extracts to-do items from conversation
-- `search_messages(query: str)` - Semantic search in chat history
+- `search_messages(query: str, limit: int)` - Semantic search through user's conversation history
+- `get_recent_messages(count: int)` - Retrieve the N most recent messages
+- `summarize_chat(last_n: int)` - Generate a summary of recent messages
+- `extract_tasks()` - Extract to-do items from conversation
+- `get_conversation_stats()` - Get statistics like message count, date range, etc.
 
 ## Environment Variables
 
