@@ -157,9 +157,9 @@ The system uses function calling (supported by all providers) for agent commands
 - `REDIS_URL`: Redis connection (if using)
 - `ENCRYPTION_KEY`: Key for encrypting user API keys in database
 
-### WhatsApp Bridge
-- `PORT`: Service port (default 3000)
-- `WEBHOOK_URL`: Backend webhook endpoint
+### WhatsApp Bridge (zapw)
+- `PORT`: Service port (default 3000 - already used by zapw)
+- `WEBHOOK_URL`: Backend webhook endpoint  
 - Note: No authentication required (secured via network isolation)
 
 ## Testing Strategy

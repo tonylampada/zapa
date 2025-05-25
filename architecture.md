@@ -374,13 +374,13 @@ graph TB
 graph TB
     subgraph "Docker Compose Network"
         subgraph "Private Services"
-            PRIV_FE[Private Frontend<br/>:3000]
+            PRIV_FE[Private Frontend<br/>:3100]
             PRIV_BE[Private Backend<br/>:8001]
-            WB[WhatsApp Bridge<br/>:3001]
+            WB[WhatsApp Bridge<br/>:3000]
         end
         
         subgraph "Public Services"
-            PUB_FE[Public Frontend<br/>:3002]
+            PUB_FE[Public Frontend<br/>:3200]
             PUB_BE[Public Backend<br/>:8002]
         end
         
