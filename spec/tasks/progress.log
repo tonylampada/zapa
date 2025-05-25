@@ -20,22 +20,24 @@
 - [x] Created Task 13: WhatsApp Bridge integration
 - [x] Created Task 17: Docker setup and orchestration
 - [x] Created architecture.md with Mermaid diagrams
+- [x] Revised architecture.md for dual FastAPI services design
 
 ### In Progress
-- [ ] Creating remaining task specifications
+- [ ] Updating task specifications to match new architecture
 
 ### Next Steps
-- [ ] Create Task 09-12: Frontend components (auth, sessions, chat, commands)
-- [ ] Create Task 14: Webhook integration details
-- [ ] Create Task 15-16: OpenAI integration and vector memory
-- [ ] Create Task 18-19: Database and Redis setup
-- [ ] Create Task 20-23: Testing, documentation, and deployment
-- [ ] Review all tasks for completeness
-- [ ] Begin implementation with Task 01
+- [ ] Update existing tasks to reflect dual service architecture
+- [ ] Create/update tasks for Zapa Private service
+- [ ] Create/update tasks for Zapa Public service
+- [ ] Update database schema tasks for new message storage strategy
+- [ ] Update authentication tasks for WhatsApp-based auth
+- [ ] Create remaining task specifications
+- [ ] Begin implementation with updated Task 01
 
-### Architecture Insights
-- System follows microservices architecture with 3 main components
-- Strict separation of plumbing (infrastructure) from intelligence (business logic)
-- Comprehensive security measures including JWT, rate limiting, and account lockout
-- Docker-based deployment with health monitoring
-- Test-driven development approach throughout
+### Architecture Changes
+- System now has two FastAPI services: Zapa Private and Zapa Public
+- Private service handles webhooks and admin functions (not exposed to internet)
+- Public service handles user authentication and data viewing
+- WhatsApp-based authentication using codes sent from main number
+- Efficient message storage - no large objects, only metadata for media
+- Frontend uses Vue.js + Tailwind CSS

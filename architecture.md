@@ -466,8 +466,19 @@ graph LR
     AUD --> COMMON
     AUD --> META
     AUD --> REPLY
-    
-    Note right of META: {<br/>  "duration": 120,<br/>  "size": 1048576,<br/>  "dimensions": {<br/>    "width": 1920,<br/>    "height": 1080<br/>  },<br/>  "mime_type": "image/jpeg"<br/>}
+```
+
+### Media Metadata Example
+```json
+{
+  "duration": 120,
+  "size": 1048576,
+  "dimensions": {
+    "width": 1920,
+    "height": 1080
+  },
+  "mime_type": "image/jpeg"
+}
 ```
 
 ## Scalability Considerations
