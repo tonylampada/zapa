@@ -69,6 +69,7 @@ graph LR
     
     subgraph "Service Layer"
         MS[Message Service]
+        AS[Agent Service]
         SS[Session Service]
         NS[Notification Service]
     end
@@ -76,22 +77,28 @@ graph LR
     subgraph "Adapter Layer"
         WC[WhatsApp Client]
         DR[DB Repository]
+        LA[LLM Adapter]
         MQ[Message Queue]
     end
     
     WH --> MS
+    MS --> AS
     ADM --> SS
     ADM --> QR
     QR --> WC
     
+    AS --> LA
     MS --> DR
+    AS --> DR
     SS --> WC
     SS --> DR
     NS --> WC
     
     style WH fill:#faa,stroke:#333,stroke-width:2px
     style MS fill:#afa,stroke:#333,stroke-width:2px
+    style AS fill:#afa,stroke:#333,stroke-width:2px
     style WC fill:#aaf,stroke:#333,stroke-width:2px
+    style LA fill:#aaf,stroke:#333,stroke-width:2px
 ```
 
 ### Zapa Public (Internet-Facing Service)
