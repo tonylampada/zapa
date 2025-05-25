@@ -215,11 +215,12 @@ sequenceDiagram
 
 ```mermaid
 erDiagram
-    USERS ||--o{ SESSIONS : has
-    SESSIONS ||--o{ MESSAGES : contains
-    USERS ||--o{ AUTH_CODES : receives
+    USER ||--o{ SESSION : has
+    SESSION ||--o{ MESSAGE : contains
+    USER ||--o{ AUTH_CODE : receives
+    USER ||--o{ MESSAGE : owns
     
-    USERS {
+    USER {
         int id PK
         string phone_number UK
         string display_name
@@ -230,7 +231,7 @@ erDiagram
         datetime updated_at
     }
     
-    SESSIONS {
+    SESSION {
         int id PK
         int user_id FK
         string session_type "main|user"
@@ -241,9 +242,10 @@ erDiagram
         datetime created_at
     }
     
-    MESSAGES {
+    MESSAGE {
         bigint id PK
         int session_id FK
+        int user_id FK "redundant for query performance"
         string sender_jid
         string recipient_jid
         datetime timestamp
@@ -255,7 +257,7 @@ erDiagram
         datetime created_at
     }
     
-    AUTH_CODES {
+    AUTH_CODE {
         int id PK
         int user_id FK
         string code
