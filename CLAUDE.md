@@ -152,8 +152,7 @@ The system uses function calling (supported by all providers) for agent commands
 
 ### Backend
 - `DATABASE_URL`: PostgreSQL connection string
-- `WHATSAPP_API_URL`: WhatsApp Bridge service URL
-- `WHATSAPP_API_KEY`: Shared secret for Bridge authentication
+- `WHATSAPP_API_URL`: WhatsApp Bridge service URL (internal network)
 - `ADMIN_TOKEN_SECRET`: JWT signing secret
 - `REDIS_URL`: Redis connection (if using)
 - `ENCRYPTION_KEY`: Key for encrypting user API keys in database
@@ -161,7 +160,7 @@ The system uses function calling (supported by all providers) for agent commands
 ### WhatsApp Bridge
 - `PORT`: Service port (default 3000)
 - `WEBHOOK_URL`: Backend webhook endpoint
-- `API_KEY`: API authentication key
+- Note: No authentication required (secured via network isolation)
 
 ## Testing Strategy
 

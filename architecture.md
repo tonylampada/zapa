@@ -354,8 +354,8 @@ graph TB
     
     subgraph "Private Security"
         ADMIN_AUTH[Admin Authentication]
-        WEBHOOK_AUTH[Webhook Verification]
         INTERNAL[Internal Network Only]
+        BRIDGE_NOTE[WhatsApp Bridge: No Auth<br/>Protected by network isolation]
     end
     
     subgraph "Shared Security"
@@ -567,6 +567,12 @@ def get_conversation_stats() -> Dict:
 - API keys stored encrypted in database per user
 - Unified adapter interface allows seamless provider switching
 - Each provider's specific features (function calling, tokens, models) normalized through adapters
+
+### 7. WhatsApp Bridge Security Model
+- The zapw WhatsApp Bridge service has no built-in authentication
+- Security achieved through network isolation (private network only)
+- Bridge only accessible from Private API service
+- Never exposed to public internet or DMZ
 
 ## Message Storage Strategy
 
