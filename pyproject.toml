@@ -14,6 +14,9 @@ dependencies = [
     "pydantic-settings==2.1.0",
     "httpx==0.26.0",
     "python-jose[cryptography]==3.3.0",
+    "sqlalchemy==2.0.25",
+    "psycopg2-binary==2.9.9",
+    "alembic==1.13.1",
 ]
 
 [project.optional-dependencies]
@@ -41,7 +44,7 @@ env = [
 ]
 
 [tool.coverage.run]
-source = ["app"]
+source = ["app", "models", "schemas"]
 omit = ["*/tests/*", "*/conftest.py"]
 
 [tool.black]
@@ -51,11 +54,11 @@ target-version = ["py310"]
 [tool.ruff]
 line-length = 88
 select = ["E", "F", "I", "N", "UP", "B"]
-ignore = ["E501"]  # line too long
+ignore = ["E501", "F821", "B017"]  # line too long, forward references, pytest.raises(Exception)
 
 [tool.mypy]
 python_version = "3.10"
 ignore_missing_imports = true
 
 [tool.setuptools.packages.find]
-include = ["app*"]
+include = ["app*", "models*", "schemas*"]
