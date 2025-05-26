@@ -10,7 +10,7 @@ from app.config.base import BaseSettings
 def setup_logging(settings: BaseSettings) -> None:
     """Set up logging configuration."""
     log_level = getattr(logging, settings.LOG_LEVEL.upper(), logging.INFO)
-    
+
     logging_config: Dict[str, Any] = {
         "version": 1,
         "disable_existing_loggers": False,
@@ -65,13 +65,13 @@ def setup_logging(settings: BaseSettings) -> None:
             },
         },
     }
-    
+
     # Use JSON formatter in production
     if settings.ENVIRONMENT == "production":
         logging_config["handlers"]["console"]["formatter"] = "json"
-    
+
     logging.config.dictConfig(logging_config)
-    
+
     # Set up exception logging
     def handle_exception(exc_type, exc_value, exc_traceback):
         """Log uncaught exceptions."""
@@ -79,11 +79,10 @@ def setup_logging(settings: BaseSettings) -> None:
             # Don't log keyboard interrupts
             sys.__excepthook__(exc_type, exc_value, exc_traceback)
             return
-            
+
         logger = logging.getLogger(__name__)
         logger.critical(
-            "Uncaught exception", 
-            exc_info=(exc_type, exc_value, exc_traceback)
+            "Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback)
         )
-    
+
     sys.excepthook = handle_exception

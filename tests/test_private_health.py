@@ -18,10 +18,13 @@ def test_private_readiness_check(private_client):
     """Test the private service readiness check endpoint."""
     # Note: This may return 503 due to external dependencies in test environment
     response = private_client.get("/api/v1/ready")
-    
+
     # Accept both 200 (ready) and 503 (not ready) as valid responses
-    assert response.status_code in [status.HTTP_200_OK, status.HTTP_503_SERVICE_UNAVAILABLE]
-    
+    assert response.status_code in [
+        status.HTTP_200_OK,
+        status.HTTP_503_SERVICE_UNAVAILABLE,
+    ]
+
     if response.status_code == status.HTTP_200_OK:
         data = response.json()
         assert data["status"] == "ready"

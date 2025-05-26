@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional
 
 class ZapaException(Exception):
     """Base exception for Zapa applications."""
-    
+
     def __init__(
         self,
         message: str,
@@ -22,7 +22,7 @@ class ZapaException(Exception):
 
 class DatabaseError(ZapaException):
     """Database-related errors."""
-    
+
     def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
         super().__init__(
             message=message,
@@ -34,7 +34,7 @@ class DatabaseError(ZapaException):
 
 class ConfigurationError(ZapaException):
     """Configuration-related errors."""
-    
+
     def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
         super().__init__(
             message=message,
@@ -46,7 +46,7 @@ class ConfigurationError(ZapaException):
 
 class WhatsAppBridgeError(ZapaException):
     """WhatsApp Bridge connectivity errors."""
-    
+
     def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
         super().__init__(
             message=message,
@@ -58,8 +58,12 @@ class WhatsAppBridgeError(ZapaException):
 
 class AuthenticationError(ZapaException):
     """Authentication-related errors."""
-    
-    def __init__(self, message: str = "Authentication failed", details: Optional[Dict[str, Any]] = None):
+
+    def __init__(
+        self,
+        message: str = "Authentication failed",
+        details: Optional[Dict[str, Any]] = None,
+    ):
         super().__init__(
             message=message,
             error_code="AUTHENTICATION_ERROR",
@@ -70,8 +74,10 @@ class AuthenticationError(ZapaException):
 
 class AuthorizationError(ZapaException):
     """Authorization-related errors."""
-    
-    def __init__(self, message: str = "Access denied", details: Optional[Dict[str, Any]] = None):
+
+    def __init__(
+        self, message: str = "Access denied", details: Optional[Dict[str, Any]] = None
+    ):
         super().__init__(
             message=message,
             error_code="AUTHORIZATION_ERROR",
@@ -82,12 +88,14 @@ class AuthorizationError(ZapaException):
 
 class ValidationError(ZapaException):
     """Input validation errors."""
-    
-    def __init__(self, message: str, field: str = None, details: Optional[Dict[str, Any]] = None):
+
+    def __init__(
+        self, message: str, field: str = None, details: Optional[Dict[str, Any]] = None
+    ):
         error_details = details or {}
         if field:
             error_details["field"] = field
-            
+
         super().__init__(
             message=message,
             error_code="VALIDATION_ERROR",
@@ -98,17 +106,22 @@ class ValidationError(ZapaException):
 
 class NotFoundError(ZapaException):
     """Resource not found errors."""
-    
-    def __init__(self, resource: str, identifier: str = None, details: Optional[Dict[str, Any]] = None):
+
+    def __init__(
+        self,
+        resource: str,
+        identifier: str = None,
+        details: Optional[Dict[str, Any]] = None,
+    ):
         message = f"{resource} not found"
         if identifier:
             message += f": {identifier}"
-            
+
         error_details = details or {}
         error_details["resource"] = resource
         if identifier:
             error_details["identifier"] = identifier
-            
+
         super().__init__(
             message=message,
             error_code="NOT_FOUND",
@@ -119,8 +132,12 @@ class NotFoundError(ZapaException):
 
 class RateLimitError(ZapaException):
     """Rate limiting errors."""
-    
-    def __init__(self, message: str = "Rate limit exceeded", details: Optional[Dict[str, Any]] = None):
+
+    def __init__(
+        self,
+        message: str = "Rate limit exceeded",
+        details: Optional[Dict[str, Any]] = None,
+    ):
         super().__init__(
             message=message,
             error_code="RATE_LIMIT_EXCEEDED",
@@ -131,11 +148,13 @@ class RateLimitError(ZapaException):
 
 class ExternalServiceError(ZapaException):
     """External service errors (LLM providers, etc.)."""
-    
-    def __init__(self, service: str, message: str, details: Optional[Dict[str, Any]] = None):
+
+    def __init__(
+        self, service: str, message: str, details: Optional[Dict[str, Any]] = None
+    ):
         error_details = details or {}
         error_details["service"] = service
-        
+
         super().__init__(
             message=f"{service}: {message}",
             error_code="EXTERNAL_SERVICE_ERROR",

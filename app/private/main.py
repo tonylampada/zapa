@@ -27,10 +27,10 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Zapa Private entrypoint...")
     logger.info(f"Environment: {settings.ENVIRONMENT}")
     logger.info(f"Debug mode: {settings.DEBUG}")
-    
+
     # Get database manager
     database_manager = get_database_manager(settings)
-    
+
     # Test database connection
     try:
         if await database_manager.health_check():
@@ -39,15 +39,15 @@ async def lifespan(app: FastAPI):
             logger.error("Database connection failed!")
     except Exception as e:
         logger.error(f"Database connection error: {e}")
-        
+
     # Store database manager in app state for cleanup
     app.state.database_manager = database_manager
-        
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down Zapa Private entrypoint...")
-    if hasattr(app.state, 'database_manager'):
+    if hasattr(app.state, "database_manager"):
         await app.state.database_manager.close()
 
 
@@ -64,7 +64,7 @@ app = FastAPI(
 if settings.ENVIRONMENT == "production":
     app.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=["localhost", "127.0.0.1", "*.internal.company.com"]
+        allowed_hosts=["localhost", "127.0.0.1", "*.internal.company.com"],
     )
 
 # CORS middleware
@@ -93,7 +93,7 @@ async def timing_middleware(request: Request, call_next):
 async def logging_middleware(request: Request, call_next):
     """Log all requests."""
     start_time = time.time()
-    
+
     # Log request
     logger.info(
         f"Request: {request.method} {request.url.path}",
@@ -102,11 +102,11 @@ async def logging_middleware(request: Request, call_next):
             "path": request.url.path,
             "query_params": str(request.query_params),
             "client_ip": request.client.host if request.client else None,
-        }
+        },
     )
-    
+
     response = await call_next(request)
-    
+
     # Log response
     process_time = time.time() - start_time
     logger.info(
@@ -114,9 +114,9 @@ async def logging_middleware(request: Request, call_next):
         extra={
             "status_code": response.status_code,
             "process_time": process_time,
-        }
+        },
     )
-    
+
     return response
 
 
@@ -144,13 +144,16 @@ async def general_exception_handler(request: Request, exc: Exception):
         content={
             "error": "INTERNAL_SERVER_ERROR",
             "message": "An unexpected error occurred",
-            "details": {} if settings.ENVIRONMENT == "production" else {"exception": str(exc)},
+            "details": {}
+            if settings.ENVIRONMENT == "production"
+            else {"exception": str(exc)},
         },
     )
 
 
 # Include API routes
 app.include_router(api_router, prefix="/api/v1")
+
 
 # Root endpoint
 @app.get("/")
