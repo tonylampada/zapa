@@ -14,8 +14,8 @@ os.environ["PRIVATE_SERVICE_SECRET"] = "test_private_service_secret_for_testing_
 os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/test"
 
 # Import settings modules after setting env vars
-from app.config.private import PrivateSettings
-from app.config.public import PublicSettings
+from app.config.private import PrivateSettings  # noqa: E402
+from app.config.public import PublicSettings  # noqa: E402
 
 # Create test settings instances
 private_test_settings = PrivateSettings()
@@ -37,8 +37,8 @@ def mock_public_settings():
 
 
 # Import apps after mocking settings
-from private_main import app as private_app
-from public_main import app as public_app
+from private_main import app as private_app  # noqa: E402
+from public_main import app as public_app  # noqa: E402
 
 
 @pytest.fixture

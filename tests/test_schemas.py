@@ -309,9 +309,7 @@ def test_user_create_default_preferences():
     assert user.preferences == {}
 
     # Custom preferences
-    user2 = UserCreate(
-        phone_number="+1234567890", preferences={"theme": "dark", "lang": "en"}
-    )
+    user2 = UserCreate(phone_number="+1234567890", preferences={"theme": "dark", "lang": "en"})
     assert user2.preferences["theme"] == "dark"
     assert user2.preferences["lang"] == "en"
 

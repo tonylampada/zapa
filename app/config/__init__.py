@@ -4,4 +4,3 @@ from .database import DatabaseConfig
 from .encryption import EncryptionManager
 
 __all__ = ["BaseSettings", "DatabaseConfig", "EncryptionManager"]
-

@@ -61,4 +61,3 @@ try:
 except Exception:
     # Settings will be created in tests with required values
     settings = None  # type: ignore
-

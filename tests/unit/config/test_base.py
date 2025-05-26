@@ -1,5 +1,4 @@
 """Tests for base configuration."""
-import os
 
 import pytest
 from pydantic import ValidationError

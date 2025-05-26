@@ -75,4 +75,3 @@ class EncryptionManager:
     def generate_key(cls) -> str:
         """Generate a secure random key."""
         return base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
-
