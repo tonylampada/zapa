@@ -71,7 +71,7 @@ async def readiness_check() -> dict[str, Any]:
             checks["whatsapp_bridge"] = {
                 "status": "healthy" if bridge_healthy else "unhealthy",
                 "url": settings.WHATSAPP_BRIDGE_URL,
-                "response_code": response.status_code,
+                "response_code": str(response.status_code),
             }
             if not bridge_healthy:
                 overall_status = "not_ready"

@@ -89,7 +89,7 @@ class ValidationError(ZapaException):
     """Input validation errors."""
 
     def __init__(
-        self, message: str, field: str = None, details: dict[str, Any] | None = None
+        self, message: str, field: str | None = None, details: dict[str, Any] | None = None
     ):
         error_details = details or {}
         if field:
@@ -109,7 +109,7 @@ class NotFoundError(ZapaException):
     def __init__(
         self,
         resource: str,
-        identifier: str = None,
+        identifier: str | None = None,
         details: dict[str, Any] | None = None,
     ):
         message = f"{resource} not found"
