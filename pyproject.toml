@@ -40,6 +40,9 @@ dev = [
 testpaths = ["tests"]
 python_files = "test_*.py"
 asyncio_mode = "auto"
+markers = [
+    "integration: Integration tests that require external services",
+]
 env = [
     "ENVIRONMENT=test",
     "INTEGRATION_TEST_WHATSAPP=false",
