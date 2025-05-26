@@ -100,8 +100,8 @@ async def readiness_check() -> dict[str, Any]:
 
 @router.get("/database")
 async def database_check(
-    db: Session = Depends(get_db_session),
-) -> dict[str, Any]:  # noqa: B008
+    db: Session = Depends(get_db_session),  # noqa: B008
+) -> dict[str, Any]:
     """
     Detailed database connectivity check.
 
