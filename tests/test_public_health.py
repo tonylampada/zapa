@@ -48,6 +48,6 @@ def test_public_openapi_schema(public_client):
 
 def test_public_cors_headers(public_client):
     """Test CORS headers are set correctly for public service."""
-    response = public_client.get("/health", headers={"Origin": "http://localhost:3000"})
+    response = public_client.get("/health", headers={"Origin": "http://localhost:3200"})
     assert response.status_code == status.HTTP_200_OK
     assert "access-control-allow-origin" in response.headers

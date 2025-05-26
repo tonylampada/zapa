@@ -1,12 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.config import settings
+from app.config.private import settings
 
 app = FastAPI(
     title="Zapa Private API",
     description="Internal service for WhatsApp agent management",
-    version="0.1.0",
+    version=settings.VERSION,
     docs_url="/docs" if settings.ENVIRONMENT != "production" else None,
     redoc_url="/redoc" if settings.ENVIRONMENT != "production" else None,
 )
@@ -26,8 +26,8 @@ async def health_check():
     """Health check endpoint."""
     return {
         "status": "healthy",
-        "service": "zapa-private",
-        "version": "0.1.0",
+        "service": settings.SERVICE_NAME,
+        "version": settings.VERSION,
         "environment": settings.ENVIRONMENT,
     }
 
@@ -38,5 +38,5 @@ async def readiness_check():
     # TODO: Add checks for database, redis, whatsapp bridge
     return {
         "status": "ready",
-        "service": "zapa-private",
+        "service": settings.SERVICE_NAME,
     }
