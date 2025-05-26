@@ -22,7 +22,9 @@ class DatabaseConfig(BaseSettings):
     # Redis
     REDIS_URL: str = Field(default="redis://localhost:6379/0", description="Redis URL")
     REDIS_KEY_PREFIX: str = Field(default="zapa:", description="Redis key prefix")
-    REDIS_SESSION_TTL: int = Field(default=3600, ge=300, description="Session TTL in seconds")
+    REDIS_SESSION_TTL: int = Field(
+        default=3600, ge=300, description="Session TTL in seconds"
+    )
 
     @field_validator("DATABASE_URL")
     @classmethod

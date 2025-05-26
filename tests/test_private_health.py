@@ -48,6 +48,8 @@ def test_private_openapi_schema(private_client):
 
 def test_private_cors_headers(private_client):
     """Test CORS headers are set correctly for private service."""
-    response = private_client.get("/health", headers={"Origin": "http://localhost:3100"})
+    response = private_client.get(
+        "/health", headers={"Origin": "http://localhost:3100"}
+    )
     assert response.status_code == status.HTTP_200_OK
     assert "access-control-allow-origin" in response.headers

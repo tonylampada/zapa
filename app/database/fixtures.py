@@ -13,7 +13,10 @@ from models.user import User
 
 
 def create_test_user(
-    session: Session, phone_number: str = "+1234567890", display_name: str = "Test User", **kwargs
+    session: Session,
+    phone_number: str = "+1234567890",
+    display_name: str = "Test User",
+    **kwargs,
 ) -> User:
     """Create a test user."""
     user = User(
@@ -41,7 +44,9 @@ def create_test_session(
         user_id=user.id,
         session_type=session_type,
         status=status,
-        connected_at=datetime.now(timezone.utc) if status == SessionStatus.CONNECTED else None,
+        connected_at=datetime.now(timezone.utc)
+        if status == SessionStatus.CONNECTED
+        else None,
         metadata=kwargs.get("metadata", {"device": "iPhone"}),
         **kwargs,
     )
@@ -88,7 +93,11 @@ def create_test_message(
 
 
 def create_test_auth_code(
-    session: Session, user: User, code: str = "123456", expires_in_minutes: int = 5, **kwargs
+    session: Session,
+    user: User,
+    code: str = "123456",
+    expires_in_minutes: int = 5,
+    **kwargs,
 ) -> AuthCode:
     """Create a test auth code."""
     # Extract known kwargs to avoid conflicts
@@ -239,8 +248,12 @@ def create_media_messages(
 def create_test_data(session: Session) -> dict:
     """Create a complete set of test data."""
     # Create users
-    user1 = create_test_user(session, phone_number="+1234567890", display_name="Alice Smith")
-    user2 = create_test_user(session, phone_number="+0987654321", display_name="Bob Johnson")
+    user1 = create_test_user(
+        session, phone_number="+1234567890", display_name="Alice Smith"
+    )
+    user2 = create_test_user(
+        session, phone_number="+0987654321", display_name="Bob Johnson"
+    )
 
     # Create sessions
     session1 = create_test_session(session, user1)

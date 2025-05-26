@@ -34,7 +34,9 @@ def db_session():
 
 def test_create_test_user(db_session):
     """Test creating a test user."""
-    user = create_test_user(db_session, phone_number="+1234567890", display_name="Test User")
+    user = create_test_user(
+        db_session, phone_number="+1234567890", display_name="Test User"
+    )
 
     assert user.id is not None
     assert user.phone_number == "+1234567890"

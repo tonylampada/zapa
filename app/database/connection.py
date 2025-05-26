@@ -47,7 +47,9 @@ class DatabaseManager:
         """Get asynchronous SQLAlchemy engine."""
         if self._async_engine is None:
             # Convert postgresql:// to postgresql+asyncpg://
-            async_url = self.config.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://")
+            async_url = self.config.DATABASE_URL.replace(
+                "postgresql://", "postgresql+asyncpg://"
+            )
             self._async_engine = create_async_engine(
                 async_url,
                 pool_size=self.config.DATABASE_POOL_SIZE,

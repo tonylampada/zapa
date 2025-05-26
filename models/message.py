@@ -28,17 +28,23 @@ class Message(Base):
     __tablename__ = "message"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    session_id: Mapped[int] = mapped_column(ForeignKey("session.id"), nullable=False, index=True)
+    session_id: Mapped[int] = mapped_column(
+        ForeignKey("session.id"), nullable=False, index=True
+    )
     user_id: Mapped[int] = mapped_column(
         ForeignKey("user.id"), nullable=False, index=True  # Redundant for performance
     )
     sender_jid: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     recipient_jid: Mapped[str] = mapped_column(String(50), nullable=False)
-    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    timestamp: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, index=True
+    )
     message_type: Mapped[MessageType] = mapped_column(Enum(MessageType), nullable=False)
     content: Mapped[str | None] = mapped_column(Text)  # Nullable for media messages
     caption: Mapped[str | None] = mapped_column(Text)
-    reply_to_id: Mapped[int | None] = mapped_column(ForeignKey("message.id"), index=True)
+    reply_to_id: Mapped[int | None] = mapped_column(
+        ForeignKey("message.id"), index=True
+    )
     media_metadata: Mapped[dict[str, Any] | None] = mapped_column(JSON)
 
     # Relationships
