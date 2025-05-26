@@ -23,11 +23,40 @@
 - [x] Revised architecture.md for dual FastAPI services design
 
 ### In Progress
-- [ ] Task 03: Core Configuration and Settings
+- [ ] Task 05: Private Service Structure - Major refactor to entrypoint structure
 
-### Next Steps
-- [ ] Update existing tasks to reflect dual service architecture
-- [ ] Create/update tasks for Zapa Private service
+## 2025-05-26
+
+### Architecture Refactor
+- User clarified that private and public are NOT separate services but two entrypoints of the same backend project
+- This is a single FastAPI project with two entry points accessed via private_main.py and public_main.py
+- Updating all task specifications to reflect this correct architecture
+
+### Completed Today
+- [x] Task 03: Core Configuration and Settings - Updated to single backend with entrypoints
+- [x] Task 04: Database Migrations - Updated paths from shared/ to backend/app/
+- [x] Task 05: Private Entrypoint Structure - Refactored to backend/app/private structure
+- [x] Task 12: Public Auth Flow - Updated for public entrypoint and added public_main.py
+- [x] Task 16: Integration Testing - Updated all test paths and service references
+
+### Architecture Refactor Summary
+Successfully updated all high-priority task specifications to reflect the correct architecture:
+- Single backend project with two FastAPI entrypoints (private_main.py and public_main.py)
+- Shared codebase in backend/app/ with submodules for private and public APIs
+- Configuration split into base, private, and public settings
+- Database and core utilities shared between entrypoints
+- Test structure organized by unit/integration/e2e tests
+
+### Remaining Tasks to Update
+The following medium-priority tasks still need updating for the new architecture:
+- Task 07: LLM Adapter Interface
+- Task 08: Message Service
+- Task 09: Agent Service  
+- Task 10: Admin API Endpoints
+- Task 11: Webhook Handlers
+- Task 13: WhatsApp Integration
+
+Frontend tasks (14-15) may not need significant changes as they remain separate projects.
 - [ ] Create/update tasks for Zapa Public service
 - [ ] Update database schema tasks for new message storage strategy
 - [ ] Update authentication tasks for WhatsApp-based auth

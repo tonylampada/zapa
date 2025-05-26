@@ -18,14 +18,14 @@ Create the WhatsApp Bridge adapter that communicates with the zapw service, incl
 
 ## Files to Create
 
-### services/private/app/adapters/__init__.py
+### backend/app/adapters/__init__.py
 ```python
 from .whatsapp import WhatsAppBridge, WhatsAppBridgeError
 
 __all__ = ["WhatsAppBridge", "WhatsAppBridgeError"]
 ```
 
-### services/private/app/adapters/whatsapp.py
+### backend/app/adapters/whatsapp.py
 ```python
 """WhatsApp Bridge adapter for zapw service."""
 import httpx
@@ -290,12 +290,12 @@ class WhatsAppBridge:
             raise ConnectionError(f"Failed to connect to WhatsApp Bridge: {e}")
 ```
 
-### services/private/tests/adapters/__init__.py
+### backend/tests/unit/adapters/__init__.py
 ```python
 # Empty file to make adapters a package
 ```
 
-### services/private/tests/adapters/test_whatsapp_unit.py
+### backend/tests/unit/adapters/test_whatsapp_unit.py
 ```python
 """Unit tests for WhatsApp Bridge adapter with mocked responses."""
 import pytest
@@ -319,7 +319,7 @@ async def bridge():
     """Create WhatsApp Bridge instance."""
     async with WhatsAppBridge(
         base_url="http://localhost:3000",
-        webhook_url="http://localhost:8001/webhooks/whatsapp",
+        webhook_url="http://localhost:8001/api/v1/webhooks/whatsapp",
     ) as bridge:
         yield bridge
 
@@ -387,7 +387,7 @@ async def test_create_session_success(bridge, mock_response):
             "/sessions",
             json={
                 "session_id": "test-session",
-                "webhook_url": "http://localhost:8001/webhooks/whatsapp",
+                "webhook_url": "http://localhost:8001/api/v1/webhooks/whatsapp",
             }
         )
 
@@ -583,7 +583,7 @@ async def test_recipient_formatting():
             assert call_args["recipient_jid"] == "+0987654321@s.whatsapp.net"
 ```
 
-### services/private/tests/adapters/test_whatsapp_integration.py
+### backend/tests/integration/adapters/test_whatsapp_integration.py
 ```python
 """Integration tests for WhatsApp Bridge adapter."""
 import pytest
@@ -605,7 +605,7 @@ async def bridge():
     """Create real WhatsApp Bridge connection."""
     # Use actual WhatsApp Bridge URL from environment or default
     bridge_url = os.getenv("WHATSAPP_BRIDGE_URL", "http://localhost:3000")
-    webhook_url = os.getenv("WEBHOOK_URL", "http://localhost:8001/webhooks/whatsapp")
+    webhook_url = os.getenv("WEBHOOK_URL", "http://localhost:8001/api/v1/webhooks/whatsapp")
     
     async with WhatsAppBridge(
         base_url=bridge_url,
@@ -746,7 +746,7 @@ async def test_real_concurrent_operations(bridge):
         await asyncio.gather(*delete_tasks, return_exceptions=True)
 ```
 
-### services/private/tests/adapters/conftest.py
+### backend/tests/conftest.py
 ```python
 """Fixtures for adapter tests."""
 import pytest
@@ -770,7 +770,7 @@ def integration_test_env(monkeypatch):
 
 ### Update pyproject.toml for integration tests
 
-Add to `services/private/pyproject.toml`:
+Add to `backend/pyproject.toml`:
 
 ```toml
 [tool.pytest.ini_options]
@@ -811,9 +811,9 @@ if [ "$1" == "whatsapp" ] || [ "$1" == "all" ]; then
         exit 1
     fi
     
-    cd services/private
-    INTEGRATION_TEST_WHATSAPP=true uv run pytest tests/adapters/test_whatsapp_integration.py -v -s
-    cd ../..
+    cd backend
+    INTEGRATION_TEST_WHATSAPP=true uv run pytest tests/integration/adapters/test_whatsapp_integration.py -v -s
+    cd ..
 fi
 
 # Future: Add other integration tests (LLM providers, etc.)
@@ -826,22 +826,22 @@ echo "✅ Integration tests completed!"
 
 ```bash
 # Run unit tests only (default)
-cd services/private
-uv run pytest tests/adapters/test_whatsapp_unit.py -v
+cd backend
+uv run pytest tests/unit/adapters/test_whatsapp_unit.py -v
 
 # Run integration tests (requires zapw running)
 # First start zapw: docker run -p 3000:3000 zapw/zapw
-INTEGRATION_TEST_WHATSAPP=true uv run pytest tests/adapters/test_whatsapp_integration.py -v -s
+INTEGRATION_TEST_WHATSAPP=true uv run pytest tests/integration/adapters/test_whatsapp_integration.py -v -s
 
 # Or use the script
 chmod +x scripts/test-integration.sh
 ./scripts/test-integration.sh whatsapp
 
 # Run all tests including integration
-INTEGRATION_TEST_WHATSAPP=true uv run pytest tests/adapters/ -v
+INTEGRATION_TEST_WHATSAPP=true uv run pytest tests/unit/adapters/ tests/integration/adapters/ -v
 
 # Run with coverage
-uv run pytest tests/adapters/test_whatsapp_unit.py -v --cov=app.adapters.whatsapp
+uv run pytest tests/unit/adapters/test_whatsapp_unit.py -v --cov=app.adapters.whatsapp
 ```
 
 ## Verification

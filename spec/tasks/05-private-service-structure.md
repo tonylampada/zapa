@@ -1,7 +1,7 @@
-# Task 05: Private Service Structure and Health Checks
+# Task 05: Private Entrypoint Structure and Health Checks
 
 ## Objective
-Set up the complete structure for the Zapa Private service with health checks, logging, middleware, and comprehensive tests.
+Set up the complete structure for the Zapa Private entrypoint with health checks, logging, middleware, and comprehensive tests.
 
 ## Prerequisites
 - Tasks 01-04 completed
@@ -9,7 +9,7 @@ Set up the complete structure for the Zapa Private service with health checks, l
 - Configuration system in place
 
 ## Success Criteria
-- [ ] Complete private service structure with proper layering
+- [ ] Complete private entrypoint structure with proper layering
 - [ ] Database connectivity and health checks
 - [ ] Logging and middleware configuration
 - [ ] Dependency injection for services
@@ -18,15 +18,15 @@ Set up the complete structure for the Zapa Private service with health checks, l
 
 ## Files to Create
 
-### services/private/app/__init__.py
+### backend/app/private/__init__.py
 ```python
-"""Zapa Private Service."""
+"""Zapa Private Entrypoint."""
 __version__ = "0.1.0"
 ```
 
-### services/private/app/main.py
+### backend/app/private/main.py
 ```python
-"""FastAPI application for Zapa Private service."""
+"""FastAPI application for Zapa Private entrypoint."""
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
@@ -35,14 +35,14 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 import time
 
-from app.core.config import settings
+from app.config.private import settings
 from app.core.logging import setup_logging
-from app.core.database import database_manager
+from app.database.connection import get_database_manager
 from app.core.exceptions import ZapaException
-from app.api.v1.router import api_router
+from app.private.api.v1.router import api_router
 
 # Set up logging
-setup_logging()
+setup_logging(settings)
 logger = logging.getLogger(__name__)
 
 
@@ -50,7 +50,10 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Application lifespan events."""
     # Startup
-    logger.info("Starting Zapa Private service...")
+    logger.info("Starting Zapa Private entrypoint...")
+    
+    # Get database manager
+    database_manager = get_database_manager(settings)
     
     # Test database connection
     if await database_manager.health_check():
@@ -61,13 +64,13 @@ async def lifespan(app: FastAPI):
     yield
     
     # Shutdown
-    logger.info("Shutting down Zapa Private service...")
+    logger.info("Shutting down Zapa Private entrypoint...")
     await database_manager.close()
 
 
 app = FastAPI(
     title="Zapa Private API",
-    description="Internal service for WhatsApp agent management",
+    description="Internal API for WhatsApp agent management",
     version=settings.VERSION,
     docs_url="/docs" if settings.ENVIRONMENT != "production" else None,
     redoc_url="/redoc" if settings.ENVIRONMENT != "production" else None,
@@ -210,9 +213,9 @@ async def readiness_check():
 app.include_router(api_router, prefix=settings.API_V1_STR)
 ```
 
-### services/private/app/core/exceptions.py
+### backend/app/core/exceptions.py
 ```python
-"""Custom exceptions for Zapa Private service."""
+"""Custom exceptions for Zapa backend."""
 from typing import Any, Dict, Optional
 
 
@@ -315,18 +318,18 @@ class AuthorizationError(ZapaException):
         )
 ```
 
-### services/private/app/core/logging.py
+### backend/app/core/logging.py
 ```python
-"""Logging configuration for Zapa Private service."""
+"""Logging configuration for Zapa backend."""
 import logging
 import logging.config
 import sys
 from typing import Dict, Any
 
-from app.core.config import settings
+from app.config.base import BaseSettings
 
 
-def setup_logging():
+def setup_logging(settings: BaseSettings):
     """Set up logging configuration."""
     logging_config: Dict[str, Any] = {
         "version": 1,
@@ -384,32 +387,38 @@ def setup_logging():
         logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 ```
 
-### services/private/app/core/database.py
+### backend/app/core/__init__.py
 ```python
-"""Database setup for Private service."""
-from zapa_shared.database import DatabaseManager
-from app.core.config import settings
+"""Core utilities package."""
+from .exceptions import (
+    ZapaException, ValidationError, NotFoundError, ConflictError,
+    WhatsAppError, LLMError, AuthenticationError, AuthorizationError
+)
+from .logging import setup_logging
 
-# Global database manager instance
-database_manager = DatabaseManager(settings)
+__all__ = [
+    "ZapaException", "ValidationError", "NotFoundError", "ConflictError",
+    "WhatsAppError", "LLMError", "AuthenticationError", "AuthorizationError",
+    "setup_logging",
+]
 ```
 
-### services/private/app/api/__init__.py
+### backend/app/private/api/__init__.py
 ```python
-"""API package."""
+"""Private API package."""
 ```
 
-### services/private/app/api/v1/__init__.py
+### backend/app/private/api/v1/__init__.py
 ```python
 """API v1 package."""
 ```
 
-### services/private/app/api/v1/router.py
+### backend/app/private/api/v1/router.py
 ```python
 """Main API router for v1."""
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import health
+from app.private.api.v1.endpoints import health
 
 api_router = APIRouter()
 
@@ -422,19 +431,18 @@ api_router.include_router(health.router, prefix="/health", tags=["health"])
 # api_router.include_router(sessions.router, prefix="/sessions", tags=["sessions"])
 ```
 
-### services/private/app/api/v1/endpoints/__init__.py
+### backend/app/private/api/v1/endpoints/__init__.py
 ```python
 """API endpoints package."""
 ```
 
-### services/private/app/api/v1/endpoints/health.py
+### backend/app/private/api/v1/endpoints/health.py
 ```python
 """Health check endpoints."""
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.core.database import database_manager
-from zapa_shared.database import get_db_session
+from app.database.connection import get_database_manager, get_db_session
 
 router = APIRouter()
 
@@ -442,6 +450,9 @@ router = APIRouter()
 @router.get("/detailed")
 async def detailed_health_check(db: Session = Depends(get_db_session)):
     """Detailed health check with database and external service status."""
+    from app.config.private import settings
+    database_manager = get_database_manager(settings)
+    
     checks = {
         "database": await database_manager.health_check(),
         "whatsapp_bridge": False,  # TODO: Implement when WhatsApp adapter is ready
@@ -470,7 +481,7 @@ async def ping():
     return {"status": "pong"}
 ```
 
-### services/private/app/api/dependencies.py
+### backend/app/private/api/dependencies.py
 ```python
 """Shared dependencies for API endpoints."""
 from typing import AsyncGenerator
@@ -478,7 +489,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.database import database_manager
+from app.database.connection import get_database_manager
 
 # Security
 security = HTTPBearer(auto_error=False)
@@ -486,6 +497,8 @@ security = HTTPBearer(auto_error=False)
 
 async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
     """Dependency to get async database session."""
+    from app.config.private import settings
+    database_manager = get_database_manager(settings)
     async with database_manager.get_async_session() as session:
         yield session
 
@@ -521,14 +534,14 @@ async def verify_whatsapp_webhook(
     return True
 ```
 
-### services/private/tests/test_main.py
+### backend/tests/unit/private/test_main.py
 ```python
 """Tests for main FastAPI application."""
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, AsyncMock
+from unittest.mock import patch, AsyncMock, MagicMock
 
-from app.main import app
+from app.private.main import app
 
 
 @pytest.fixture
@@ -549,10 +562,12 @@ def test_health_endpoint(client):
     assert data["environment"] == "test"
 
 
-@patch('app.core.database.database_manager.health_check')
-def test_ready_endpoint_healthy(mock_health_check, client):
+@patch('app.database.connection.get_database_manager')
+def test_ready_endpoint_healthy(mock_get_db_manager, client):
     """Test readiness endpoint when all services are healthy."""
-    mock_health_check.return_value = True
+    mock_db_manager = MagicMock()
+    mock_db_manager.health_check = AsyncMock(return_value=True)
+    mock_get_db_manager.return_value = mock_db_manager
     
     response = client.get("/ready")
     assert response.status_code == 200
@@ -564,10 +579,12 @@ def test_ready_endpoint_healthy(mock_health_check, client):
     assert data["checks"]["service"] is True
 
 
-@patch('app.core.database.database_manager.health_check')
-def test_ready_endpoint_unhealthy(mock_health_check, client):
+@patch('app.database.connection.get_database_manager')
+def test_ready_endpoint_unhealthy(mock_get_db_manager, client):
     """Test readiness endpoint when database is unhealthy."""
-    mock_health_check.return_value = False
+    mock_db_manager = MagicMock()
+    mock_db_manager.health_check = AsyncMock(return_value=False)
+    mock_get_db_manager.return_value = mock_db_manager
     
     response = client.get("/ready")
     assert response.status_code == 503
@@ -629,12 +646,14 @@ def test_api_v1_router_included(client):
 @pytest.mark.asyncio
 async def test_lifespan_events():
     """Test application lifespan events."""
-    from app.main import lifespan
+    from app.private.main import lifespan, app
     
     # Mock the database manager
-    with patch('app.main.database_manager') as mock_db_manager:
+    with patch('app.database.connection.get_database_manager') as mock_get_db_manager:
+        mock_db_manager = MagicMock()
         mock_db_manager.health_check = AsyncMock(return_value=True)
         mock_db_manager.close = AsyncMock()
+        mock_get_db_manager.return_value = mock_db_manager
         
         # Test lifespan context manager
         async with lifespan(app):
@@ -647,7 +666,7 @@ async def test_lifespan_events():
         mock_db_manager.close.assert_called_once()
 ```
 
-### services/private/tests/test_exceptions.py
+### backend/tests/unit/private/test_exceptions.py
 ```python
 """Tests for custom exceptions."""
 import pytest
@@ -748,7 +767,7 @@ def test_authorization_error():
 
 def test_exception_handler_integration():
     """Test exception handlers with FastAPI."""
-    from app.main import app
+    from app.private.main import app
     
     # Create a test endpoint that raises ZapaException
     @app.get("/test-error")
@@ -767,7 +786,7 @@ def test_exception_handler_integration():
 
 def test_general_exception_handler():
     """Test general exception handler for unexpected errors."""
-    from app.main import app
+    from app.private.main import app
     
     @app.get("/test-unexpected")
     async def test_unexpected():
@@ -784,14 +803,14 @@ def test_general_exception_handler():
     assert data["type"] == "ValueError"
 ```
 
-### services/private/tests/api/test_health.py
+### backend/tests/unit/private/api/test_health.py
 ```python
 """Tests for health check endpoints."""
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 
-from app.main import app
+from app.private.main import app
 
 
 @pytest.fixture
@@ -800,13 +819,15 @@ def client():
     return TestClient(app)
 
 
-@patch('app.api.v1.endpoints.health.database_manager.health_check')
-def test_detailed_health_check_healthy(mock_health_check, client):
+@patch('app.database.connection.get_database_manager')
+def test_detailed_health_check_healthy(mock_get_db_manager, client):
     """Test detailed health check when all services are healthy."""
-    mock_health_check.return_value = True
+    mock_db_manager = MagicMock()
+    mock_db_manager.health_check = AsyncMock(return_value=True)
+    mock_get_db_manager.return_value = mock_db_manager
     
     # Mock database session and query result
-    with patch('app.api.v1.endpoints.health.get_db_session') as mock_get_db:
+    with patch('app.private.api.v1.endpoints.health.get_db_session') as mock_get_db:
         mock_db = MagicMock()
         mock_result = MagicMock()
         mock_result.__getitem__ = MagicMock(return_value=1)
@@ -826,13 +847,15 @@ def test_detailed_health_check_healthy(mock_health_check, client):
         assert data["checks"]["redis"] is False
 
 
-@patch('app.api.v1.endpoints.health.database_manager.health_check')
-def test_detailed_health_check_database_error(mock_health_check, client):
+@patch('app.database.connection.get_database_manager')
+def test_detailed_health_check_database_error(mock_get_db_manager, client):
     """Test detailed health check when database query fails."""
-    mock_health_check.return_value = True
+    mock_db_manager = MagicMock()
+    mock_db_manager.health_check = AsyncMock(return_value=True)
+    mock_get_db_manager.return_value = mock_db_manager
     
     # Mock database session that raises exception
-    with patch('app.api.v1.endpoints.health.get_db_session') as mock_get_db:
+    with patch('app.private.api.v1.endpoints.health.get_db_session') as mock_get_db:
         mock_db = MagicMock()
         mock_db.execute.side_effect = Exception("Database error")
         mock_get_db.return_value.__enter__ = MagicMock(return_value=mock_db)
@@ -874,36 +897,32 @@ def test_health_endpoints_in_openapi(client):
     assert "Detailed health check" in detailed_endpoint["summary"]
 ```
 
-### Update services/private/pyproject.toml
-```toml
-[project]
-dependencies = [
-    "fastapi==0.109.0",
-    "uvicorn[standard]==0.27.0",
-    "pydantic==2.5.3",
-    "pydantic-settings==2.1.0",
-    "httpx==0.26.0",
-    "sqlalchemy[asyncio]==2.0.25",
-    "asyncpg==0.29.0",
-    "redis==5.0.1",
-    "zapa-shared @ file://../../shared",
-]
+### backend/private_main.py
+```python
+"""Entry point for Zapa Private API."""
+import uvicorn
+from app.private.main import app
+
+if __name__ == "__main__":
+    uvicorn.run(
+        "app.private.main:app",
+        host="0.0.0.0",
+        port=8001,
+        reload=True,
+    )
 ```
 
 ## Commands to Run
 
 ```bash
-# Install updated dependencies
-cd services/private
-uv pip install -e ".[dev]"
-
 # Run tests
-uv run pytest tests/test_main.py -v
-uv run pytest tests/test_exceptions.py -v
-uv run pytest tests/api/test_health.py -v
+cd backend
+uv run pytest tests/unit/private/test_main.py -v
+uv run pytest tests/unit/private/test_exceptions.py -v
+uv run pytest tests/unit/private/api/test_health.py -v
 
-# Run the service
-uv run uvicorn app.main:app --reload --port 8001
+# Run the private entrypoint
+uv run python private_main.py
 
 # Test endpoints manually
 curl http://localhost:8001/health
@@ -915,7 +934,7 @@ curl http://localhost:8001/api/v1/health/ping
 open http://localhost:8001/docs
 
 # Run with coverage
-uv run pytest tests/ -v --cov=app --cov-report=term-missing
+uv run pytest tests/unit/private/ -v --cov=app.private --cov-report=term-missing
 ```
 
 ## Verification

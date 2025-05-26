@@ -1,7 +1,7 @@
 # Task 16: Integration Testing
 
 ## Overview
-Create comprehensive integration tests that verify the complete system works end-to-end. Test real interactions between all components: WhatsApp Bridge, backend services, LLM providers, and frontends.
+Create comprehensive integration tests that verify the complete system works end-to-end. Test real interactions between all components: WhatsApp Bridge, backend entrypoints, LLM providers, and frontends.
 
 ## Prerequisites
 - All previous tasks (1-15) implemented
@@ -52,24 +52,43 @@ services:
     ports:
       - "3001:3000"
     environment:
-      WEBHOOK_URL: http://zapa-private:8000/webhooks/whatsapp
+      WEBHOOK_URL: http://backend-private:8001/api/v1/webhooks/whatsapp
 
-  # Zapa Private (Test Mode)
-  zapa-private:
+  # Backend (Test Mode) - Private entrypoint
+  backend-private:
     build:
       context: ./backend
       target: test
     ports:
-      - "8001:8000"
+      - "8001:8001"
     environment:
       DATABASE_URL: postgresql://test_user:test_pass@test-db:5432/zapa_test
       REDIS_URL: redis://test-redis:6379
       WHATSAPP_API_URL: http://mock-whatsapp:3000
       TESTING: "true"
+    command: python private_main.py
     depends_on:
       - test-db
       - test-redis
       - mock-whatsapp
+
+  # Backend (Test Mode) - Public entrypoint
+  backend-public:
+    build:
+      context: ./backend
+      target: test
+    ports:
+      - "8002:8002"
+    environment:
+      DATABASE_URL: postgresql://test_user:test_pass@test-db:5432/zapa_test
+      REDIS_URL: redis://test-redis:6379
+      PRIVATE_SERVICE_URL: http://backend-private:8001
+      TESTING: "true"
+    command: python public_main.py
+    depends_on:
+      - test-db
+      - test-redis
+      - backend-private
 
   # Test Runner
   test-runner:
@@ -79,10 +98,11 @@ services:
       - ./tests:/tests
       - ./test-results:/results
     environment:
-      ZAPA_PRIVATE_URL: http://zapa-private:8000
-      ZAPA_PUBLIC_URL: http://zapa-public:8080
+      ZAPA_PRIVATE_URL: http://backend-private:8001
+      ZAPA_PUBLIC_URL: http://backend-public:8002
     depends_on:
-      - zapa-private
+      - backend-private
+      - backend-public
 ```
 
 ### Step 2: Create Mock WhatsApp Bridge
@@ -181,7 +201,7 @@ app.listen(PORT, () => {
 
 ### Step 3: Create E2E Test Suite
 ```python
-# tests/e2e/test_full_flow.py
+# backend/tests/e2e/test_full_flow.py
 import pytest
 import asyncio
 import aiohttp
@@ -359,7 +379,7 @@ class TestE2EFlow:
 
 ### Step 4: Create Load Testing Suite
 ```python
-# tests/load/test_concurrent_users.py
+# backend/tests/load/test_concurrent_users.py
 import asyncio
 import aiohttp
 import time
@@ -481,7 +501,7 @@ async def simulate_user(session, phone_number, duration):
 
 ### Step 5: Create Integration Test Scenarios
 ```python
-# tests/integration/test_failure_scenarios.py
+# backend/tests/integration/test_failure_scenarios.py
 import pytest
 import asyncio
 from unittest.mock import patch
@@ -607,7 +627,7 @@ class TestFailureScenarios:
 
 ### Step 6: Create Security Testing Suite
 ```python
-# tests/security/test_security.py
+# backend/tests/security/test_security.py
 import pytest
 import jwt
 import asyncio
@@ -725,7 +745,7 @@ class TestSecurity:
 
 ### Step 7: Create Performance Benchmarks
 ```python
-# tests/performance/test_benchmarks.py
+# backend/tests/performance/test_benchmarks.py
 import pytest
 import asyncio
 import time
@@ -905,17 +925,17 @@ jobs:
     - name: Run integration tests
       run: |
         docker-compose -f docker-compose.test.yml run test-runner \
-          pytest tests/integration -v --junitxml=results/integration.xml
+          pytest backend/tests/integration -v --junitxml=results/integration.xml
     
     - name: Run E2E tests
       run: |
         docker-compose -f docker-compose.test.yml run test-runner \
-          pytest tests/e2e -v --junitxml=results/e2e.xml
+          pytest backend/tests/e2e -v --junitxml=results/e2e.xml
     
     - name: Run load tests
       run: |
         docker-compose -f docker-compose.test.yml run test-runner \
-          locust -f tests/load/test_concurrent_users.py \
+          locust -f backend/tests/load/test_concurrent_users.py \
           --headless -u 50 -r 5 -t 5m \
           --html results/load-test.html
     

@@ -1,7 +1,7 @@
 # Task 04: Database Migrations and Fixtures
 
 ## Objective
-Set up Alembic migrations, create database fixtures for testing, and establish database connection utilities for both services.
+Set up Alembic migrations, create database fixtures for testing, and establish database connection utilities for the backend.
 
 ## Prerequisites
 - Tasks 01-03 completed
@@ -10,7 +10,7 @@ Set up Alembic migrations, create database fixtures for testing, and establish d
 
 ## Success Criteria
 - [ ] Alembic migrations working for all models
-- [ ] Database connection utilities for both services
+- [ ] Database connection utilities for the backend
 - [ ] Test fixtures for reliable test data
 - [ ] Migration rollback/upgrade tests
 - [ ] Database seeding scripts
@@ -18,7 +18,7 @@ Set up Alembic migrations, create database fixtures for testing, and establish d
 
 ## Files to Create
 
-### shared/database/__init__.py
+### backend/app/database/__init__.py
 ```python
 from .connection import DatabaseManager, get_db_session
 from .fixtures import create_test_data, cleanup_test_data
@@ -26,7 +26,7 @@ from .fixtures import create_test_data, cleanup_test_data
 __all__ = ["DatabaseManager", "get_db_session", "create_test_data", "cleanup_test_data"]
 ```
 
-### shared/database/connection.py
+### backend/app/database/connection.py
 ```python
 """Database connection utilities."""
 import asyncio
@@ -38,8 +38,8 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
 import logging
 
-from models.base import Base
-from config.database import DatabaseConfig
+from app.models.base import Base
+from app.config.database import DatabaseConfig
 
 logger = logging.getLogger(__name__)
 
@@ -212,7 +212,7 @@ def get_database_manager(config: Optional[DatabaseConfig] = None) -> DatabaseMan
     global _db_manager
     if _db_manager is None:
         if config is None:
-            from config.database import DatabaseConfig
+            from app.config.database import DatabaseConfig
             config = DatabaseConfig()
         _db_manager = DatabaseManager(config)
     return _db_manager
@@ -235,19 +235,19 @@ async def get_async_db_session():
         yield session
 ```
 
-### shared/database/fixtures.py
+### backend/app/database/fixtures.py
 ```python
 """Test fixtures and sample data creation."""
 from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 from sqlalchemy.orm import Session
 
-from models.user import User
-from models.session import Session as WhatsAppSession, SessionType, SessionStatus
-from models.message import Message, MessageType
-from models.auth_code import AuthCode
-from models.llm_config import LLMConfig, LLMProvider
-from config.encryption import EncryptionManager
+from app.models.user import User
+from app.models.session import Session as WhatsAppSession, SessionType, SessionStatus
+from app.models.message import Message, MessageType
+from app.models.auth_code import AuthCode
+from app.models.llm_config import LLMConfig, LLMProvider
+from app.config.encryption import EncryptionManager
 
 
 def create_test_user(
@@ -532,7 +532,204 @@ def cleanup_test_data(session: Session):
     session.commit()
 ```
 
-### shared/alembic/versions/001_initial_schema.py
+### backend/alembic.ini
+```ini
+# A generic, single database configuration.
+
+[alembic]
+# path to migration scripts
+script_location = alembic
+
+# template used to generate migration file names; The default value is %%(rev)s_%%(slug)s
+# Uncomment the line below if you want the files to be prepended with date and time
+# file_template = %%(year)d%%(month).2d%%(day).2d_%%(hour).2d%%(minute).2d-%%(rev)s_%%(slug)s
+
+# sys.path path, will be prepended to sys.path if present.
+# defaults to the current working directory.
+prepend_sys_path = .
+
+# timezone to use when rendering the date within the migration file
+# as well as the filename.
+# If specified, requires the python-dateutil library
+# one of: utc, system
+# timezone = 
+
+# max length of characters to apply to the
+# "slug" field
+# truncate_slug_length = 40
+
+# set to 'true' to run the environment during
+# the 'revision' command, regardless of autogenerate
+# revision_environment = false
+
+# set to 'true' to allow .pyc and .pyo files without
+# a source .py file to be detected as revisions in the
+# versions/ directory
+# sourceless = false
+
+# version location specification; This defaults
+# to alembic/versions.  When using multiple version
+# directories, initial revisions must be specified with --version-path
+# version_locations = %(here)s/bar:%(here)s/bat:alembic/versions
+
+# version path separator; As mentioned above, this is the character used to split
+# version_locations. The default within new alembic.ini files is "os", which uses os.pathsep.
+# version_path_separator = :
+# version_path_separator = ;
+# version_path_separator = space
+version_path_separator = os  # Use os.pathsep.
+
+# the output encoding used when revision files
+# are written from script.py.mako
+# output_encoding = utf-8
+
+sqlalchemy.url = postgresql://zapa:zapa@localhost:5432/zapa_db
+
+
+[post_write_hooks]
+# post_write_hooks defines scripts or Python functions that are run
+# on newly generated revision scripts.  See the documentation for further
+# detail and examples
+
+# format using "black" - use the console_scripts runner, against the "black" entrypoint
+# hooks = black
+# black.type = console_scripts
+# black.entrypoint = black
+# black.options = -l 79 REVISION_SCRIPT_FILENAME
+
+# Logging configuration
+[loggers]
+keys = root,sqlalchemy,alembic
+
+[handlers]
+keys = console
+
+[formatters]
+keys = generic
+
+[logger_root]
+level = WARN
+handlers = console
+qualname =
+
+[logger_sqlalchemy]
+level = WARN
+handlers =
+qualname = sqlalchemy.engine
+
+[logger_alembic]
+level = INFO
+handlers =
+qualname = alembic
+
+[handler_console]
+class = StreamHandler
+args = (sys.stderr,)
+level = NOTSET
+formatter = generic
+
+[formatter_generic]
+format = %(levelname)-5.5s [%(name)s] %(message)s
+datefmt = %H:%M:%S
+```
+
+### backend/alembic/env.py
+```python
+from logging.config import fileConfig
+from sqlalchemy import engine_from_config
+from sqlalchemy import pool
+from alembic import context
+import os
+import sys
+from pathlib import Path
+
+# Add the backend directory to the Python path
+sys.path.append(str(Path(__file__).parent.parent))
+
+from app.models.base import Base
+from app.config.database import DatabaseConfig
+
+# this is the Alembic Config object
+config = context.config
+
+# Interpret the config file for Python logging.
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
+
+# add your model's MetaData object here
+target_metadata = Base.metadata
+
+# Get database URL from environment or config
+db_config = DatabaseConfig()
+config.set_main_option("sqlalchemy.url", db_config.DATABASE_URL)
+
+
+def run_migrations_offline() -> None:
+    """Run migrations in 'offline' mode."""
+    url = config.get_main_option("sqlalchemy.url")
+    context.configure(
+        url=url,
+        target_metadata=target_metadata,
+        literal_binds=True,
+        dialect_opts={"paramstyle": "named"},
+    )
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+def run_migrations_online() -> None:
+    """Run migrations in 'online' mode."""
+    connectable = engine_from_config(
+        config.get_section(config.config_ini_section),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
+
+    with connectable.connect() as connection:
+        context.configure(
+            connection=connection, target_metadata=target_metadata
+        )
+
+        with context.begin_transaction():
+            context.run_migrations()
+
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()
+```
+
+### backend/alembic/script.py.mako
+```mako
+"""${message}
+
+Revision ID: ${up_revision}
+Revises: ${down_revision | comma,n}
+Create Date: ${create_date}
+
+"""
+from alembic import op
+import sqlalchemy as sa
+${imports if imports else ""}
+
+# revision identifiers, used by Alembic.
+revision = ${repr(up_revision)}
+down_revision = ${repr(down_revision)}
+branch_labels = ${repr(branch_labels)}
+depends_on = ${repr(depends_on)}
+
+
+def upgrade() -> None:
+    ${upgrades if upgrades else "pass"}
+
+
+def downgrade() -> None:
+    ${downgrades if downgrades else "pass"}
+```
+
+### backend/alembic/versions/001_initial_schema.py
 ```python
 """Initial schema
 
@@ -667,15 +864,15 @@ def downgrade() -> None:
     op.execute('DROP TYPE IF EXISTS llmprovider')
 ```
 
-### shared/tests/database/test_connection.py
+### backend/tests/unit/database/test_connection.py
 ```python
 """Tests for database connection utilities."""
 import pytest
 from unittest.mock import patch, MagicMock
 import asyncio
 
-from database.connection import DatabaseManager, TestDatabaseManager, get_database_manager
-from config.database import DatabaseConfig
+from app.database.connection import DatabaseManager, TestDatabaseManager, get_database_manager
+from app.config.database import DatabaseConfig
 
 
 @pytest.fixture
@@ -700,7 +897,7 @@ def test_database_manager_initialization(db_config):
     assert db_manager._session_maker is None
 
 
-@patch('database.connection.create_engine')
+@patch('app.database.connection.create_engine')
 def test_engine_creation(mock_create_engine, db_config):
     """Test engine creation with config parameters."""
     mock_engine = MagicMock()
@@ -723,8 +920,8 @@ def test_engine_creation(mock_create_engine, db_config):
     assert mock_create_engine.call_count == 1
 
 
-@patch('database.connection.sessionmaker')
-@patch('database.connection.create_engine')
+@patch('app.database.connection.sessionmaker')
+@patch('app.database.connection.create_engine')
 def test_session_maker_creation(mock_create_engine, mock_sessionmaker, db_config):
     """Test session maker creation."""
     mock_engine = MagicMock()
@@ -758,8 +955,8 @@ def test_test_database_manager():
 def test_get_database_manager_singleton():
     """Test that get_database_manager returns singleton."""
     # Clear any existing manager
-    import database.connection
-    database.connection._db_manager = None
+    import app.database.connection
+    app.database.connection._db_manager = None
     
     config = DatabaseConfig(
         SECRET_KEY="a" * 32,
@@ -773,7 +970,7 @@ def test_get_database_manager_singleton():
     assert manager1 is manager2
     
     # Clean up
-    database.connection._db_manager = None
+    app.database.connection._db_manager = None
 
 
 @pytest.mark.asyncio
@@ -781,7 +978,7 @@ async def test_async_engine_url_conversion(db_config):
     """Test that async engine URL is converted correctly."""
     db_manager = DatabaseManager(db_config)
     
-    with patch('database.connection.create_async_engine') as mock_create:
+    with patch('app.database.connection.create_async_engine') as mock_create:
         mock_engine = MagicMock()
         mock_create.return_value = mock_engine
         
@@ -817,9 +1014,9 @@ async def test_async_session_context_manager():
 
 def test_get_db_session_dependency():
     """Test the get_db_session dependency function."""
-    from database.connection import get_db_session
+    from app.database.connection import get_db_session
     
-    with patch('database.connection.get_database_manager') as mock_get_manager:
+    with patch('app.database.connection.get_database_manager') as mock_get_manager:
         mock_manager = MagicMock()
         mock_session = MagicMock()
         mock_manager.get_session.return_value = mock_session
@@ -841,22 +1038,22 @@ def test_get_db_session_dependency():
         mock_session.close.assert_called_once()
 ```
 
-### shared/tests/database/test_fixtures.py
+### backend/tests/unit/database/test_fixtures.py
 ```python
 """Tests for database fixtures."""
 import pytest
 from datetime import datetime, timezone
 
-from database.connection import TestDatabaseManager
-from database.fixtures import (
+from app.database.connection import TestDatabaseManager
+from app.database.fixtures import (
     create_test_user, create_test_session, create_test_message,
     create_test_auth_code, create_test_llm_config, create_test_data,
     cleanup_test_data, create_conversation_history, create_media_messages
 )
-from models.user import User
-from models.session import Session, SessionType, SessionStatus
-from models.message import Message, MessageType
-from models.llm_config import LLMProvider
+from app.models.user import User
+from app.models.session import Session, SessionType, SessionStatus
+from app.models.message import Message, MessageType
+from app.models.llm_config import LLMProvider
 
 
 @pytest.fixture
@@ -1090,15 +1287,15 @@ def test_message_reply_relationship(db_session):
 ## Commands to Run
 
 ```bash
-# Set up shared database utilities
-cd shared
-uv run python -c "from database.connection import TestDatabaseManager; db = TestDatabaseManager(); db.create_tables(); print('Tables created')"
+# Set up database utilities
+cd backend
+uv run python -c "from app.database.connection import TestDatabaseManager; db = TestDatabaseManager(); db.create_tables(); print('Tables created')"
 
 # Test database connections
-uv run pytest tests/database/test_connection.py -v
+uv run pytest tests/unit/database/test_connection.py -v
 
 # Test fixtures
-uv run pytest tests/database/test_fixtures.py -v
+uv run pytest tests/unit/database/test_fixtures.py -v
 
 # Create initial migration
 uv run alembic revision --autogenerate -m "Initial schema"

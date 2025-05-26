@@ -1,7 +1,7 @@
-# Task 12: Public Service Authentication Flow
+# Task 12: Public Entrypoint Authentication Flow
 
 ## Overview
-Implement the WhatsApp-based authentication flow for Zapa Public. Users authenticate by receiving a code via WhatsApp from the main service number, establishing trust without passwords.
+Implement the WhatsApp-based authentication flow for Zapa Public entrypoint. Users authenticate by receiving a code via WhatsApp from the main service number, establishing trust without passwords.
 
 ## Prerequisites
 - Task 04: Authentication Service (JWT generation)
@@ -18,11 +18,101 @@ Implement the WhatsApp-based authentication flow for Zapa Public. Users authenti
 7. Auto-creates user account on first auth
 8. Secure code generation (6 digits)
 
+## Public Entrypoint Setup
+
+### backend/public_main.py
+```python
+"""Entry point for Zapa Public API."""
+import uvicorn
+from app.public.main import app
+
+if __name__ == "__main__":
+    uvicorn.run(
+        "app.public.main:app",
+        host="0.0.0.0",
+        port=8002,
+        reload=True,
+    )
+```
+
+### backend/app/public/main.py
+```python
+"""FastAPI application for Zapa Public entrypoint."""
+import logging
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.config.public import settings
+from app.core.logging import setup_logging
+from app.database.connection import get_database_manager
+from app.public.api.v1.router import api_router
+
+# Set up logging
+setup_logging(settings)
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan events."""
+    # Startup
+    logger.info("Starting Zapa Public entrypoint...")
+    
+    # Get database manager
+    database_manager = get_database_manager(settings)
+    
+    # Test database connection
+    if await database_manager.health_check():
+        logger.info("Database connection successful")
+    else:
+        logger.error("Database connection failed!")
+        
+    yield
+    
+    # Shutdown
+    logger.info("Shutting down Zapa Public entrypoint...")
+    await database_manager.close()
+
+
+app = FastAPI(
+    title="Zapa Public API",
+    description="Public API for WhatsApp agent data access",
+    version=settings.VERSION,
+    docs_url="/docs" if settings.ENVIRONMENT != "production" else None,
+    redoc_url="/redoc" if settings.ENVIRONMENT != "production" else None,
+    lifespan=lifespan,
+)
+
+# CORS middleware - configured for public frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.CORS_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
+
+# Include API router
+app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# Health check endpoints
+@app.get("/health")
+async def health_check():
+    """Basic health check endpoint."""
+    return {
+        "status": "healthy",
+        "service": "zapa-public",
+        "version": settings.VERSION,
+        "environment": settings.ENVIRONMENT,
+    }
+```
+
 ## Test-Driven Development Steps
 
 ### Step 1: Create Auth Models
 ```python
-# backend/zapa_public/models/auth.py
+# backend/app/public/models/auth.py
 from pydantic import BaseModel, Field, validator
 from typing import Optional
 from datetime import datetime
@@ -60,7 +150,7 @@ class AuthTokenResponse(BaseModel):
 
 **Tests:**
 ```python
-# backend/tests/unit/test_auth_models.py
+# backend/tests/unit/public/test_auth_models.py
 def test_phone_validation():
     # Valid formats
     assert AuthCodeRequest(phone_number="+1234567890").phone_number == "+1234567890"
@@ -85,7 +175,7 @@ def test_code_validation():
 
 ### Step 2: Create Auth Code Storage
 ```python
-# backend/zapa_public/services/auth_store.py
+# backend/app/public/services/auth_store.py
 from typing import Optional
 from datetime import datetime, timedelta
 import secrets
@@ -185,7 +275,7 @@ class AuthCodeStore:
 
 **Tests:**
 ```python
-# backend/tests/unit/test_auth_store.py
+# backend/tests/unit/public/test_auth_store.py
 @pytest.mark.asyncio
 async def test_code_generation_and_storage(mock_redis):
     store = AuthCodeStore(mock_redis)
@@ -222,14 +312,14 @@ async def test_code_verification(mock_redis):
 
 ### Step 3: Create Public Auth Service
 ```python
-# backend/zapa_public/services/public_auth_service.py
+# backend/app/public/services/public_auth_service.py
 from typing import Optional, Tuple
 from datetime import datetime, timedelta
-from backend.shared.models import User
-from backend.shared.database import get_db
-from backend.zapa_public.services.auth_store import AuthCodeStore
-from backend.zapa_private.adapters.whatsapp_bridge import WhatsAppBridgeAdapter
-from backend.zapa_private.services.auth_service import AuthService
+from app.models.user import User
+from app.database.connection import get_db_session
+from app.public.services.auth_store import AuthCodeStore
+from app.adapters.whatsapp_bridge import WhatsAppBridgeAdapter
+from app.services.auth_service import AuthService
 import logging
 
 logger = logging.getLogger(__name__)
@@ -327,7 +417,7 @@ class PublicAuthService:
 
 **Tests:**
 ```python
-# backend/tests/unit/test_public_auth_service.py
+# backend/tests/unit/public/test_public_auth_service.py
 @pytest.mark.asyncio
 async def test_request_auth_code_success(mock_services):
     service = PublicAuthService(
@@ -376,18 +466,18 @@ async def test_verify_code_creates_user(mock_services, test_db):
 
 ### Step 4: Create Public Auth API Endpoints
 ```python
-# backend/zapa_public/api/auth.py
+# backend/app/public/api/auth.py
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from backend.zapa_public.models.auth import (
+from app.public.models.auth import (
     AuthCodeRequest,
     AuthCodeVerify,
     AuthTokenResponse
 )
-from backend.zapa_public.services.public_auth_service import PublicAuthService
-from backend.zapa_public.core.dependencies import (
+from app.public.services.public_auth_service import PublicAuthService
+from app.public.api.dependencies import (
     get_public_auth_service,
-    get_db
+    get_db_session
 )
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
@@ -415,7 +505,7 @@ async def request_auth_code(
 async def verify_auth_code(
     request: AuthCodeVerify,
     auth_service: PublicAuthService = Depends(get_public_auth_service),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db_session)
 ):
     """Verify authentication code and receive JWT token."""
     result = await auth_service.verify_code_and_authenticate(
@@ -446,7 +536,7 @@ async def get_current_user(
 
 **Tests:**
 ```python
-# backend/tests/integration/test_public_auth_api.py
+# backend/tests/integration/public/test_public_auth_api.py
 @pytest.mark.asyncio
 async def test_auth_flow_complete(test_client, test_db, mock_redis):
     """Test complete authentication flow."""
@@ -494,11 +584,11 @@ async def test_auth_flow_complete(test_client, test_db, mock_redis):
 
 ### Step 5: Add Security Middleware
 ```python
-# backend/zapa_public/core/security.py
+# backend/app/public/core/security.py
 from fastapi import HTTPException, Security, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Optional, Dict
-from backend.zapa_private.services.auth_service import AuthService
+from app.services.auth_service import AuthService
 
 security = HTTPBearer()
 
@@ -545,7 +635,7 @@ async def request_auth_code(...):
 
 ### Step 6: Add Phone Number Validation Service
 ```python
-# backend/zapa_public/services/phone_validator.py
+# backend/app/public/services/phone_validator.py
 import phonenumbers
 from phonenumbers import carrier, geocoder
 from typing import Optional, Dict
@@ -606,7 +696,7 @@ async def request_auth_code(self, phone_number: str) -> Tuple[bool, str]:
 ## Integration Tests
 
 ```python
-# backend/tests/integration/test_public_auth_integration.py
+# backend/tests/integration/public/test_public_auth_integration.py
 @pytest.mark.integration
 @pytest.mark.skipif(
     os.getenv("INTEGRATION_TEST_WHATSAPP", "false").lower() != "true",

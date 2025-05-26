@@ -9,7 +9,7 @@ This document provides a comprehensive overview of all tasks needed to implement
 3. **CI/CD First**: Every commit must pass GitHub Actions
 4. **Integration Tests**: External services have both mocked tests (for CI) and real integration tests (skippable)
 5. **UV for Python**: All Python dependencies managed with UV package manager
-6. **Dual Service Architecture**: Separate Private and Public FastAPI services
+6. **Single Backend Architecture**: One backend with Private and Public FastAPI entrypoints
 
 ## Task Structure
 
@@ -38,41 +38,31 @@ For external services (WhatsApp Bridge, LLM providers):
 - 03: Core configuration and settings
 - 04: Database migrations and fixtures
 
-### Phase 2: Zapa Private Service (Tasks 05-11)
-- 05: Private service structure and health checks
+### Phase 2: Backend Core Services (Tasks 05-09)
+- 05: Private entrypoint structure and health checks
 - 06: WhatsApp Bridge adapter (with integration tests)
 - 07: LLM adapter interface and implementations
 - 08: Message service and storage
 - 09: Agent service with LLM tools
-- 10: Admin API endpoints
+
+### Phase 3: API Endpoints (Tasks 10-13)
+- 10: Admin API endpoints (private entrypoint)
 - 11: Webhook handlers for WhatsApp events
+- 12: Public authentication flow
+- 13: WhatsApp integration and message flow
 
-### Phase 3: Zapa Public Service (Tasks 12-17)
-- 12: Public service structure and health checks
-- 13: WhatsApp authentication service
-- 14: User service and data access
-- 15: Public API endpoints
-- 16: JWT session management
-- 17: Inter-service communication
+### Phase 4: Frontend & User Features (Tasks 14-16)
+- 14: Frontend user dashboard (Vue.js + Tailwind)
+- 15: Admin frontend setup
+- 16: Integration testing
 
-### Phase 4: Frontend (Tasks 18-23)
-- 18: Vue.js project setup with Tailwind
-- 19: Shared component library
-- 20: Private admin frontend
-- 21: Public user frontend
-- 22: Frontend authentication flow
-- 23: Real-time updates (optional WebSocket)
-
-### Phase 5: Infrastructure (Tasks 24-27)
-- 24: Docker setup for all services
-- 25: Docker Compose orchestration
-- 26: Redis setup for caching/sessions
-- 27: Production configuration
-
-### Phase 6: Integration & Quality (Tasks 28-30)
-- 28: End-to-end integration tests
-- 29: Performance and load testing
-- 30: Documentation and deployment guide
+### Phase 5: Infrastructure & Deployment
+- Docker setup for backend and frontends
+- Docker Compose orchestration
+- Redis setup for caching/sessions
+- Production configuration
+- Performance and load testing
+- Documentation and deployment guide
 
 ## Success Metrics
 
@@ -95,7 +85,7 @@ Each task must achieve:
 
 ## Key Architectural Decisions
 
-1. **Two FastAPI Services**: Private (internal) and Public (internet-facing)
+1. **Two FastAPI Entrypoints**: Private (internal) and Public (internet-facing) in single backend
 2. **WhatsApp Bridge**: No authentication, secured by network isolation
 3. **Multi-LLM Support**: Adapter pattern for OpenAI, Anthropic, Google
 4. **WhatsApp Auth**: Users authenticate via codes sent from main number

@@ -1,7 +1,7 @@
 # Task 03: Core Configuration and Settings
 
 ## Objective
-Create a robust configuration system for both services with proper validation, environment-specific settings, and comprehensive tests.
+Create a robust configuration system for the backend with both private and public entrypoints, with proper validation, environment-specific settings, and comprehensive tests.
 
 ## Prerequisites
 - Tasks 01-02 completed
@@ -9,7 +9,7 @@ Create a robust configuration system for both services with proper validation, e
 - All tests passing in CI/CD
 
 ## Success Criteria
-- [ ] Configuration classes for both services
+- [ ] Configuration classes for both private and public entrypoints
 - [ ] Environment variable validation with Pydantic
 - [ ] Development, test, and production configurations
 - [ ] Encryption utilities for sensitive data
@@ -18,7 +18,7 @@ Create a robust configuration system for both services with proper validation, e
 
 ## Files to Create
 
-### shared/config/__init__.py
+### backend/app/config/__init__.py
 ```python
 from .base import BaseSettings
 from .encryption import EncryptionManager
@@ -27,7 +27,7 @@ from .database import DatabaseConfig
 __all__ = ["BaseSettings", "EncryptionManager", "DatabaseConfig"]
 ```
 
-### shared/config/base.py
+### backend/app/config/base.py
 ```python
 """Base configuration settings."""
 from typing import List, Optional, Literal
@@ -36,7 +36,7 @@ from pydantic_settings import BaseSettings as PydanticBaseSettings
 
 
 class BaseSettings(PydanticBaseSettings):
-    """Base settings for all services."""
+    """Base settings for backend application."""
     
     # Environment
     ENVIRONMENT: Literal["development", "test", "production"] = Field(
@@ -87,7 +87,7 @@ class BaseSettings(PydanticBaseSettings):
         case_sensitive = True
 ```
 
-### shared/config/database.py
+### backend/app/config/database.py
 ```python
 """Database configuration."""
 from typing import Optional
@@ -154,7 +154,7 @@ class DatabaseConfig(BaseSettings):
         return sessionmaker(autocommit=False, autoflush=False, bind=engine)
 ```
 
-### shared/config/encryption.py
+### backend/app/config/encryption.py
 ```python
 """Encryption utilities for sensitive data."""
 import base64
@@ -235,16 +235,16 @@ class EncryptionManager:
         return base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
 ```
 
-### services/private/app/core/config.py
+### backend/app/config/private.py
 ```python
-"""Private service configuration."""
+"""Private entrypoint configuration."""
 from typing import Optional
 from pydantic import Field
-from zapa_shared.config import BaseSettings, DatabaseConfig
+from app.config import BaseSettings, DatabaseConfig
 
 
-class PrivateServiceSettings(BaseSettings, DatabaseConfig):
-    """Configuration for Zapa Private service."""
+class PrivateSettings(BaseSettings, DatabaseConfig):
+    """Configuration for Zapa Private entrypoint."""
     
     # Service Info
     SERVICE_NAME: str = Field(default="zapa-private")
@@ -290,19 +290,19 @@ class PrivateServiceSettings(BaseSettings, DatabaseConfig):
 
 
 # Global settings instance
-settings = PrivateServiceSettings()
+settings = PrivateSettings()
 ```
 
-### services/public/app/core/config.py
+### backend/app/config/public.py
 ```python
-"""Public service configuration."""
+"""Public entrypoint configuration."""
 from typing import List
 from pydantic import Field, validator
-from zapa_shared.config import BaseSettings, DatabaseConfig
+from app.config import BaseSettings, DatabaseConfig
 
 
-class PublicServiceSettings(BaseSettings, DatabaseConfig):
-    """Configuration for Zapa Public service."""
+class PublicSettings(BaseSettings, DatabaseConfig):
+    """Configuration for Zapa Public entrypoint."""
     
     # Service Info
     SERVICE_NAME: str = Field(default="zapa-public")
@@ -352,17 +352,17 @@ class PublicServiceSettings(BaseSettings, DatabaseConfig):
 
 
 # Global settings instance
-settings = PublicServiceSettings()
+settings = PublicSettings()
 ```
 
-### shared/tests/config/test_base.py
+### backend/tests/unit/config/test_base.py
 ```python
 """Tests for base configuration."""
 import pytest
 from pydantic import ValidationError
 import os
 
-from config.base import BaseSettings
+from app.config.base import BaseSettings
 
 
 def test_base_settings_default_values():
@@ -446,14 +446,14 @@ def test_environment_variable_loading(monkeypatch):
     assert settings.LOG_LEVEL == "WARNING"
 ```
 
-### shared/tests/config/test_database.py
+### backend/tests/unit/config/test_database.py
 ```python
 """Tests for database configuration."""
 import pytest
 from pydantic import ValidationError
 from unittest.mock import patch, MagicMock
 
-from config.database import DatabaseConfig
+from app.config.database import DatabaseConfig
 
 
 def test_database_config_valid():
@@ -513,7 +513,7 @@ def test_redis_url_validation():
         )
 
 
-@patch('config.database.create_engine')
+@patch('app.config.database.create_engine')
 def test_get_database_engine(mock_create_engine):
     """Test database engine creation."""
     mock_engine = MagicMock()
@@ -539,8 +539,8 @@ def test_get_database_engine(mock_create_engine):
     )
 
 
-@patch('config.database.sessionmaker')
-@patch('config.database.create_engine')
+@patch('app.config.database.sessionmaker')
+@patch('app.config.database.create_engine')
 def test_get_session_maker(mock_create_engine, mock_sessionmaker):
     """Test session maker creation."""
     mock_engine = MagicMock()
@@ -564,13 +564,13 @@ def test_get_session_maker(mock_create_engine, mock_sessionmaker):
     )
 ```
 
-### shared/tests/config/test_encryption.py
+### backend/tests/unit/config/test_encryption.py
 ```python
 """Tests for encryption utilities."""
 import pytest
 import base64
 
-from config.encryption import EncryptionManager
+from app.config.encryption import EncryptionManager
 
 
 @pytest.fixture
@@ -676,18 +676,18 @@ def test_fernet_caching(encryption_manager):
     assert fernet1 is fernet2
 ```
 
-### services/private/tests/test_config.py
+### backend/tests/unit/config/test_private.py
 ```python
-"""Tests for private service configuration."""
+"""Tests for private entrypoint configuration."""
 import pytest
 from pydantic import ValidationError
 
-from app.core.config import PrivateServiceSettings
+from app.config.private import PrivateSettings
 
 
 def test_private_service_settings_defaults():
     """Test private service settings with required values only."""
-    settings = PrivateServiceSettings(
+    settings = PrivateSettings(
         SECRET_KEY="a" * 32,
         ENCRYPTION_KEY="b" * 32,
         ADMIN_TOKEN_SECRET="c" * 32,
@@ -704,7 +704,7 @@ def test_private_service_settings_defaults():
 
 def test_webhook_url_property():
     """Test webhook URL property construction."""
-    settings = PrivateServiceSettings(
+    settings = PrivateSettings(
         SECRET_KEY="a" * 32,
         ENCRYPTION_KEY="b" * 32,
         ADMIN_TOKEN_SECRET="c" * 32,
@@ -723,7 +723,7 @@ def test_webhook_url_property():
 
 def test_integration_test_flags():
     """Test integration test flag defaults."""
-    settings = PrivateServiceSettings(
+    settings = PrivateSettings(
         SECRET_KEY="a" * 32,
         ENCRYPTION_KEY="b" * 32,
         ADMIN_TOKEN_SECRET="c" * 32,
@@ -740,7 +740,7 @@ def test_validation_errors():
     """Test validation errors for private service settings."""
     # Missing required field
     with pytest.raises(ValidationError):
-        PrivateServiceSettings(
+        PrivateSettings(
             SECRET_KEY="a" * 32,
             ENCRYPTION_KEY="b" * 32,
             # Missing ADMIN_TOKEN_SECRET
@@ -749,7 +749,7 @@ def test_validation_errors():
     
     # Invalid timeout range
     with pytest.raises(ValidationError):
-        PrivateServiceSettings(
+        PrivateSettings(
             SECRET_KEY="a" * 32,
             ENCRYPTION_KEY="b" * 32,
             ADMIN_TOKEN_SECRET="c" * 32,
@@ -758,14 +758,16 @@ def test_validation_errors():
         )
 ```
 
-### Update shared/pyproject.toml
+### Update backend/pyproject.toml
 ```toml
 [project]
-name = "zapa-shared"
+name = "zapa-backend"
 version = "0.1.0"
-description = "Shared models and schemas for Zapa services"
+description = "Zapa WhatsApp Agent Backend"
 requires-python = ">=3.10"
 dependencies = [
+    "fastapi==0.109.0",
+    "uvicorn[standard]==0.27.0",
     "sqlalchemy==2.0.25",
     "psycopg2-binary==2.9.9",
     "alembic==1.13.1",
@@ -773,30 +775,153 @@ dependencies = [
     "pydantic-settings==2.1.0",
     "cryptography==41.0.8",
     "redis==5.0.1",
+    "httpx==0.26.0",
+    "python-jose[cryptography]==3.3.0",
+    "passlib[bcrypt]==1.7.4",
+    "python-multipart==0.0.6",
 ]
+```
+
+### backend/tests/unit/config/test_public.py
+```python
+"""Tests for public entrypoint configuration."""
+import pytest
+from pydantic import ValidationError
+
+from app.config.public import PublicSettings
+
+
+def test_public_service_settings_defaults():
+    """Test public service settings with required values only."""
+    settings = PublicSettings(
+        SECRET_KEY="a" * 32,
+        ENCRYPTION_KEY="b" * 32,
+        PRIVATE_SERVICE_SECRET="d" * 32,
+        DATABASE_URL="postgresql://user:pass@localhost:5432/zapa",
+    )
+    
+    assert settings.SERVICE_NAME == "zapa-public"
+    assert settings.VERSION == "0.1.0"
+    assert settings.AUTH_CODE_LENGTH == 6
+    assert settings.AUTH_CODE_EXPIRE_MINUTES == 5
+    assert settings.JWT_TOKEN_EXPIRE_HOURS == 24
+    assert settings.JWT_REFRESH_TOKEN_EXPIRE_DAYS == 30
+    assert settings.PRIVATE_SERVICE_URL == "http://localhost:8001"
+
+
+def test_cors_origins_includes_public_frontend():
+    """Test that CORS origins include public frontend by default."""
+    settings = PublicSettings(
+        SECRET_KEY="a" * 32,
+        ENCRYPTION_KEY="b" * 32,
+        PRIVATE_SERVICE_SECRET="d" * 32,
+        DATABASE_URL="postgresql://user:pass@localhost:5432/zapa",
+    )
+    
+    assert "http://localhost:3200" in settings.CORS_ORIGINS
+    
+    # Test with custom origins
+    settings = PublicSettings(
+        SECRET_KEY="a" * 32,
+        ENCRYPTION_KEY="b" * 32,
+        PRIVATE_SERVICE_SECRET="d" * 32,
+        DATABASE_URL="postgresql://user:pass@localhost:5432/zapa",
+        CORS_ORIGINS="https://app.example.com,https://www.example.com",
+    )
+    
+    # Should still include public frontend
+    assert "http://localhost:3200" in settings.CORS_ORIGINS
+    assert "https://app.example.com" in settings.CORS_ORIGINS
+    assert "https://www.example.com" in settings.CORS_ORIGINS
+
+
+def test_rate_limiting_validation():
+    """Test rate limiting configuration validation."""
+    # Valid settings
+    settings = PublicSettings(
+        SECRET_KEY="a" * 32,
+        ENCRYPTION_KEY="b" * 32,
+        PRIVATE_SERVICE_SECRET="d" * 32,
+        DATABASE_URL="postgresql://user:pass@localhost:5432/zapa",
+        AUTH_RATE_LIMIT_PER_HOUR=50,
+        API_RATE_LIMIT_PER_MINUTE=200,
+    )
+    
+    assert settings.AUTH_RATE_LIMIT_PER_HOUR == 50
+    assert settings.API_RATE_LIMIT_PER_MINUTE == 200
+    
+    # Invalid rate limit (too high)
+    with pytest.raises(ValidationError):
+        PublicSettings(
+            SECRET_KEY="a" * 32,
+            ENCRYPTION_KEY="b" * 32,
+            PRIVATE_SERVICE_SECRET="d" * 32,
+            DATABASE_URL="postgresql://user:pass@localhost:5432/zapa",
+            AUTH_RATE_LIMIT_PER_HOUR=200,  # Max is 100
+        )
+
+
+def test_data_access_limits():
+    """Test data access limit configuration."""
+    settings = PublicSettings(
+        SECRET_KEY="a" * 32,
+        ENCRYPTION_KEY="b" * 32,
+        PRIVATE_SERVICE_SECRET="d" * 32,
+        DATABASE_URL="postgresql://user:pass@localhost:5432/zapa",
+        MAX_MESSAGES_PER_REQUEST=500,
+        MAX_SEARCH_RESULTS=100,
+        MESSAGE_HISTORY_DAYS=730,
+    )
+    
+    assert settings.MAX_MESSAGES_PER_REQUEST == 500
+    assert settings.MAX_SEARCH_RESULTS == 100
+    assert settings.MESSAGE_HISTORY_DAYS == 730
+    
+    # Test boundaries
+    with pytest.raises(ValidationError):
+        PublicSettings(
+            SECRET_KEY="a" * 32,
+            ENCRYPTION_KEY="b" * 32,
+            PRIVATE_SERVICE_SECRET="d" * 32,
+            DATABASE_URL="postgresql://user:pass@localhost:5432/zapa",
+            MAX_MESSAGES_PER_REQUEST=2000,  # Max is 1000
+        )
+
+
+def test_private_service_communication():
+    """Test private service communication settings."""
+    settings = PublicSettings(
+        SECRET_KEY="a" * 32,
+        ENCRYPTION_KEY="b" * 32,
+        PRIVATE_SERVICE_SECRET="shared_secret_for_service_auth_123456789",
+        DATABASE_URL="postgresql://user:pass@localhost:5432/zapa",
+        PRIVATE_SERVICE_URL="http://private-api:8001",
+        PRIVATE_SERVICE_TIMEOUT=30.0,
+    )
+    
+    assert settings.PRIVATE_SERVICE_URL == "http://private-api:8001"
+    assert settings.PRIVATE_SERVICE_TIMEOUT == 30.0
+    assert len(settings.PRIVATE_SERVICE_SECRET) >= 32
 ```
 
 ## Commands to Run
 
 ```bash
-# Test shared configuration
-cd shared
-uv run pytest tests/config/ -v --cov=config
+# Test all configuration modules
+cd backend
+uv run pytest tests/unit/config/ -v --cov=app.config
 
-# Test service configurations
-cd services/private
-uv run pytest tests/test_config.py -v
+# Test private entrypoint configuration
+uv run pytest tests/unit/config/test_private.py -v
 
-cd services/public
-uv run pytest tests/test_config.py -v
+# Test public entrypoint configuration  
+uv run pytest tests/unit/config/test_public.py -v
 
 # Test encryption utilities
-cd shared
-uv run pytest tests/config/test_encryption.py -v
+uv run pytest tests/unit/config/test_encryption.py -v
 
 # Generate a new encryption key (for production)
-cd shared
-uv run python -c "from config.encryption import EncryptionManager; print(EncryptionManager.generate_key())"
+uv run python -c "from app.config.encryption import EncryptionManager; print(EncryptionManager.generate_key())"
 ```
 
 ## Verification
