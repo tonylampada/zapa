@@ -186,7 +186,7 @@ def get_database_manager(config: DatabaseConfig | None = None) -> DatabaseManage
         if config is None:
             from app.config.database import DatabaseConfig
 
-            config = DatabaseConfig()
+            config = DatabaseConfig()  # type: ignore[call-arg]
         _db_manager = DatabaseManager(config)
     return _db_manager
 

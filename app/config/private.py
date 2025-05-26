@@ -54,7 +54,7 @@ class PrivateSettings(DatabaseConfig):
 # This will be initialized when the module is imported in production
 # For tests, create instances with explicit values
 try:
-    settings = PrivateSettings()
+    settings = PrivateSettings()  # type: ignore[call-arg]
 except Exception:
     # Settings will be created in tests with required values
     settings = None  # type: ignore
