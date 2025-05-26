@@ -1,9 +1,8 @@
 """Custom exceptions for Zapa applications."""
-from fastapi import HTTPException
-from typing import Any, Dict, Optional
+from typing import Any
 
 
-class ZapaException(Exception):
+class ZapaException(Exception):  # noqa: N818
     """Base exception for Zapa applications."""
 
     def __init__(
@@ -11,7 +10,7 @@ class ZapaException(Exception):
         message: str,
         error_code: str = "ZAPA_ERROR",
         status_code: int = 500,
-        details: Optional[Dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
     ):
         self.message = message
         self.error_code = error_code
@@ -23,7 +22,7 @@ class ZapaException(Exception):
 class DatabaseError(ZapaException):
     """Database-related errors."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: dict[str, Any] | None = None):
         super().__init__(
             message=message,
             error_code="DATABASE_ERROR",
@@ -35,7 +34,7 @@ class DatabaseError(ZapaException):
 class ConfigurationError(ZapaException):
     """Configuration-related errors."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: dict[str, Any] | None = None):
         super().__init__(
             message=message,
             error_code="CONFIGURATION_ERROR",
@@ -47,7 +46,7 @@ class ConfigurationError(ZapaException):
 class WhatsAppBridgeError(ZapaException):
     """WhatsApp Bridge connectivity errors."""
 
-    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, message: str, details: dict[str, Any] | None = None):
         super().__init__(
             message=message,
             error_code="WHATSAPP_BRIDGE_ERROR",
@@ -62,7 +61,7 @@ class AuthenticationError(ZapaException):
     def __init__(
         self,
         message: str = "Authentication failed",
-        details: Optional[Dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
     ):
         super().__init__(
             message=message,
@@ -76,7 +75,7 @@ class AuthorizationError(ZapaException):
     """Authorization-related errors."""
 
     def __init__(
-        self, message: str = "Access denied", details: Optional[Dict[str, Any]] = None
+        self, message: str = "Access denied", details: dict[str, Any] | None = None
     ):
         super().__init__(
             message=message,
@@ -90,7 +89,7 @@ class ValidationError(ZapaException):
     """Input validation errors."""
 
     def __init__(
-        self, message: str, field: str = None, details: Optional[Dict[str, Any]] = None
+        self, message: str, field: str = None, details: dict[str, Any] | None = None
     ):
         error_details = details or {}
         if field:
@@ -111,7 +110,7 @@ class NotFoundError(ZapaException):
         self,
         resource: str,
         identifier: str = None,
-        details: Optional[Dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
     ):
         message = f"{resource} not found"
         if identifier:
@@ -136,7 +135,7 @@ class RateLimitError(ZapaException):
     def __init__(
         self,
         message: str = "Rate limit exceeded",
-        details: Optional[Dict[str, Any]] = None,
+        details: dict[str, Any] | None = None,
     ):
         super().__init__(
             message=message,
@@ -150,7 +149,7 @@ class ExternalServiceError(ZapaException):
     """External service errors (LLM providers, etc.)."""
 
     def __init__(
-        self, service: str, message: str, details: Optional[Dict[str, Any]] = None
+        self, service: str, message: str, details: dict[str, Any] | None = None
     ):
         error_details = details or {}
         error_details["service"] = service

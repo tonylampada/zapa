@@ -1,11 +1,11 @@
 """Tests for private main application."""
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from fastapi.testclient import TestClient
 
-from app.private.main import app
 from app.private.api.v1.health import get_db_session
-from app.core.exceptions import ZapaException, DatabaseError
+from app.private.main import app
 
 
 @pytest.fixture

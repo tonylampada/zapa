@@ -1,21 +1,22 @@
 """Health check endpoints for private API."""
 import logging
-from typing import Dict, Any
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy import text
-import httpx
+from typing import Any
 
-from app.database.connection import get_db_session, get_database_manager
+import httpx
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+
 from app.config.private import settings
 from app.core.exceptions import DatabaseError, WhatsAppBridgeError
+from app.database.connection import get_database_manager, get_db_session
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
 @router.get("/health")
-async def health_check() -> Dict[str, Any]:
+async def health_check() -> dict[str, Any]:
     """
     Basic health check endpoint.
 
@@ -30,7 +31,7 @@ async def health_check() -> Dict[str, Any]:
 
 
 @router.get("/ready")
-async def readiness_check() -> Dict[str, Any]:
+async def readiness_check() -> dict[str, Any]:
     """
     Comprehensive readiness check.
 
@@ -98,7 +99,9 @@ async def readiness_check() -> Dict[str, Any]:
 
 
 @router.get("/database")
-async def database_check(db: Session = Depends(get_db_session)) -> Dict[str, Any]:
+async def database_check(
+    db: Session = Depends(get_db_session),
+) -> dict[str, Any]:  # noqa: B008
     """
     Detailed database connectivity check.
 
@@ -122,11 +125,11 @@ async def database_check(db: Session = Depends(get_db_session)) -> Dict[str, Any
 
     except Exception as e:
         logger.error(f"Database check failed: {e}")
-        raise DatabaseError(f"Database connectivity failed: {str(e)}")
+        raise DatabaseError(f"Database connectivity failed: {str(e)}") from e
 
 
 @router.get("/whatsapp-bridge")
-async def whatsapp_bridge_check() -> Dict[str, Any]:
+async def whatsapp_bridge_check() -> dict[str, Any]:
     """
     Detailed WhatsApp Bridge connectivity check.
 
@@ -164,12 +167,14 @@ async def whatsapp_bridge_check() -> Dict[str, Any]:
 
     except httpx.RequestError as e:
         logger.error(f"WhatsApp Bridge connection error: {e}")
-        raise WhatsAppBridgeError(f"Failed to connect to WhatsApp Bridge: {str(e)}")
+        raise WhatsAppBridgeError(
+            f"Failed to connect to WhatsApp Bridge: {str(e)}"
+        ) from e
     except httpx.HTTPStatusError as e:
         logger.error(f"WhatsApp Bridge HTTP error: {e}")
         raise WhatsAppBridgeError(
             f"WhatsApp Bridge returned error: {e.response.status_code}"
-        )
+        ) from e
     except Exception as e:
         logger.error(f"WhatsApp Bridge check failed: {e}")
-        raise WhatsAppBridgeError(f"WhatsApp Bridge check failed: {str(e)}")
+        raise WhatsAppBridgeError(f"WhatsApp Bridge check failed: {str(e)}") from e

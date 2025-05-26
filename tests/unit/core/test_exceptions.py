@@ -1,17 +1,16 @@
 """Tests for core exception classes."""
-import pytest
 
 from app.core.exceptions import (
-    ZapaException,
-    DatabaseError,
-    ConfigurationError,
-    WhatsAppBridgeError,
     AuthenticationError,
     AuthorizationError,
-    ValidationError,
+    ConfigurationError,
+    DatabaseError,
+    ExternalServiceError,
     NotFoundError,
     RateLimitError,
-    ExternalServiceError,
+    ValidationError,
+    WhatsAppBridgeError,
+    ZapaException,
 )
 
 

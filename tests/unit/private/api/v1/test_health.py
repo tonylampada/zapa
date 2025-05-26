@@ -1,12 +1,11 @@
 """Tests for private API health endpoints."""
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from fastapi.testclient import TestClient
-from httpx import Response
 
-from app.private.main import app
+import pytest
+from fastapi.testclient import TestClient
+
 from app.private.api.v1.health import get_db_session
-from app.core.exceptions import DatabaseError, WhatsAppBridgeError
+from app.private.main import app
 
 
 @pytest.fixture
