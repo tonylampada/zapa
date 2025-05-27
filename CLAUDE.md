@@ -11,7 +11,7 @@ Zapa is a WhatsApp Agent System that integrates WhatsApp messaging with AI-power
 - **Admin Frontend (Vue.js)**: Web interface for managing agents
 - **PostgreSQL Database**: Central data storage
 - **Redis/RabbitMQ (Optional)**: Message queue for async processing
-- **LLM Providers**: OpenAI, Anthropic, or Google (user-configurable) for agent intelligence
+- **LLM Providers**: Uses OpenAI Agents SDK with support for OpenAI, Anthropic, Google, or any OpenAI-compatible API
 
 ## Architecture Philosophy
 
@@ -28,23 +28,30 @@ This project strictly follows the **"Plumbing + Intelligence"** architecture mod
 ```bash
 # Install dependencies
 cd backend
-pip install -r requirements.txt
+pip install -e ".[dev]"
 
-# Run development server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# Run private service (internal, webhooks, admin)
+uvicorn private_main:app --reload --port 8001
+
+# Run public service (external, user auth/dashboard)
+uvicorn public_main:app --reload --port 8002
 
 # Run tests
 pytest -v
 
 # Run with coverage
-pytest --cov=app --cov-report=html
+pytest -v --cov=app --cov=models --cov=schemas --cov-report=html
 
-# Linting
-flake8 app/
-black app/ --check
+# Linting and formatting
+black app/ models/ schemas/ tests/ private_main.py public_main.py
+ruff check app/ models/ schemas/ tests/ private_main.py public_main.py
 
-# Format code
-black app/
+# Type checking
+mypy app/ models/ schemas/
+
+# Database migrations
+alembic upgrade head
+alembic revision --autogenerate -m "Description"
 ```
 
 ### Frontend (Vue.js)
@@ -95,41 +102,52 @@ docker-compose down -v
 # Connect to PostgreSQL in Docker
 docker-compose exec db psql -U myuser -d whatsapp_agent
 
-# Run migrations (when implemented)
-cd backend
-alembic upgrade head
-
-# Create new migration
-alembic revision --autogenerate -m "Description"
+# Connect to local development database
+psql -U myuser -d whatsapp_agent
 ```
 
 ## Key Architectural Patterns
 
+### Dual Entrypoint Architecture
+
+This is a **single backend project** with two FastAPI entrypoints:
+- `private_main.py` → Private API (port 8001) - internal network only
+- `public_main.py` → Public API (port 8002) - internet-facing
+
+Both share the same codebase under `backend/app/` to avoid duplication.
+
 ### Backend Structure
 
-The backend follows a strict layered architecture:
-
 ```
-backend/app/
-├── api/          # Surface layer - FastAPI routers (no business logic)
-├── services/     # Service layer - Business logic and orchestration
-├── adapters/     # Adapter layer - External integrations
-├── models/       # Data models and schemas
-└── core/         # Shared utilities and configuration
+backend/
+├── app/
+│   ├── core/           # Shared utilities (config, database, exceptions, security)
+│   ├── models/         # SQLAlchemy ORM models
+│   ├── schemas/        # Pydantic validation schemas
+│   ├── adapters/       # External service integrations (WhatsApp, LLMs)
+│   ├── services/       # Business logic layer
+│   ├── private/        # Private API endpoints
+│   │   └── api/v1/     # Version 1 private API routes
+│   └── public/         # Public API endpoints
+│       └── api/v1/     # Version 1 public API routes
+├── alembic/            # Database migrations
+├── tests/              # Test suite
+├── private_main.py     # Private service entrypoint
+└── public_main.py      # Public service entrypoint
 ```
 
 ### Service Communication
 
-- **Webhooks**: WhatsApp Bridge → Backend (for incoming messages/events)
+- **Webhooks**: WhatsApp Bridge → Backend Private API (for incoming messages/events)
 - **REST API**: Backend → WhatsApp Bridge (for sending messages)
-- **REST API**: Frontend → Backend (for admin operations)
+- **REST API**: Frontend → Backend Public API (for user operations)
 - **WebSocket** (optional): Backend → Frontend (for real-time updates)
 
 ### Message Processing Flow
 
 1. User sends WhatsApp message to main service number
-2. Message arrives at Node.js Bridge
-3. Bridge sends webhook to Backend `/webhooks/whatsapp`
+2. Message arrives at Node.js Bridge (zapw)
+3. Bridge sends webhook to Backend Private API `/webhooks/whatsapp`
 4. Backend stores message and loads user's LLM configuration
 5. AgentService calls user's configured LLM provider with:
    - The user's message
@@ -139,10 +157,16 @@ backend/app/
 7. Generated response sent back via Bridge REST API to user
 8. Assistant's response stored in database
 
-### LLM Function Calling
+### LLM Agent Integration
 
-The system uses function calling (supported by all providers) for agent commands:
-- `search_messages(query: str, limit: int)` - Semantic search through user's conversation history
+The system uses the OpenAI Agents SDK (`openai-agents`) for agent capabilities. This provides:
+- Built-in tool management with `@function_tool` decorators
+- Structured outputs with Pydantic models
+- Support for multiple LLM providers via custom clients
+- Context management for passing database sessions to tools
+
+Agent tools available:
+- `search_messages(query: str, limit: int)` - Search through user's conversation history
 - `get_recent_messages(count: int)` - Retrieve the N most recent messages
 - `summarize_chat(last_n: int)` - Generate a summary of recent messages
 - `extract_tasks()` - Extract to-do items from conversation
@@ -158,7 +182,7 @@ The system uses function calling (supported by all providers) for agent commands
 - `ENCRYPTION_KEY`: Key for encrypting user API keys in database
 
 ### WhatsApp Bridge (zapw)
-- `PORT`: Service port (default 3000 - already used by zapw)
+- `PORT`: Service port (default 3000)
 - `WEBHOOK_URL`: Backend webhook endpoint  
 - Note: No authentication required (secured via network isolation)
 
@@ -169,19 +193,45 @@ The system uses function calling (supported by all providers) for agent commands
 - **E2E Tests**: Frontend tests with Cypress
 - **Load Tests**: Use Locust for concurrent session testing
 
+Test database uses SQLite in-memory for speed, production uses PostgreSQL.
+
 ## Security Considerations
 
 - Admin authentication via JWT
-- API key authentication between services
+- User authentication via WhatsApp codes from main number
+- API key authentication between services (except WhatsApp Bridge)
 - Rate limiting on message processing
 - Input sanitization for LLM prompts
 - XSS protection in frontend
-- Secrets managed via environment variables
+- User API keys stored encrypted with Fernet symmetric encryption
 
 ## Development Tips
 
-- Remember to commit and push frequently whenever you reach a good state
+- Always update `spec/tasks/progress.log` when completing tasks
+- Run tests before committing: `pytest -v`
+- Ensure CI passes before merging
+- Use `gh run list` to check CI status
+- Follow TDD approach - write tests first
+- Keep adapter implementations isolated with clear interfaces
+
+## Common Pitfalls
+
+- WhatsApp Bridge adapter requires phone numbers in format: `{number}@s.whatsapp.net`
+- SQLAlchemy 2.0 requires `text()` wrapper for raw SQL queries
+- Mock `httpx` responses carefully - `json()` is sync, not async
+- Remember to add `__init__.py` files to make directories proper Python packages
+- Use `pytest.ini` with `pythonpath = .` for backend tests to resolve imports
+
+## Current Implementation Status
+
+Check `spec/tasks/progress.log` for detailed task completion status. As of last update:
+- Tasks 01-06: ✅ Complete
+- Task 07: LLM Adapter using OpenAI Agents SDK (in progress)
+- Tasks 08-16: Pending
 
 ## Memories and Guidelines
 
-- Always keep a log of your tasks progress in spec/tasks/progress.log
+- Always commit and push frequently when reaching a good state
+- Use `gh` CLI for GitHub operations
+- No need to ask for permission to commit
+- Check CI status regularly with `gh run list`
