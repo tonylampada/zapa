@@ -318,12 +318,18 @@ class MessageService:
         if message.media_metadata and "whatsapp_message_id" in message.media_metadata:
             whatsapp_message_id = message.media_metadata["whatsapp_message_id"]
 
+        # Handle both enum and string types (for tests and production)
+        if hasattr(message.message_type, "value"):
+            message_type_value = message.message_type.value
+        else:
+            message_type_value = message.message_type
+
         return MessageResponse(
             id=message.id,
             user_id=message.user_id,
             content=message.content or "",
             direction=direction,
-            message_type=MessageType(message.message_type.value),
+            message_type=MessageType(message_type_value),
             whatsapp_message_id=whatsapp_message_id,
             metadata=message.media_metadata,
             created_at=message.created_at,
