@@ -172,6 +172,39 @@ Frontend tasks (14-15) may not need significant changes as they remain separate 
 - [x] Service focuses purely on data operations - no intelligent processing
 - [x] Total tests passing: 14 message-related tests
 
+#### Task 09: Agent Service with LLM Tools ✅ (2025-05-27)
+- [x] Created agent schemas in backend/app/schemas/agent.py:
+  - AgentRequest, AgentResponse for service interface
+  - ToolCall, ToolResult for LLM function calling
+  - LLMResponse for structured LLM output
+- [x] Implemented LLM tools in backend/app/services/llm_tools.py:
+  - search_messages: Full-text search through conversation history
+  - get_recent_messages: Retrieve N most recent messages
+  - get_messages_by_date_range: Query messages within time range
+  - get_conversation_stats: Get message counts and date ranges
+- [x] Created AgentService in backend/app/services/agent_service.py:
+  - process_message: Main orchestration method for LLM interactions
+  - Loads user's LLM configuration from database
+  - Builds conversation context from message history (oldest first)
+  - Integrates with openai-agents SDK via create_agent factory
+  - Stores incoming/outgoing messages via MessageService
+  - Handles custom instructions from user's LLM config
+- [x] Wrote comprehensive unit tests:
+  - 8 tests for LLM tools covering all tool functions
+  - 8 tests for AgentService covering success/error scenarios
+  - Fixed mock issues with AsyncMock vs Mock for sync methods
+  - Tests cover conversation context building and tool execution
+- [x] Created integration tests for end-to-end agent flow:
+  - Tests with mocked LLM responses for CI
+  - Skippable tests for real LLM APIs (OpenAI, Anthropic, Google)
+  - Database integration with message storage
+- [x] Fixed all import and module structure issues:
+  - Kept agent code only in backend directory
+  - Updated model field access (LLMConfig.model_settings)
+  - Fixed MessageType enum conversion between models and schemas
+- [x] All tests passing: 16 unit tests in backend/tests/unit/services/
+- [x] CI/CD pipeline passing after fixing imports and formatting
+
 ### Architecture Changes
 - System now has two FastAPI services: Zapa Private and Zapa Public
 - Private service handles webhooks and admin functions (not exposed to internet)
