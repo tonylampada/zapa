@@ -18,11 +18,12 @@ Create the Agent Service that orchestrates LLM interactions with function callin
 - Generate and return appropriate responses
 
 ### LLM Tools Implementation
-- `search_messages(query: str, limit: int)` - Semantic search through conversation
+- `search_messages(query: str, limit: int)` - Text search through conversation history
 - `get_recent_messages(count: int)` - Retrieve recent messages
-- `summarize_chat(last_n: int)` - Generate conversation summary
-- `extract_tasks()` - Extract to-do items from conversation
-- `get_conversation_stats()` - Get message statistics
+- `get_messages_by_date_range(start: str, end: str)` - Get messages within date range
+- `get_conversation_stats()` - Get basic message statistics (counts, dates)
+
+**Note**: The tools provide raw data access only. Intelligent operations like summarization and task extraction happen in the LLM based on the raw message data returned by these tools.
 
 ### Response Processing
 - Parse LLM responses and function calls
@@ -214,8 +215,7 @@ class LLMTools:
         self.tools: Dict[str, Callable] = {
             "search_messages": self.search_messages,
             "get_recent_messages": self.get_recent_messages,
-            "summarize_chat": self.summarize_chat,
-            "extract_tasks": self.extract_tasks,
+            "get_messages_by_date_range": self.get_messages_by_date_range,
             "get_conversation_stats": self.get_conversation_stats,
         }
     
@@ -265,30 +265,21 @@ class LLMTools:
             {
                 "type": "function",
                 "function": {
-                    "name": "summarize_chat",
-                    "description": "Generate a summary of recent conversation",
+                    "name": "get_messages_by_date_range",
+                    "description": "Get messages within a specific date range",
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "last_n": {
-                                "type": "integer",
-                                "description": "Number of recent messages to summarize",
-                                "default": 20
+                            "start_date": {
+                                "type": "string",
+                                "description": "Start date in ISO format (YYYY-MM-DD)"
+                            },
+                            "end_date": {
+                                "type": "string",
+                                "description": "End date in ISO format (YYYY-MM-DD)"
                             }
                         },
-                        "required": []
-                    }
-                }
-            },
-            {
-                "type": "function",
-                "function": {
-                    "name": "extract_tasks",
-                    "description": "Extract potential tasks or to-dos from the conversation",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {},
-                        "required": []
+                        "required": ["start_date", "end_date"]
                     }
                 }
             },
@@ -346,25 +337,29 @@ class LLMTools:
             for msg in messages
         ]
     
-    async def summarize_chat(self, last_n: int = 20) -> str:
-        """Generate a summary of recent conversation."""
-        summary = await self.message_service.summarize_conversation(
-            self.user_id, last_n
+    async def get_messages_by_date_range(
+        self, 
+        start_date: str, 
+        end_date: str
+    ) -> List[Dict[str, Any]]:
+        """Get messages within a specific date range."""
+        from datetime import datetime
+        
+        start = datetime.fromisoformat(start_date)
+        end = datetime.fromisoformat(end_date)
+        
+        messages = await self.message_service.get_messages_by_date_range(
+            self.user_id, start, end
         )
-        return summary
-    
-    async def extract_tasks(self) -> List[Dict[str, Any]]:
-        """Extract potential tasks from conversation."""
-        tasks = await self.message_service.extract_tasks(self.user_id)
         
         return [
             {
-                "content": task.content,
-                "confidence": task.confidence_score,
-                "from_message_id": task.extracted_from_message_id,
-                "suggested_due_date": task.suggested_due_date.isoformat() if task.suggested_due_date else None
+                "content": msg.content,
+                "direction": msg.direction,
+                "timestamp": msg.created_at.isoformat(),
+                "message_id": msg.id
             }
-            for task in tasks
+            for msg in messages
         ]
     
     async def get_conversation_stats(self) -> Dict[str, Any]:
@@ -500,3 +495,5 @@ After completing this task:
 - Ensure tool definitions are compatible with all LLM providers
 - Keep tool execution lightweight and fast
 - Log all LLM interactions for debugging purposes
+- Tools provide raw data only - intelligence comes from the LLM
+- The Message Service is a dumb data layer - no processing logic

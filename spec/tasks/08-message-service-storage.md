@@ -6,27 +6,33 @@
 
 ## Objective
 
-Create the Message Service that handles storing, retrieving, and managing WhatsApp messages with semantic search capabilities. This service will be used by LLM tools to access conversation history.
+Create the Message Service as a pure data access layer for WhatsApp messages. This service serves as a bridge between the database and the rest of the application, with two primary use cases:
+
+1. **Webhook Handlers**: Store incoming/outgoing messages from WhatsApp into the database
+2. **LLM Tools**: Provide data access methods that the LLM can use to read conversation history
+
+**Important**: This service is purely for data operations. It should NOT perform any intelligent operations like summarization or task extraction - those behaviors should emerge from the LLM's use of the raw data.
 
 ## Requirements
 
 ### Core Message Operations
 - Store incoming and outgoing messages
-- Retrieve messages with pagination
+- Retrieve messages with pagination and filtering
 - Search messages by content (text search initially, semantic later)
-- Get conversation statistics
-- Extract tasks/todos from messages
+- Get basic conversation statistics (counts, dates)
+- Update message status (delivered, read, failed)
 
 ### Message Storage
 - Store messages with proper metadata (timestamp, direction, user_id, etc.)
 - Handle different message types (text, media, system messages)
+- Maintain session continuity for conversations
 - Efficient querying for conversation history
 
-### Search Functionality
+### Data Retrieval
 - Text-based search through message content
-- Recent message retrieval
-- Conversation summarization support
-- Task extraction from messages
+- Recent message retrieval with flexible filtering
+- Time-range based queries
+- Session-based message grouping
 
 ## Test Strategy
 
@@ -34,8 +40,7 @@ Create the Message Service that handles storing, retrieving, and managing WhatsA
 - Message storage and retrieval
 - Search functionality with mocked data
 - Pagination logic
-- Statistics calculation
-- Task extraction logic
+- Statistics calculation (counts, date ranges)
 
 ### Integration Tests (Skippable)
 - Database operations with real PostgreSQL
@@ -68,7 +73,7 @@ from sqlalchemy import desc, func, or_
 from app.models import Message, User, Session as SessionModel
 from app.schemas.message import (
     MessageCreate, MessageResponse, MessageSearchParams,
-    ConversationStats, TaskItem
+    ConversationStats
 )
 
 
@@ -108,20 +113,29 @@ class MessageService:
         """Get statistics about the user's conversation."""
         pass
     
-    async def extract_tasks(
-        self, 
-        user_id: int, 
-        last_n: int = 50
-    ) -> List[TaskItem]:
-        """Extract potential tasks from recent messages."""
+    async def get_messages_by_date_range(
+        self,
+        user_id: int,
+        start_date: datetime,
+        end_date: datetime,
+        limit: int = 100
+    ) -> List[MessageResponse]:
+        """Get messages within a specific date range."""
         pass
     
-    async def summarize_conversation(
-        self, 
-        user_id: int, 
-        last_n: int = 20
-    ) -> str:
-        """Generate a summary of recent messages."""
+    async def update_message_status(
+        self,
+        whatsapp_message_id: str,
+        status: str
+    ) -> Optional[MessageResponse]:
+        """Update the delivery status of a message."""
+        pass
+    
+    async def get_or_create_session(
+        self,
+        user_id: int
+    ) -> SessionModel:
+        """Get active session or create a new one."""
         pass
 ```
 
@@ -179,11 +193,11 @@ class ConversationStats(BaseModel):
     last_message_date: Optional[datetime]
     average_messages_per_day: float
 
-class TaskItem(BaseModel):
-    content: str
-    extracted_from_message_id: int
-    confidence_score: float = Field(ge=0.0, le=1.0)
-    suggested_due_date: Optional[datetime] = None
+class MessageStatus(str, Enum):
+    SENT = "sent"
+    DELIVERED = "delivered"
+    READ = "read"
+    FAILED = "failed"
 ```
 
 ## Acceptance Criteria
@@ -193,7 +207,8 @@ class TaskItem(BaseModel):
 - [ ] Recent messages can be retrieved with pagination
 - [ ] Text search works across message content
 - [ ] Conversation statistics are calculated correctly
-- [ ] Task extraction identifies potential todos from messages
+- [ ] Messages can be retrieved by date range
+- [ ] Message status can be updated
 
 ### Data Integrity
 - [ ] Messages are properly associated with users
@@ -255,8 +270,12 @@ class TestMessageService:
         # Test stats calculation
         pass
     
-    async def test_extract_tasks_from_messages(self, message_service, mock_db):
-        # Test task extraction logic
+    async def test_get_messages_by_date_range(self, message_service, mock_db):
+        # Test date range filtering
+        pass
+    
+    async def test_update_message_status(self, message_service, mock_db):
+        # Test message status updates
         pass
 ```
 
@@ -297,3 +316,5 @@ After completing this task:
 - Focus on correctness first, then optimize for performance
 - Ensure proper error handling for all edge cases
 - Keep the service focused on data operations only
+- No intelligent processing - that's the LLM's job
+- The service is a dumb data layer that provides raw conversation data
