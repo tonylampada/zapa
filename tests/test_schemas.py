@@ -5,7 +5,7 @@ from pydantic import ValidationError
 
 from schemas.auth import AuthCodeRequest, AuthCodeVerify, AuthToken
 from schemas.llm import LLMConfigCreate, LLMConfigResponse, LLMConfigUpdate, LLMProvider
-from schemas.message import MessageCreate, MessageResponse, MessageType
+from schemas.message import MessageCreate, MessageResponse, MessageType, MessageDirection
 from schemas.session import (
     SessionCreate,
     SessionResponse,
@@ -108,52 +108,44 @@ def test_session_response_schema():
 def test_message_create_schema():
     """Test MessageCreate schema validation."""
     msg = MessageCreate(
-        session_id=1,
-        user_id=1,
-        sender_jid="+1234567890@s.whatsapp.net",
-        recipient_jid="+0987654321@s.whatsapp.net",
-        timestamp=datetime.now(timezone.utc),
-        message_type=MessageType.TEXT,
         content="Hello, world!",
+        direction=MessageDirection.INCOMING,
+        message_type=MessageType.TEXT,
+        whatsapp_message_id="12345",
+        metadata={"extra": "data"},
     )
     assert msg.message_type == MessageType.TEXT
     assert msg.content == "Hello, world!"
+    assert msg.direction == MessageDirection.INCOMING
 
-    # Media message without content
+    # Media message
     media_msg = MessageCreate(
-        session_id=1,
-        user_id=1,
-        sender_jid="+1234567890@s.whatsapp.net",
-        recipient_jid="+0987654321@s.whatsapp.net",
-        timestamp=datetime.now(timezone.utc),
+        content="Nice photo!",
+        direction=MessageDirection.OUTGOING,
         message_type=MessageType.IMAGE,
-        caption="Nice photo!",
-        media_metadata={"size": 1024000, "dimensions": {"width": 1920, "height": 1080}},
+        metadata={"size": 1024000, "dimensions": {"width": 1920, "height": 1080}},
     )
-    assert media_msg.content is None
-    assert media_msg.caption == "Nice photo!"
+    assert media_msg.content == "Nice photo!"
+    assert media_msg.message_type == MessageType.IMAGE
 
 
 def test_message_response_schema():
     """Test MessageResponse schema."""
     message_data = {
         "id": 1,
-        "session_id": 1,
         "user_id": 1,
-        "sender_jid": "+1234567890@s.whatsapp.net",
-        "recipient_jid": "+0987654321@s.whatsapp.net",
-        "timestamp": datetime.now(timezone.utc),
-        "message_type": MessageType.TEXT,
         "content": "Hello",
-        "caption": None,
-        "reply_to_id": None,
-        "media_metadata": None,
+        "direction": MessageDirection.INCOMING,
+        "message_type": MessageType.TEXT,
+        "whatsapp_message_id": "12345",
+        "metadata": {"extra": "data"},
         "created_at": datetime.now(timezone.utc),
     }
 
     response = MessageResponse(**message_data)
     assert response.id == 1
     assert response.content == "Hello"
+    assert response.direction == MessageDirection.INCOMING
 
 
 def test_auth_code_request_schema():
@@ -343,14 +335,10 @@ def test_auth_code_request_edge_cases():
 def test_message_create_reply():
     """Test MessageCreate with reply."""
     msg = MessageCreate(
-        session_id=1,
-        user_id=1,
-        sender_jid="+1234567890@s.whatsapp.net",
-        recipient_jid="+0987654321@s.whatsapp.net",
-        timestamp=datetime.now(timezone.utc),
-        message_type=MessageType.TEXT,
         content="This is a reply",
-        reply_to_id=42,
+        direction=MessageDirection.INCOMING,
+        message_type=MessageType.TEXT,
+        metadata={"reply_to_id": 42},
     )
-    assert msg.reply_to_id == 42
+    assert msg.metadata["reply_to_id"] == 42
     assert msg.content == "This is a reply"
