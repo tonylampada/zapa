@@ -22,7 +22,7 @@ Create webhook handlers in Zapa Private to receive and process WhatsApp events f
 
 ### Step 1: Create Webhook Models
 ```python
-# backend/zapa_private/models/webhooks.py
+# backend/app/schemas/webhook.py
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 from datetime import datetime
@@ -51,7 +51,7 @@ class MessageReceivedData(BaseModel):
 
 **Tests:**
 ```python
-# backend/tests/unit/test_webhook_models.py
+# backend/tests/unit/schemas/test_webhook.py
 def test_webhook_event_parsing():
     event_data = {
         "event_type": "message.received",
@@ -70,17 +70,17 @@ def test_webhook_event_parsing():
 
 ### Step 2: Create Webhook Handler Service
 ```python
-# backend/zapa_private/services/webhook_handler.py
+# backend/app/services/webhook_handler.py
 from typing import Dict, Any
 import logging
-from backend.zapa_private.models.webhooks import (
+from app.schemas.webhook import (
     WhatsAppWebhookEvent, 
     WebhookEventType,
     MessageReceivedData
 )
-from backend.zapa_private.services.message_service import MessageService
-from backend.zapa_private.services.agent_service import AgentService
-from backend.shared.models import MessageDirection
+from app.services.message_service import MessageService
+from app.services.agent_service import AgentService
+from app.models import MessageType
 
 logger = logging.getLogger(__name__)
 
@@ -144,7 +144,7 @@ class WebhookHandlerService:
 
 **Tests:**
 ```python
-# backend/tests/unit/test_webhook_handler.py
+# backend/tests/unit/services/test_webhook_handler.py
 @pytest.mark.asyncio
 async def test_handle_message_received(mock_services):
     handler = WebhookHandlerService(
@@ -177,12 +177,12 @@ async def test_handle_message_received(mock_services):
 
 ### Step 3: Create Webhook API Endpoint
 ```python
-# backend/zapa_private/api/webhooks.py
+# backend/app/private/api/v1/webhooks.py
 from fastapi import APIRouter, HTTPException, Depends, Header
 from typing import Optional
-from backend.zapa_private.models.webhooks import WhatsAppWebhookEvent
-from backend.zapa_private.services.webhook_handler import WebhookHandlerService
-from backend.zapa_private.core.dependencies import get_webhook_handler
+from app.schemas.webhook import WhatsAppWebhookEvent
+from app.services.webhook_handler import WebhookHandlerService
+from app.core.dependencies import get_webhook_handler
 
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
 
@@ -209,7 +209,7 @@ async def whatsapp_webhook(
 
 **Tests:**
 ```python
-# backend/tests/integration/test_webhook_endpoints.py
+# backend/tests/integration/private/api/v1/test_webhook_endpoints.py
 @pytest.mark.asyncio
 async def test_webhook_endpoint(test_client, test_db):
     event_data = {
@@ -274,7 +274,7 @@ async def _handle_message_sent(
 
 ### Step 5: Add Retry Logic for Failed Processing
 ```python
-# backend/zapa_private/services/retry_handler.py
+# backend/app/services/retry_handler.py
 from typing import Callable, Any, Optional
 import asyncio
 import logging
@@ -334,7 +334,7 @@ async def _handle_message_received(self, event: WhatsAppWebhookEvent) -> Dict[st
 
 ### Step 6: Add Webhook Validation
 ```python
-# backend/zapa_private/core/security.py
+# backend/app/core/webhook_security.py
 import hmac
 import hashlib
 from typing import Optional
@@ -385,7 +385,7 @@ async def whatsapp_webhook(
 ## Integration Tests
 
 ```python
-# backend/tests/integration/test_webhook_integration.py
+# backend/tests/integration/services/test_webhook_integration.py
 import pytest
 import asyncio
 from datetime import datetime

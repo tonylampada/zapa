@@ -23,10 +23,10 @@ Complete the integration between Zapa services and the WhatsApp Bridge (zapw). T
 
 ### Step 1: Create Bridge Configuration Service
 ```python
-# backend/zapa_private/services/bridge_config.py
+# backend/app/services/bridge_config.py
 from typing import Dict, Optional, List
 from dataclasses import dataclass
-from backend.zapa_private.adapters.whatsapp_bridge import WhatsAppBridgeAdapter
+from app.adapters.whatsapp import WhatsAppBridgeAdapter
 import logging
 
 logger = logging.getLogger(__name__)
@@ -125,7 +125,7 @@ class BridgeConfigurationService:
 
 **Tests:**
 ```python
-# backend/tests/unit/test_bridge_config.py
+# backend/tests/unit/services/test_bridge_config.py
 @pytest.mark.asyncio
 async def test_configure_bridge(mock_bridge_adapter):
     config = BridgeConfig(
@@ -169,7 +169,7 @@ async def test_get_bridge_status(mock_bridge_adapter):
 
 ### Step 2: Create Message Queue for Reliability
 ```python
-# backend/zapa_private/services/message_queue.py
+# backend/app/services/message_queue.py
 from typing import Optional, Dict, Any, Callable
 from datetime import datetime
 import asyncio
@@ -341,7 +341,7 @@ class MessageQueueService:
 
 **Tests:**
 ```python
-# backend/tests/unit/test_message_queue.py
+# backend/tests/unit/services/test_message_queue.py
 @pytest.mark.asyncio
 async def test_enqueue_message(mock_redis, mock_bridge):
     queue = MessageQueueService(mock_redis, mock_bridge)
@@ -389,7 +389,7 @@ async def test_message_processing(mock_redis, mock_bridge):
 
 ### Step 3: Create Integration Monitoring Service
 ```python
-# backend/zapa_private/services/integration_monitor.py
+# backend/app/services/integration_monitor.py
 from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 from dataclasses import dataclass
@@ -591,15 +591,15 @@ class IntegrationMonitor:
 
 ### Step 4: Create Integration Orchestrator
 ```python
-# backend/zapa_private/services/integration_orchestrator.py
+# backend/app/services/integration_orchestrator.py
 from typing import Optional
-from backend.zapa_private.services.bridge_config import (
+from app.services.bridge_config import (
     BridgeConfigurationService,
     BridgeConfig
 )
-from backend.zapa_private.services.message_queue import MessageQueueService
-from backend.zapa_private.services.integration_monitor import IntegrationMonitor
-from backend.zapa_private.adapters.whatsapp_bridge import WhatsAppBridgeAdapter
+from app.services.message_queue import MessageQueueService
+from app.services.integration_monitor import IntegrationMonitor
+from app.adapters.whatsapp import WhatsAppBridgeAdapter
 import logging
 
 logger = logging.getLogger(__name__)
@@ -723,13 +723,13 @@ class WhatsAppIntegrationOrchestrator:
 
 ### Step 5: Add Integration API Endpoints
 ```python
-# backend/zapa_private/api/integration.py
+# backend/app/private/api/v1/integration.py
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Dict
-from backend.zapa_private.services.integration_orchestrator import (
+from app.services.integration_orchestrator import (
     WhatsAppIntegrationOrchestrator
 )
-from backend.zapa_private.core.dependencies import (
+from app.core.dependencies import (
     get_integration_orchestrator,
     require_admin
 )
@@ -778,7 +778,7 @@ async def get_queue_statistics(
 
 ### Step 6: Create Integration Tests
 ```python
-# backend/tests/integration/test_whatsapp_integration.py
+# backend/tests/integration/services/test_whatsapp_integration.py
 import pytest
 import asyncio
 from datetime import datetime

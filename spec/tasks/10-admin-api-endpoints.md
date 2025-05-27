@@ -50,28 +50,28 @@ Create the admin API endpoints for the Zapa Private service that allow administr
 
 ### API Routers
 ```
-backend/zapa_private/app/api/admin/users.py
-backend/zapa_private/app/api/admin/llm_config.py
-backend/zapa_private/app/api/admin/system.py
+backend/app/private/api/v1/admin/users.py
+backend/app/private/api/v1/admin/llm_config.py
+backend/app/private/api/v1/admin/system.py
 ```
 
 ### Authentication
 ```
-backend/zapa_private/app/api/auth.py
-backend/zapa_private/app/core/security.py
+backend/app/private/api/v1/auth.py
+backend/app/core/security.py
 ```
 
 ### Schemas
 ```
-backend/shared/app/schemas/admin_schemas.py
+backend/app/schemas/admin.py
 ```
 
 ### Tests
 ```
-backend/zapa_private/tests/api/test_admin_users.py
-backend/zapa_private/tests/api/test_admin_llm_config.py
-backend/zapa_private/tests/api/test_admin_system.py
-backend/zapa_private/tests/api/test_auth.py
+backend/tests/unit/private/api/v1/test_admin_users.py
+backend/tests/unit/private/api/v1/test_admin_llm_config.py
+backend/tests/unit/private/api/v1/test_admin_system.py
+backend/tests/unit/private/api/v1/test_auth.py
 ```
 
 ## Implementation Details
@@ -79,15 +79,15 @@ backend/zapa_private/tests/api/test_auth.py
 ### User Management Endpoints
 
 ```python
-# backend/zapa_private/app/api/admin/users.py
+# backend/app/private/api/v1/admin/users.py
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from app.core.database import get_db
+from app.database.connection import get_db
 from app.core.security import get_current_admin
 from app.services.message_service import MessageService
-from shared.app.schemas.admin_schemas import (
+from app.schemas.admin import (
     UserListResponse, UserDetailResponse, UserCreate, UserUpdate,
     ConversationHistoryResponse, PaginationParams
 )
@@ -173,15 +173,15 @@ async def clear_user_conversations(
 ### LLM Configuration Endpoints
 
 ```python
-# backend/zapa_private/app/api/admin/llm_config.py
+# backend/app/private/api/v1/admin/llm_config.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
-from app.core.database import get_db
+from app.database.connection import get_db
 from app.core.security import get_current_admin
-from app.adapters.llm_adapter_factory import LLMAdapterFactory
-from shared.app.schemas.admin_schemas import (
+from app.adapters.llm.agent import create_agent
+from app.schemas.admin import (
     LLMConfigResponse, LLMConfigCreate, LLMConfigUpdate,
     LLMProviderInfo, LLMConfigTestResponse
 )
@@ -261,14 +261,14 @@ async def test_user_llm_config(
 ### System Management Endpoints
 
 ```python
-# backend/zapa_private/app/api/admin/system.py
+# backend/app/private/api/v1/admin/system.py
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 
-from app.core.database import get_db
+from app.database.connection import get_db
 from app.core.security import get_current_admin
-from shared.app.schemas.admin_schemas import (
+from app.schemas.admin import (
     SystemStatsResponse, SystemHealthResponse, ExportDataResponse
 )
 
@@ -309,7 +309,7 @@ async def export_system_data(
 ### Authentication and Security
 
 ```python
-# backend/zapa_private/app/core/security.py
+# backend/app/core/security.py
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import JWTError, jwt
@@ -317,8 +317,8 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.core.database import get_db
-from shared.app.models.models import User
+from app.database.connection import get_db
+from app.models import User
 
 security = HTTPBearer()
 
@@ -373,7 +373,7 @@ async def get_current_admin(current_user: User = Depends(get_current_user)):
 ### Admin Schemas
 
 ```python
-# backend/shared/app/schemas/admin_schemas.py
+# backend/app/schemas/admin.py
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from datetime import datetime
@@ -502,7 +502,7 @@ class SystemHealthResponse(BaseModel):
 
 ### Unit Test Structure
 ```python
-# backend/zapa_private/tests/api/test_admin_users.py
+# backend/tests/unit/private/api/v1/test_admin_users.py
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import Mock, patch

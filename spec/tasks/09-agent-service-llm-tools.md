@@ -47,24 +47,24 @@ Create the Agent Service that orchestrates LLM interactions with function callin
 
 ### Service Implementation
 ```
-backend/zapa_private/app/services/agent_service.py
+backend/app/services/agent_service.py
 ```
 
 ### LLM Tools
 ```
-backend/zapa_private/app/services/llm_tools.py
+backend/app/services/llm_tools.py
 ```
 
 ### Schemas
 ```
-backend/shared/app/schemas/agent_schemas.py
+backend/app/schemas/agent.py
 ```
 
 ### Tests
 ```
-backend/zapa_private/tests/services/test_agent_service.py
-backend/zapa_private/tests/services/test_llm_tools.py
-backend/zapa_private/tests/integration/test_agent_integration.py
+backend/tests/unit/services/test_agent_service.py
+backend/tests/unit/services/test_llm_tools.py
+backend/tests/integration/services/test_agent_integration.py
 ```
 
 ## Implementation Details
@@ -72,7 +72,7 @@ backend/zapa_private/tests/integration/test_agent_integration.py
 ### Agent Service Class
 
 ```python
-# backend/zapa_private/app/services/agent_service.py
+# backend/app/services/agent_service.py
 from typing import Dict, Any, List, Optional
 from sqlalchemy.orm import Session
 import json
@@ -80,9 +80,9 @@ import logging
 
 from app.services.message_service import MessageService
 from app.services.llm_tools import LLMTools
-from app.adapters.llm_adapter_factory import LLMAdapterFactory
-from shared.app.models.models import User, LLMConfig
-from shared.app.schemas.agent_schemas import (
+from app.adapters.llm.agent import create_agent
+from app.models import User, LLMConfig
+from app.schemas.agent import (
     AgentRequest, AgentResponse, ToolCall, ToolResult
 )
 
@@ -197,7 +197,7 @@ class AgentService:
 ### LLM Tools Implementation
 
 ```python
-# backend/zapa_private/app/services/llm_tools.py
+# backend/app/services/llm_tools.py
 from typing import Dict, Any, List, Callable
 import json
 from datetime import datetime, timedelta
@@ -384,7 +384,7 @@ class LLMTools:
 ### Agent Schemas
 
 ```python
-# backend/shared/app/schemas/agent_schemas.py
+# backend/app/schemas/agent.py
 from pydantic import BaseModel, Field
 from typing import Dict, Any, List, Optional
 from datetime import datetime
@@ -457,12 +457,12 @@ class LLMResponse(BaseModel):
 
 ### Unit Test Structure
 ```python
-# backend/zapa_private/tests/services/test_agent_service.py
+# backend/tests/unit/services/test_agent_service.py
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 
 from app.services.agent_service import AgentService
-from shared.app.schemas.agent_schemas import AgentResponse
+from app.schemas.agent import AgentResponse
 
 class TestAgentService:
     @pytest.fixture

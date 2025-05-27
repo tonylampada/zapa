@@ -57,7 +57,8 @@ services:
   # Backend (Test Mode) - Private entrypoint
   backend-private:
     build:
-      context: ./backend
+      context: .
+      dockerfile: Dockerfile
       target: test
     ports:
       - "8001:8001"
@@ -75,7 +76,8 @@ services:
   # Backend (Test Mode) - Public entrypoint
   backend-public:
     build:
-      context: ./backend
+      context: .
+      dockerfile: Dockerfile
       target: test
     ports:
       - "8002:8002"
@@ -98,8 +100,8 @@ services:
       - ./tests:/tests
       - ./test-results:/results
     environment:
-      ZAPA_PRIVATE_URL: http://backend-private:8001
-      ZAPA_PUBLIC_URL: http://backend-public:8002
+      ZAPA_PRIVATE_URL: http://backend-private:8001/api/v1
+      ZAPA_PUBLIC_URL: http://backend-public:8002/api/v1
     depends_on:
       - backend-private
       - backend-public
@@ -201,7 +203,7 @@ app.listen(PORT, () => {
 
 ### Step 3: Create E2E Test Suite
 ```python
-# backend/tests/e2e/test_full_flow.py
+# tests/e2e/test_full_flow.py
 import pytest
 import asyncio
 import aiohttp
@@ -379,7 +381,7 @@ class TestE2EFlow:
 
 ### Step 4: Create Load Testing Suite
 ```python
-# backend/tests/load/test_concurrent_users.py
+# tests/load/test_concurrent_users.py
 import asyncio
 import aiohttp
 import time
@@ -501,7 +503,7 @@ async def simulate_user(session, phone_number, duration):
 
 ### Step 5: Create Integration Test Scenarios
 ```python
-# backend/tests/integration/test_failure_scenarios.py
+# tests/integration/test_failure_scenarios.py
 import pytest
 import asyncio
 from unittest.mock import patch
@@ -627,7 +629,7 @@ class TestFailureScenarios:
 
 ### Step 6: Create Security Testing Suite
 ```python
-# backend/tests/security/test_security.py
+# tests/security/test_security.py
 import pytest
 import jwt
 import asyncio
@@ -745,7 +747,7 @@ class TestSecurity:
 
 ### Step 7: Create Performance Benchmarks
 ```python
-# backend/tests/performance/test_benchmarks.py
+# tests/performance/test_benchmarks.py
 import pytest
 import asyncio
 import time
@@ -925,17 +927,17 @@ jobs:
     - name: Run integration tests
       run: |
         docker-compose -f docker-compose.test.yml run test-runner \
-          pytest backend/tests/integration -v --junitxml=results/integration.xml
+          pytest tests/integration -v --junitxml=results/integration.xml
     
     - name: Run E2E tests
       run: |
         docker-compose -f docker-compose.test.yml run test-runner \
-          pytest backend/tests/e2e -v --junitxml=results/e2e.xml
+          pytest tests/e2e -v --junitxml=results/e2e.xml
     
     - name: Run load tests
       run: |
         docker-compose -f docker-compose.test.yml run test-runner \
-          locust -f backend/tests/load/test_concurrent_users.py \
+          locust -f tests/load/test_concurrent_users.py \
           --headless -u 50 -r 5 -t 5m \
           --html results/load-test.html
     

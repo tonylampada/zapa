@@ -45,18 +45,13 @@ Create the Message Service that handles storing, retrieving, and managing WhatsA
 
 ### Service Implementation
 ```
-backend/zapa_private/app/services/message_service.py
-```
-
-### Schemas
-```
-backend/shared/app/schemas/message_schemas.py
+backend/app/services/message_service.py
 ```
 
 ### Tests
 ```
-backend/zapa_private/tests/services/test_message_service.py
-backend/zapa_private/tests/integration/test_message_integration.py
+backend/tests/unit/services/test_message_service.py
+backend/tests/integration/services/test_message_integration.py
 ```
 
 ## Implementation Details
@@ -64,14 +59,14 @@ backend/zapa_private/tests/integration/test_message_integration.py
 ### MessageService Class
 
 ```python
-# backend/zapa_private/app/services/message_service.py
+# backend/app/services/message_service.py
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, func, or_
 
-from shared.app.models.models import Message, User
-from shared.app.schemas.message_schemas import (
+from app.models import Message, User, Session as SessionModel
+from app.schemas.message import (
     MessageCreate, MessageResponse, MessageSearchParams,
     ConversationStats, TaskItem
 )
@@ -133,7 +128,7 @@ class MessageService:
 ### Message Schemas
 
 ```python
-# backend/shared/app/schemas/message_schemas.py
+# backend/app/schemas/message.py
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime
@@ -227,13 +222,13 @@ class TaskItem(BaseModel):
 
 ### Unit Test Structure
 ```python
-# backend/zapa_private/tests/services/test_message_service.py
+# backend/tests/unit/services/test_message_service.py
 import pytest
 from unittest.mock import Mock, AsyncMock
 from datetime import datetime, timedelta
 
 from app.services.message_service import MessageService
-from shared.app.schemas.message_schemas import MessageCreate, MessageDirection
+from app.schemas.message import MessageCreate, MessageDirection
 
 class TestMessageService:
     @pytest.fixture
@@ -267,7 +262,7 @@ class TestMessageService:
 
 ### Integration Test Structure
 ```python
-# backend/zapa_private/tests/integration/test_message_integration.py
+# backend/tests/integration/services/test_message_integration.py
 import pytest
 import os
 from sqlalchemy import create_engine
