@@ -12,6 +12,7 @@ from schemas.message import (
     MessageCreate,
     MessageDirection,
     MessageResponse,
+    MessageType,
 )
 
 
@@ -322,7 +323,7 @@ class MessageService:
             user_id=message.user_id,
             content=message.content or "",
             direction=direction,
-            message_type=message.message_type,
+            message_type=MessageType(message.message_type.value),
             whatsapp_message_id=whatsapp_message_id,
             metadata=message.media_metadata,
             created_at=message.created_at,
