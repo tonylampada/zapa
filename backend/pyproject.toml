@@ -1,0 +1,115 @@
+[build-system]
+requires = ["setuptools>=68", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "zapa-backend"
+version = "0.1.0"
+description = "Zapa WhatsApp Agent System Backend"
+requires-python = ">=3.10"
+dependencies = [
+    # Core dependencies
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    
+    # Database
+    "sqlalchemy>=2.0.23",
+    "asyncpg>=0.29.0",
+    "alembic>=1.13.0",
+    
+    # HTTP client
+    "httpx>=0.26.0",
+    
+    # Security
+    "cryptography>=41.0.7",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "python-multipart>=0.0.6",
+    
+    # LLM / Agent SDK
+    "openai-agents>=0.0.1",
+    
+    # Utilities
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=7.4.3",
+    "pytest-asyncio>=0.21.1",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "aiosqlite>=0.19.0",  # For SQLite async support in tests
+    
+    # Code quality
+    "black>=23.12.0",
+    "ruff>=0.1.9",
+    "mypy>=1.8.0",
+    "types-passlib",
+    "types-python-jose",
+    
+    # Development
+    "ipython>=8.18.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*", "models*", "schemas*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_mode = "auto"
+addopts = "-v --tb=short"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+include = '\.pyi?$'
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+    "B008",  # do not perform function calls in argument defaults
+]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+plugins = ["pydantic.mypy"]
+
+[tool.coverage.run]
+source = ["app", "models", "schemas"]
+omit = ["*/tests/*", "*/alembic/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "pass",
+    "except ImportError:",
+    "if TYPE_CHECKING:",
+]
