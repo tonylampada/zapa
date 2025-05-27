@@ -5,7 +5,12 @@ from pydantic import ValidationError
 
 from schemas.auth import AuthCodeRequest, AuthCodeVerify, AuthToken
 from schemas.llm import LLMConfigCreate, LLMConfigResponse, LLMConfigUpdate, LLMProvider
-from schemas.message import MessageCreate, MessageResponse, MessageType, MessageDirection
+from schemas.message import (
+    MessageCreate,
+    MessageDirection,
+    MessageResponse,
+    MessageType,
+)
 from schemas.session import (
     SessionCreate,
     SessionResponse,

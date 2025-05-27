@@ -8,10 +8,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.services.message_service import MessageService
-from models import Base, Message, Session as SessionModel, User
-from models.session import SessionStatus, SessionType
+from models import Base, Message, User
+from models import Session as SessionModel
+from models.session import SessionStatus
 from schemas.message import (
-    ConversationStats,
     MessageCreate,
     MessageDirection,
     MessageResponse,
@@ -37,8 +37,8 @@ def db_engine():
 @pytest.fixture
 def db_session(db_engine):
     """Create database session for tests."""
-    SessionLocal = sessionmaker(bind=db_engine)
-    session = SessionLocal()
+    session_local = sessionmaker(bind=db_engine)
+    session = session_local()
     yield session
     session.close()
 
@@ -87,34 +87,34 @@ class TestMessageIntegration:
                 message_type=MessageType.TEXT,
             ),
         ]
-        
+
         stored_messages = []
         for msg_data in messages_data:
             result = await message_service.store_message(test_user.id, msg_data)
             stored_messages.append(result)
-        
+
         # Verify messages were stored
         assert len(stored_messages) == 3
         assert all(isinstance(msg, MessageResponse) for msg in stored_messages)
-        
+
         # Retrieve recent messages
         recent = await message_service.get_recent_messages(test_user.id, count=10)
         assert len(recent) == 3
-        
+
         # Messages should be in reverse chronological order
         assert recent[0].content == "How can I help you?"
         assert recent[2].content == "Hello from user"
-        
+
         # Verify session was created
-        session = db_session.query(SessionModel).filter(
-            SessionModel.user_id == test_user.id
-        ).first()
+        session = (
+            db_session.query(SessionModel)
+            .filter(SessionModel.user_id == test_user.id)
+            .first()
+        )
         assert session is not None
         assert session.status == SessionStatus.CONNECTED
 
-    async def test_message_search_functionality(
-        self, message_service, test_user
-    ):
+    async def test_message_search_functionality(self, message_service, test_user):
         """Test searching messages by content."""
         # Store messages with different content
         messages = [
@@ -124,7 +124,7 @@ class TestMessageIntegration:
             "Thank you for your help!",
             "Goodbye!",
         ]
-        
+
         for content in messages:
             await message_service.store_message(
                 test_user.id,
@@ -134,33 +134,31 @@ class TestMessageIntegration:
                     message_type=MessageType.TEXT,
                 ),
             )
-        
+
         # Search for "help"
         help_results = await message_service.search_messages(
             test_user.id, "help", limit=10
         )
         assert len(help_results) == 2
         assert all("help" in msg.content.lower() for msg in help_results)
-        
+
         # Search for "order"
         order_results = await message_service.search_messages(
             test_user.id, "order", limit=10
         )
         assert len(order_results) == 2
-        
+
         # Search for non-existent term
         no_results = await message_service.search_messages(
             test_user.id, "nonexistent", limit=10
         )
         assert len(no_results) == 0
 
-    async def test_conversation_statistics(
-        self, message_service, test_user
-    ):
+    async def test_conversation_statistics(self, message_service, test_user):
         """Test conversation statistics calculation."""
         # Store messages over several days
-        base_time = datetime.utcnow() - timedelta(days=7)
-        
+        # Create messages over 7 days
+
         # Create messages with different timestamps
         for day in range(7):
             # Morning message from user
@@ -172,7 +170,7 @@ class TestMessageIntegration:
                     message_type=MessageType.TEXT,
                 ),
             )
-            
+
             # Response from service
             await message_service.store_message(
                 test_user.id,
@@ -182,10 +180,10 @@ class TestMessageIntegration:
                     message_type=MessageType.TEXT,
                 ),
             )
-        
+
         # Get statistics
         stats = await message_service.get_conversation_stats(test_user.id)
-        
+
         assert stats.total_messages == 14
         assert stats.messages_sent == 7  # From user
         assert stats.messages_received == 7  # From service
@@ -193,9 +191,7 @@ class TestMessageIntegration:
         assert stats.first_message_date is not None
         assert stats.last_message_date is not None
 
-    async def test_message_status_updates(
-        self, message_service, test_user
-    ):
+    async def test_message_status_updates(self, message_service, test_user):
         """Test updating message delivery status."""
         # Store a message with WhatsApp ID
         result = await message_service.store_message(
@@ -207,30 +203,26 @@ class TestMessageIntegration:
                 whatsapp_message_id="wa_123456",
             ),
         )
-        
+
         assert result.whatsapp_message_id == "wa_123456"
-        
+
         # Update status to delivered
-        updated = await message_service.update_message_status(
-            "wa_123456", "delivered"
-        )
+        updated = await message_service.update_message_status("wa_123456", "delivered")
         assert updated is not None
         assert updated.metadata["status"] == "delivered"
-        
+
         # Update status to read
         updated = await message_service.update_message_status("wa_123456", "read")
         assert updated is not None
         assert updated.metadata["status"] == "read"
-        
+
         # Try to update non-existent message
         not_found = await message_service.update_message_status(
             "nonexistent", "delivered"
         )
         assert not_found is None
 
-    async def test_date_range_queries(
-        self, message_service, test_user
-    ):
+    async def test_date_range_queries(self, message_service, test_user):
         """Test retrieving messages by date range."""
         # Store messages across different dates
         now = datetime.utcnow()
@@ -241,8 +233,8 @@ class TestMessageIntegration:
             now - timedelta(days=1),
             now,
         ]
-        
-        for i, date in enumerate(dates):
+
+        for i, _ in enumerate(dates):
             # We need to manually set the timestamp for testing
             # This would require modifying the service or using a different approach
             await message_service.store_message(
@@ -253,28 +245,26 @@ class TestMessageIntegration:
                     message_type=MessageType.TEXT,
                 ),
             )
-        
+
         # Query messages from last 7 days
         week_start = now - timedelta(days=7)
         week_messages = await message_service.get_messages_by_date_range(
             test_user.id, week_start, now, limit=100
         )
-        
+
         # Should get messages from last 7 days (indexes 1-4)
         assert len(week_messages) >= 4
-        
+
         # Query messages from last 3 days
         three_days_start = now - timedelta(days=3)
         recent_messages = await message_service.get_messages_by_date_range(
             test_user.id, three_days_start, now, limit=100
         )
-        
+
         # Should get messages from last 3 days (indexes 2-4)
         assert len(recent_messages) >= 3
 
-    async def test_session_management(
-        self, message_service, db_session, test_user
-    ):
+    async def test_session_management(self, message_service, db_session, test_user):
         """Test session creation and management."""
         # First message should create a session
         await message_service.store_message(
@@ -285,14 +275,16 @@ class TestMessageIntegration:
                 message_type=MessageType.TEXT,
             ),
         )
-        
+
         # Check session was created
-        sessions = db_session.query(SessionModel).filter(
-            SessionModel.user_id == test_user.id
-        ).all()
+        sessions = (
+            db_session.query(SessionModel)
+            .filter(SessionModel.user_id == test_user.id)
+            .all()
+        )
         assert len(sessions) == 1
         assert sessions[0].status == SessionStatus.CONNECTED
-        
+
         # Subsequent messages should use same session
         await message_service.store_message(
             test_user.id,
@@ -302,26 +294,26 @@ class TestMessageIntegration:
                 message_type=MessageType.TEXT,
             ),
         )
-        
+
         # Still only one session
-        sessions = db_session.query(SessionModel).filter(
-            SessionModel.user_id == test_user.id
-        ).all()
+        sessions = (
+            db_session.query(SessionModel)
+            .filter(SessionModel.user_id == test_user.id)
+            .all()
+        )
         assert len(sessions) == 1
-        
+
         # All messages should have same session_id
-        messages = db_session.query(Message).filter(
-            Message.user_id == test_user.id
-        ).all()
+        messages = (
+            db_session.query(Message).filter(Message.user_id == test_user.id).all()
+        )
         assert all(msg.session_id == sessions[0].id for msg in messages)
 
-    async def test_search_performance_large_dataset(
-        self, message_service, test_user
-    ):
+    async def test_search_performance_large_dataset(self, message_service, test_user):
         """Test search performance with many messages."""
         # Store 1000 messages
         import time
-        
+
         for i in range(1000):
             content = f"Message {i}: "
             if i % 10 == 0:
@@ -330,7 +322,7 @@ class TestMessageIntegration:
                 content += "another term"
             else:
                 content += "regular content"
-            
+
             await message_service.store_message(
                 test_user.id,
                 MessageCreate(
@@ -339,17 +331,17 @@ class TestMessageIntegration:
                     message_type=MessageType.TEXT,
                 ),
             )
-        
+
         # Time the search
         start = time.time()
         results = await message_service.search_messages(
             test_user.id, "special", limit=50
         )
         end = time.time()
-        
+
         # Should find 100 messages (every 10th)
         assert len(results) == 50  # Limited to 50
         assert all("special" in msg.content for msg in results)
-        
+
         # Search should be reasonably fast (< 500ms)
         assert (end - start) < 0.5
