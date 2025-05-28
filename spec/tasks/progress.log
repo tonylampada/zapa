@@ -205,6 +205,46 @@ Frontend tasks (14-15) may not need significant changes as they remain separate 
 - [x] All tests passing: 16 unit tests in backend/tests/unit/services/
 - [x] CI/CD pipeline passing after fixing imports and formatting
 
+#### Task 10: Admin API Endpoints ✅ (2025-05-27)
+- [x] Created comprehensive admin API endpoints in backend/app/private/api/v1/admin/:
+  - User management: list, get, create, update, delete, view conversations
+  - LLM configuration: list providers, get/create/update config, test connectivity
+  - System management: health status, statistics, data export
+  - Authentication: JWT-based admin login endpoint
+- [x] Implemented JWT authentication with role-based access control:
+  - Created security module with JWT token creation/validation
+  - get_current_user and get_current_admin dependency injection
+  - All admin endpoints require valid JWT token
+- [x] Updated User model with new fields:
+  - first_name, last_name for better user identification
+  - user_metadata (JSON) for flexible user data storage
+  - is_active for user status management
+  - is_admin for admin role flagging
+- [x] Created comprehensive admin schemas:
+  - Pagination support for list endpoints
+  - User management DTOs (create, update, list, detail)
+  - LLM configuration DTOs with API key hiding
+  - System health and statistics response models
+- [x] Implemented advanced features:
+  - Search functionality for user listing
+  - LLM configuration testing with response time measurement
+  - System resource monitoring (memory, disk, uptime)
+  - Background data export with job tracking
+  - Encrypted storage of API keys using Fernet
+- [x] Wrote unit tests for all endpoints:
+  - 4 tests for authentication endpoints
+  - 11 tests for user management endpoints
+  - 8 tests for LLM configuration endpoints
+  - 8 tests for system management endpoints
+- [x] Fixed technical issues:
+  - Changed 'metadata' to 'user_metadata' (reserved SQLAlchemy attribute)
+  - Added proper Fernet key generation from config
+  - Added psutil dependency for system monitoring
+  - Created database migration for new User fields
+  - Updated all references in schemas and endpoints
+- [x] Updated private router to include all admin endpoints
+- [x] Admin can now fully manage users, configure LLMs, and monitor system health
+
 ### Architecture Changes
 - System now has two FastAPI services: Zapa Private and Zapa Public
 - Private service handles webhooks and admin functions (not exposed to internet)

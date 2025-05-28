@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     # Security
     SECRET_KEY: str = "development-secret-key-change-in-production"
     ADMIN_TOKEN_SECRET: str = "admin-secret-change-in-production"
+    ENCRYPTION_KEY: str = "development-encryption-key-change-in-production"
 
     # External Services
     WHATSAPP_BRIDGE_URL: str = "http://localhost:3000"
