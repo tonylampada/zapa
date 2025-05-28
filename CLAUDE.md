@@ -21,37 +21,50 @@ This project strictly follows the **"Plumbing + Intelligence"** architecture mod
 2. **Service Layer**: Core business logic, orchestration, decision-making - the "intelligence"
 3. **Adapter Layer**: External integrations (DB, APIs, message queues) - isolates complexity
 
-## Development Commands
+## Development Environment (REQUIRED)
 
-### Backend (Python FastAPI)
+This project uses a containerized development environment. DO NOT run Python commands directly on the host system.
+
+### Starting the Development Environment
 
 ```bash
-# Install dependencies
-cd backend
-pip install -e ".[dev]"
+# Start all services
+docker compose -f .devcontainer/docker-compose.yml up -d
 
-# Run private service (internal, webhooks, admin)
-uvicorn private_main:app --reload --port 8001
+# Check status
+docker compose -f .devcontainer/docker-compose.yml ps
+```
 
-# Run public service (external, user auth/dashboard)
-uvicorn public_main:app --reload --port 8002
+### Running Commands
+
+ALL Python commands must be run inside the container:
+
+```bash
+# Run Python scripts
+docker exec -it zapa-dev python private_main.py
 
 # Run tests
-pytest -v
+docker exec -it zapa-dev pytest -v
 
 # Run with coverage
-pytest -v --cov=app --cov=models --cov=schemas --cov-report=html
+docker exec -it zapa-dev pytest -v --cov=app --cov=models --cov=schemas --cov-report=html
 
-# Linting and formatting
-black app/ models/ schemas/ tests/ private_main.py public_main.py
-ruff check app/ models/ schemas/ tests/ private_main.py public_main.py
+# Run database migrations
+docker exec -it zapa-dev alembic upgrade head
+docker exec -it zapa-dev alembic revision --autogenerate -m "Description"
+
+# Run linting and formatting
+docker exec -it zapa-dev black app/ models/ schemas/ tests/ private_main.py public_main.py
+docker exec -it zapa-dev ruff check app/ models/ schemas/ tests/ private_main.py public_main.py
 
 # Type checking
-mypy app/ models/ schemas/
+docker exec -it zapa-dev mypy app/ models/ schemas/
 
-# Database migrations
-alembic upgrade head
-alembic revision --autogenerate -m "Description"
+# Interactive Python shell
+docker exec -it zapa-dev ipython
+
+# Connect to PostgreSQL
+docker exec -it zapa-postgres psql -U myuser -d whatsapp_agent
 ```
 
 ### Frontend (Vue.js)
@@ -77,34 +90,33 @@ npm run test:e2e
 npm run lint
 ```
 
-### Docker Development
+### Adding Dependencies
+
+When adding new dependencies:
+
+1. Update `pyproject.toml`
+2. Rebuild the container:
+   ```bash
+   docker compose -f .devcontainer/docker-compose.yml build dev
+   docker compose -f .devcontainer/docker-compose.yml up -d
+   ```
+
+### Stopping the Environment
 
 ```bash
-# Build and run all services
-docker-compose up --build
+docker compose -f .devcontainer/docker-compose.yml down
 
-# Run in background
-docker-compose up -d
-
-# View logs
-docker-compose logs -f [service_name]
-
-# Stop all services
-docker-compose down
-
-# Run with clean slate (remove volumes)
-docker-compose down -v
+# To also remove volumes (clean slate)
+docker compose -f .devcontainer/docker-compose.yml down -v
 ```
 
-### Database
+### Important Notes
 
-```bash
-# Connect to PostgreSQL in Docker
-docker-compose exec db psql -U myuser -d whatsapp_agent
-
-# Connect to local development database
-psql -U myuser -d whatsapp_agent
-```
+- NEVER use `uv run` outside the container
+- NEVER use system Python or virtual environments
+- ALWAYS use `docker exec -it zapa-dev` for running commands
+- The container has all dependencies installed system-wide
+- Database and Redis are accessible within the container network
 
 ## Key Architectural Patterns
 
