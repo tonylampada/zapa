@@ -1,0 +1,49 @@
+services:
+  dev:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    container_name: zapa-dev
+    volumes:
+      - ..:/workspace:cached
+      - ~/.gitconfig:/root/.gitconfig:ro
+      - ~/.ssh:/root/.ssh:ro
+    environment:
+      - DATABASE_URL=postgresql://myuser:mypassword@postgres:5432/whatsapp_agent
+      - REDIS_URL=redis://redis:6379
+      - WHATSAPP_API_URL=http://host.docker.internal:3000
+      - ADMIN_TOKEN_SECRET=dev-secret
+      - ENCRYPTION_KEY=dev-encryption-key-must-be-32-bytes-long!
+      - SECRET_KEY=dev-secret-key-for-development-only!
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - zapa-network
+    stdin_open: true
+    tty: true
+
+  postgres:
+    image: postgres:15
+    container_name: zapa-postgres
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: whatsapp_agent
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - zapa-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: zapa-redis
+    networks:
+      - zapa-network
+
+volumes:
+  postgres_data:
+
+networks:
+  zapa-network:
+    driver: bridge
