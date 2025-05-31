@@ -215,16 +215,11 @@ This indicates:
 
 ## Security
 
-### Webhook Signature Validation
-- Optional HMAC-SHA256 signature validation
-- Configured via `WEBHOOK_SECRET` environment variable
-- Uses constant-time comparison to prevent timing attacks
-- Header: `X-Webhook-Signature`
-
 ### Network Security
 - Webhooks only accessible on private network
-- No authentication required (secured at network level)
+- No authentication or signature validation required
 - WhatsApp Bridge trusted as internal service
+- Security provided by network isolation
 
 ## Performance Considerations
 
@@ -270,7 +265,6 @@ All webhook events are logged with:
 - `/backend/app/services/webhook_handler.py` - Processing logic
 - `/backend/app/private/api/v1/webhooks.py` - API endpoint
 - `/backend/app/services/retry_handler.py` - Retry logic
-- `/backend/app/core/webhook_security.py` - Signature validation
 
 ### Database Impact
 - Creates users automatically

@@ -186,35 +186,6 @@ class TestWebhookEndpoints:
         
         assert response.status_code == 422  # Validation error
     
-    async def test_webhook_signature_validation(self, test_client: AsyncClient):
-        """Test webhook signature validation when configured."""
-        import hmac
-        import hashlib
-        import json
-        
-        # Mock settings to include webhook secret
-        with patch('app.core.config.get_settings') as mock_settings:
-            mock_settings.return_value.WEBHOOK_SECRET = "test_secret"
-            
-            event_data = {
-                "event_type": "connection.status",
-                "timestamp": datetime.utcnow().isoformat(),
-                "data": {
-                    "status": "connected",
-                    "session_id": "session_123",
-                    "timestamp": datetime.utcnow().isoformat()
-                }
-            }
-            
-            # Test with invalid signature
-            response = await test_client.post(
-                "/api/v1/webhooks/whatsapp",
-                json=event_data,
-                headers={"X-Webhook-Signature": "invalid_signature"}
-            )
-            
-            assert response.status_code == 401
-            assert "Invalid webhook signature" in response.json()["detail"]
     
     async def test_webhook_error_handling(self, test_client: AsyncClient):
         """Test webhook error handling doesn't fail the request."""
