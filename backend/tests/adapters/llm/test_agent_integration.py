@@ -5,7 +5,7 @@ import pytest
 
 from app.adapters.llm.agent import create_agent
 from app.models import Message, User
-from tests.fixtures import DatabaseTestManager
+from backend.tests.fixtures import DatabaseTestManager
 
 # Skip integration tests by default
 pytestmark = pytest.mark.skipif(
