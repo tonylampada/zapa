@@ -5,7 +5,7 @@ from datetime import datetime
 from cryptography.fernet import Fernet
 import time
 
-from app.database.connection import get_db
+from app.core.database import get_db
 from app.core.security import get_current_admin
 from app.core.config import settings
 from app.adapters.llm.agent import create_agent

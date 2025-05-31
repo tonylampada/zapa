@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import timedelta
 
-from app.database.connection import get_db
+from app.core.database import get_db
 from app.core.security import create_access_token, verify_password
 from app.models import User
 from app.schemas.admin import AdminLogin, AdminTokenResponse

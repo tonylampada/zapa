@@ -253,9 +253,47 @@ Successfully completed 4 major backend tasks, implementing the complete admin AP
 - [x] Updated private router to include all admin endpoints
 - [x] Admin can now fully manage users, configure LLMs, and monitor system health
 
+#### Task 11: Webhook Handlers for WhatsApp Events ✅ (2025-05-31)
+- [x] Created webhook schemas for all WhatsApp event types:
+  - message.received: Incoming messages from users
+  - message.sent: Outbound message confirmations
+  - message.failed: Failed message delivery notifications
+  - connection.status: WhatsApp connection updates
+- [x] Implemented WebhookHandlerService with event routing:
+  - Handles incoming messages and creates users if needed
+  - Stores messages with proper metadata and WhatsApp IDs
+  - Triggers agent processing for text messages
+  - Updates message delivery status from confirmations
+  - Handles connection status updates for monitoring
+- [x] Added retry logic with exponential backoff:
+  - RetryHandler utility for resilient service calls
+  - Agent processing retries 3 times before failing
+  - Message storage is critical (no retry) - always succeeds
+- [x] Implemented webhook security:
+  - WebhookValidator with HMAC-SHA256 signature validation
+  - Optional configuration via WEBHOOK_SECRET setting
+  - Constant-time comparison to prevent timing attacks
+- [x] Created webhook API endpoints:
+  - POST /api/v1/webhooks/whatsapp: Main webhook receiver
+  - GET /api/v1/webhooks/whatsapp/health: Health check
+  - Integrated into private API router
+- [x] Wrote comprehensive tests:
+  - 8 unit tests for webhook schemas validation
+  - 8 unit tests for webhook handler service
+  - 6 unit tests for retry handler functionality
+  - 6 unit tests for webhook security validation
+  - 10 integration tests for webhook endpoints
+  - 5 integration tests for full webhook flow
+- [x] Fixed technical issues:
+  - MessageCreate schema requires non-null content (empty string for media)
+  - Created app.core.database module for dependency injection
+  - Updated all admin endpoints to use new database import
+  - Phone number extraction from WhatsApp JID format
+- [x] All 43 webhook-related tests passing with 100% coverage
+- [x] Webhook system ready to receive events from WhatsApp Bridge
+
 ### Next Steps
-With core backend infrastructure complete, next priorities are:
-- **Task 11**: Webhook Handlers for WhatsApp events
+With webhook handlers complete, next priorities are:
 - **Task 12**: Public Auth Flow for user authentication  
 - **Task 13**: WhatsApp Integration testing
 - **Task 14-15**: Frontend development (Vue.js admin dashboard)

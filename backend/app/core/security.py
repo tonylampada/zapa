@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from typing import Optional
 
 from app.core.config import settings
-from app.database.connection import get_db
+from app.core.database import get_db
 from app.models import User
 
 security = HTTPBearer()

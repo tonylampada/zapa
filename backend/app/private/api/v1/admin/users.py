@@ -5,7 +5,7 @@ from typing import List, Optional
 from datetime import datetime
 import math
 
-from app.database.connection import get_db
+from app.core.database import get_db
 from app.core.security import get_current_admin
 from app.services.message_service import MessageService
 from app.schemas.admin import (
