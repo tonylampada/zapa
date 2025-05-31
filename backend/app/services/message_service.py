@@ -35,16 +35,21 @@ class MessageService:
         if not user:
             raise ValueError(f"User with id {user_id} not found")
 
-        # Determine sender and recipient JIDs based on direction
-        if message_data.direction == MessageDirection.INCOMING:
-            sender_jid = f"{user.phone_number}@s.whatsapp.net"
-            recipient_jid = "service@s.whatsapp.net"
-        elif message_data.direction == MessageDirection.OUTGOING:
-            sender_jid = "service@s.whatsapp.net"
-            recipient_jid = f"{user.phone_number}@s.whatsapp.net"
-        else:  # SYSTEM
-            sender_jid = "system"
-            recipient_jid = "system"
+        # Use provided JIDs if available, otherwise determine based on direction
+        if message_data.sender_jid and message_data.recipient_jid:
+            sender_jid = message_data.sender_jid
+            recipient_jid = message_data.recipient_jid
+        else:
+            # Fallback to old behavior for backward compatibility
+            if message_data.direction == MessageDirection.INCOMING:
+                sender_jid = f"{user.phone_number}@s.whatsapp.net"
+                recipient_jid = "service@s.whatsapp.net"
+            elif message_data.direction == MessageDirection.OUTGOING:
+                sender_jid = "service@s.whatsapp.net"
+                recipient_jid = f"{user.phone_number}@s.whatsapp.net"
+            else:  # SYSTEM
+                sender_jid = "system"
+                recipient_jid = "system"
 
         # Create message
         db_message = Message(

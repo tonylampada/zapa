@@ -30,12 +30,22 @@ def mock_services():
     return services
 
 
+@pytest.fixture
+def mock_settings(monkeypatch):
+    """Mock settings with system number."""
+    class MockSettings:
+        WHATSAPP_SYSTEM_NUMBER = '+0987654321'
+    
+    monkeypatch.setattr('app.services.webhook_handler.settings', MockSettings())
+    return '+0987654321'
+
+
 @pytest.mark.asyncio
 class TestWebhookHandlerService:
     """Test webhook handler service."""
     
-    async def test_handle_message_received(self, mock_services):
-        """Test handling of message received event."""
+    async def test_handle_message_received_to_system(self, mock_services, mock_settings):
+        """Test handling of message sent to system number."""
         handler = WebhookHandlerService(
             db=mock_services.db,
             message_service=mock_services.message,
@@ -51,7 +61,7 @@ class TestWebhookHandlerService:
             timestamp=datetime.utcnow(),
             data={
                 "from_number": "+1234567890@s.whatsapp.net",
-                "to_number": "+0987654321@s.whatsapp.net",
+                "to_number": f"{mock_settings}@s.whatsapp.net",  # System number
                 "message_id": "msg_123",
                 "text": "Hello AI",
                 "timestamp": datetime.utcnow().isoformat()
@@ -66,9 +76,42 @@ class TestWebhookHandlerService:
         assert result["status"] == "processed"
         assert result["message_id"] == 1
         mock_services.message.store_message.assert_called_once()
-        mock_services.agent.process_message.assert_called_once()
+        mock_services.agent.process_message.assert_called_once()  # Agent should be triggered
     
-    async def test_handle_message_received_new_user(self, mock_services):
+    async def test_handle_message_received_to_user(self, mock_services, mock_settings):
+        """Test handling of message sent to user's own number."""
+        handler = WebhookHandlerService(
+            db=mock_services.db,
+            message_service=mock_services.message,
+            agent_service=mock_services.agent
+        )
+        
+        # Mock user lookup - user owns the number that received the message
+        mock_user = User(id=1, phone_number="+5551234567", display_name="Test User")
+        mock_services.db.query.return_value.filter.return_value.first.return_value = mock_user
+        
+        event = WhatsAppWebhookEvent(
+            event_type=WebhookEventType.MESSAGE_RECEIVED,
+            timestamp=datetime.utcnow(),
+            data={
+                "from_number": "+1234567890@s.whatsapp.net",
+                "to_number": "+5551234567@s.whatsapp.net",  # User's own number
+                "message_id": "msg_123",
+                "text": "Hello there",
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        )
+        
+        mock_services.message.store_message.return_value = Mock(id=1)
+        
+        result = await handler.handle_webhook(event)
+        
+        assert result["status"] == "stored"  # Should only store, not process
+        assert result["message_id"] == 1
+        mock_services.message.store_message.assert_called_once()
+        mock_services.agent.process_message.assert_not_called()  # Agent should NOT be triggered
+    
+    async def test_handle_message_received_new_user(self, mock_services, mock_settings):
         """Test handling message from new user."""
         handler = WebhookHandlerService(
             db=mock_services.db,
@@ -104,7 +147,7 @@ class TestWebhookHandlerService:
         mock_services.db.add.assert_called_once()
         mock_services.db.commit.assert_called_once()
     
-    async def test_handle_message_received_with_media(self, mock_services):
+    async def test_handle_message_received_with_media(self, mock_services, mock_settings):
         """Test handling message with media."""
         handler = WebhookHandlerService(
             db=mock_services.db,

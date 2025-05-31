@@ -19,6 +19,12 @@ class PrivateSettings(DatabaseConfig):
     WHATSAPP_BRIDGE_TIMEOUT: float = Field(
         default=30.0, ge=5.0, le=300.0, description="WhatsApp Bridge timeout"
     )
+    
+    # WhatsApp Configuration
+    WHATSAPP_SYSTEM_NUMBER: str = Field(
+        default="+1234567890",
+        description="Main WhatsApp service number that receives user messages",
+    )
 
     # Webhook
     WEBHOOK_BASE_URL: str = Field(

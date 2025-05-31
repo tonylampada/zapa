@@ -53,6 +53,8 @@ class MessageCreate(BaseModel):
     message_type: MessageType = MessageType.TEXT
     whatsapp_message_id: str | None = None
     metadata: dict[str, Any] | None = None
+    sender_jid: str | None = None  # Optional, for webhook messages
+    recipient_jid: str | None = None  # Optional, for webhook messages
 
 
 class MessageResponse(BaseModel):

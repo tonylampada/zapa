@@ -15,9 +15,13 @@ The webhook handler processes four main event types:
 
 ## Message Processing Flow
 
-### 1. User Messages (From WhatsApp Users)
+The webhook handler distinguishes between two types of incoming messages:
+1. **Messages to the System Number** - These trigger AI agent processing
+2. **Messages to User's Own Number** - These are only stored for context (when user gives access to their WhatsApp)
 
-When a WhatsApp user sends a message to the service number, the following happens:
+### 1. Messages to System Number (AI Processing)
+
+When a WhatsApp user sends a message to the main service number, the following happens:
 
 ```json
 {
@@ -66,7 +70,52 @@ When a WhatsApp user sends a message to the service number, the following happen
 }
 ```
 
-### 2. System Messages (From WhatsApp Bridge)
+### 2. Messages to User's Own Number (Context Storage Only)
+
+When someone sends a message to a user's WhatsApp number (and the user has given Zapa access):
+
+```json
+{
+  "event_type": "message.received",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "data": {
+    "from_number": "+9876543210@s.whatsapp.net",
+    "to_number": "+1234567890@s.whatsapp.net",  // User's own number
+    "message_id": "msg_456",
+    "text": "Hey, are you coming to the meeting?",
+    "timestamp": "2024-01-15T10:30:00Z"
+  }
+}
+```
+
+**Processing Steps:**
+
+1. **User Identification**
+   - The system recognizes this is NOT the system number
+   - Identifies the user by the TO number (the recipient)
+   - Loads the user who owns that WhatsApp number
+
+2. **Message Storage Only**
+   - Determines message direction (incoming/outgoing based on sender)
+   - Stores message with actual sender/recipient JIDs
+   - Adds metadata flag: `is_system_message: false`
+   - NO AI processing triggered
+
+3. **Purpose**
+   - These messages provide context for the AI
+   - The AI can search and read these messages via tools
+   - Helps the AI understand the user's conversation context
+   - Enables features like "summarize my chats" or "find that message about..."
+
+**Response:**
+```json
+{
+  "status": "stored",
+  "message_id": 456
+}
+```
+
+### 3. System Messages (From WhatsApp Bridge)
 
 System messages are notifications about message delivery status:
 
@@ -152,18 +201,19 @@ System messages are notifications about message delivery status:
 }
 ```
 
-## Key Differences: User vs System Messages
+## Key Differences: Message Types
 
-| Aspect | User Messages | System Messages |
-|--------|--------------|-----------------|
-| **Event Type** | message.received | message.sent, message.failed, connection.status |
-| **Direction** | Incoming (from user) | Internal (from bridge) |
-| **User Creation** | Creates new users if needed | Never creates users |
-| **Message Storage** | Always stores in database | Updates existing messages |
-| **Agent Processing** | Triggered for text messages | Never triggered |
-| **Retry Logic** | Yes (for agent processing) | No |
-| **Response Time** | Can be slow (AI processing) | Always fast |
-| **Critical Path** | Message storage is critical | Status updates are non-critical |
+| Aspect | Messages TO System | Messages TO User's Number | Status Updates |
+|--------|-------------------|--------------------------|----------------|
+| **Event Type** | message.received | message.received | message.sent, message.failed, connection.status |
+| **Recipient** | System number | User's WhatsApp number | N/A |
+| **User Identification** | By sender (FROM) | By recipient (TO) | By message ID |
+| **User Creation** | Creates new users | Creates new users | Never creates users |
+| **Message Storage** | Yes, with metadata | Yes, with metadata | Updates existing |
+| **Agent Processing** | Yes (for text) | No | No |
+| **Purpose** | AI interaction | Context storage | Delivery tracking |
+| **Retry Logic** | Yes (agent only) | No | No |
+| **Response** | "processed" or "stored" | "stored" | "updated" |
 
 ## Media Message Handling
 
