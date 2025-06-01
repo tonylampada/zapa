@@ -292,9 +292,49 @@ Successfully completed 4 major backend tasks, implementing the complete admin AP
 - [x] All 43 webhook-related tests passing with 100% coverage
 - [x] Webhook system ready to receive events from WhatsApp Bridge
 
+#### Task 12: Public Authentication Flow ✅ (2025-06-01)
+- [x] Created WhatsApp-based authentication for public API:
+  - Users request 6-digit codes via POST /auth/request-code
+  - Codes sent via WhatsApp from main service number
+  - Codes expire after 5 minutes with one-time use
+  - Auto-creates user accounts on first authentication
+- [x] Implemented JWT token authentication:
+  - Created AuthService with secure code generation
+  - JWT tokens valid for 24 hours
+  - Token includes user_id, phone_number, and is_admin flag
+  - Proper token verification with expiration checks
+- [x] Added rate limiting for auth requests:
+  - Maximum 3 auth code requests per hour per phone number
+  - Rate limit check integrated into auth flow
+  - New users can always request first code
+- [x] Created public API structure:
+  - backend/app/public/ directory with main.py
+  - Public API router at /api/v1/auth
+  - Auth endpoints: request-code, verify, me
+  - Updated public_main.py entry point
+- [x] Integrated with WhatsApp Bridge:
+  - Sends auth codes via WhatsApp adapter
+  - Handles missing sessions gracefully
+  - Returns success even on WhatsApp errors (prevent enumeration)
+- [x] Added comprehensive security:
+  - Phone number validation (international format required)
+  - Code validation (6 digits only)
+  - Constant-time operations to prevent timing attacks
+  - No user enumeration through error messages
+- [x] Wrote comprehensive tests:
+  - 13 unit tests for AuthService covering all methods
+  - 9 unit tests for auth API endpoints
+  - Integration tests for complete auth flow
+  - Tests for rate limiting and error cases
+- [x] Fixed configuration and imports:
+  - Added WHATSAPP_API_URL to public settings
+  - Created core.dependencies for shared auth utilities
+  - Fixed alembic to use correct models from backend/app
+  - All 22 auth-related tests passing
+- [x] Public authentication system fully implemented
+
 ### Next Steps
-With webhook handlers complete, next priorities are:
-- **Task 12**: Public Auth Flow for user authentication  
+With public authentication complete, next priorities are:
 - **Task 13**: WhatsApp Integration testing
 - **Task 14-15**: Frontend development (Vue.js admin dashboard)
 

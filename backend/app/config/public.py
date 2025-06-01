@@ -21,6 +21,16 @@ class PublicSettings(DatabaseConfig):
     AUTH_RATE_LIMIT_PER_HOUR: int = Field(default=10, ge=1, le=100)
     API_RATE_LIMIT_PER_MINUTE: int = Field(default=100, ge=1)
 
+    # WhatsApp Service
+    WHATSAPP_API_URL: str = Field(
+        default="http://localhost:3000",
+        description="URL of WhatsApp Bridge service",
+    )
+    WHATSAPP_API_KEY: str | None = Field(
+        default=None,
+        description="API key for WhatsApp Bridge (if required)",
+    )
+
     # Private Service Communication
     PRIVATE_SERVICE_URL: str = Field(
         default="http://localhost:8001",
@@ -28,7 +38,9 @@ class PublicSettings(DatabaseConfig):
     )
     PRIVATE_SERVICE_TIMEOUT: float = Field(default=10.0, ge=1.0, le=60.0)
     PRIVATE_SERVICE_SECRET: str = Field(
-        ..., min_length=32, description="Shared secret for service-to-service auth"
+        default="shared-secret-for-dev-change-in-prod",
+        min_length=32,
+        description="Shared secret for service-to-service auth",
     )
 
     # Data Access

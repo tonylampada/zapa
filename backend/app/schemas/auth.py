@@ -48,3 +48,13 @@ class AuthToken(BaseModel):
     token_type: str = "bearer"
     expires_in: int = 3600  # 1 hour
     user_id: int
+
+
+class AuthTokenResponse(BaseModel):
+    """Schema for public API authentication token response."""
+
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int = 86400  # 24 hours
+    user_id: int
+    phone_number: str

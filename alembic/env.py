@@ -7,10 +7,18 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 
 # Add the backend directory to the Python path
-sys.path.append(str(Path(__file__).parent.parent))
+backend_path = Path(__file__).parent.parent / "backend"
+sys.path.insert(0, str(backend_path))
 
 from app.config.database import DatabaseConfig  # noqa: E402
-from models.base import Base  # noqa: E402
+from app.models.base import Base  # noqa: E402
+
+# Import all models to ensure they're registered with Base
+from app.models.user import User  # noqa: E402, F401
+from app.models.session import Session  # noqa: E402, F401
+from app.models.message import Message  # noqa: E402, F401
+from app.models.auth_code import AuthCode  # noqa: E402, F401
+from app.models.llm_config import LLMConfig  # noqa: E402, F401
 
 # this is the Alembic Config object
 config = context.config
