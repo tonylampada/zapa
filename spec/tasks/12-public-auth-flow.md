@@ -3,6 +3,12 @@
 ## Overview
 Implement the WhatsApp-based authentication flow for Zapa Public entrypoint. Users authenticate by receiving a code via WhatsApp from the main service number, establishing trust without passwords.
 
+**IMPORTANT UPDATE**: Based on the webhook handler implementation (Task 11), the system now properly distinguishes between:
+1. Messages TO the system number (main service) - trigger AI processing
+2. Messages TO user's own number - stored for context only
+
+This authentication flow uses the system number to send auth codes, which will NOT trigger AI processing since they originate FROM the system, not TO it.
+
 ## Prerequisites
 - Task 04: Authentication Service (JWT generation)
 - Task 06: WhatsApp Bridge Adapter (for sending auth codes)
@@ -349,7 +355,9 @@ class PublicAuthService:
         # Generate and store code
         code = await self.auth_store.store_code(phone_number)
         
-        # Send via WhatsApp
+        # Send via WhatsApp FROM system number
+        # Note: This will be sent FROM the system number TO the user,
+        # so it will NOT trigger AI processing (only messages TO system trigger AI)
         message = (
             f"Your Zapa verification code is: {code}\n\n"
             "This code expires in 5 minutes.\n"

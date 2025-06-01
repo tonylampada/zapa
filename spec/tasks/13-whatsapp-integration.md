@@ -3,6 +3,17 @@
 ## Overview
 Complete the integration between Zapa services and the WhatsApp Bridge (zapw). This connects all the pieces to enable end-to-end message flow from WhatsApp users through AI processing and back.
 
+**IMPORTANT UPDATE**: Based on the webhook handler implementation (Task 11), the system now handles two distinct message flows:
+
+1. **User → System Number**: Messages sent TO the main service number trigger AI agent processing
+2. **User's Own Number**: Messages sent TO/FROM user's WhatsApp (when they give access) are stored for context only
+
+The integration must properly configure webhook URLs and handle both scenarios. The Bridge will be configured to monitor:
+- The main system number (for AI processing)
+- Individual user numbers (for context storage)
+
+**Architecture Note**: This task should focus on the Bridge configuration and message queue reliability, as the webhook handling logic is already implemented in Task 11.
+
 ## Prerequisites
 - Task 06: WhatsApp Bridge Adapter
 - Task 09: Agent Service with LLM Tools
@@ -34,10 +45,10 @@ logger = logging.getLogger(__name__)
 @dataclass
 class BridgeConfig:
     webhook_url: str
-    webhook_secret: Optional[str]
     retry_attempts: int = 3
     retry_delay: int = 5
     health_check_interval: int = 30
+    # Note: webhook_secret removed - using internal network security
 
 class BridgeConfigurationService:
     """Manages WhatsApp Bridge configuration and health."""
@@ -55,15 +66,16 @@ class BridgeConfigurationService:
         """Configure the Bridge with our webhook endpoint."""
         try:
             # Set webhook configuration
+            # Note: Webhook secret removed as per Task 11 - internal network security
             result = await self.bridge.configure_webhook(
                 url=self.config.webhook_url,
                 events=[
-                    "message.received",
-                    "message.sent",
-                    "message.failed",
-                    "connection.status"
-                ],
-                secret=self.config.webhook_secret
+                    "message.received",  # Handles both system and user messages
+                    "message.sent",     # Delivery confirmations
+                    "message.failed",   # Failed delivery notifications
+                    "connection.status" # Connection health updates
+                ]
+                # No secret needed - internal network security
             )
             
             if result:
@@ -611,15 +623,14 @@ class WhatsAppIntegrationOrchestrator:
         self,
         bridge_adapter: WhatsAppBridgeAdapter,
         redis_client: Redis,
-        webhook_url: str,
-        webhook_secret: Optional[str] = None
+        webhook_url: str
     ):
         # Initialize configuration
         self.bridge_config = BridgeConfigurationService(
             bridge_adapter,
             BridgeConfig(
-                webhook_url=webhook_url,
-                webhook_secret=webhook_secret
+                webhook_url=webhook_url
+                # No webhook secret needed - internal network security
             )
         )
         
