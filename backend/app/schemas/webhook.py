@@ -15,7 +15,7 @@ class WhatsAppWebhookEvent(BaseModel):
     event_type: WebhookEventType
     timestamp: datetime
     data: Dict[str, Any]
-    
+
 
 class MessageReceivedData(BaseModel):
     from_number: str

@@ -33,11 +33,11 @@ def mock_redis():
 def message_queue_service(mock_redis):
     """Create message queue service with mocked Redis."""
     service = MessageQueueService()
-    
+
     # Create async function that returns the mock
     async def mock_from_url(*args, **kwargs):
         return mock_redis
-    
+
     # Mock the Redis connection
     with patch("app.services.message_queue.redis.from_url", side_effect=mock_from_url):
         yield service
@@ -65,11 +65,11 @@ async def test_enqueue_message(message_queue_service, mock_redis):
     mock_redis.lpush.assert_called_once()
     args = mock_redis.lpush.call_args[0]
     assert args[0] == "zapa:queue:high"
-    
+
     # Verify message was serialized correctly
     stored_msg = QueuedMessage.model_validate_json(args[1])
     assert stored_msg.content == "Test message"
-    
+
     mock_redis.expire.assert_called_once()
 
 
@@ -110,7 +110,7 @@ async def test_dequeue_respects_priority(message_queue_service, mock_redis):
         content="Low priority message",
         priority=MessagePriority.LOW,
     )
-    
+
     # Mock no messages in high and normal queues, message in low queue
     mock_redis.rpoplpush.side_effect = [None, None, low_priority_msg.model_dump_json()]
 
@@ -123,7 +123,7 @@ async def test_dequeue_respects_priority(message_queue_service, mock_redis):
     assert calls[0][0][0] == "zapa:queue:high"
     assert calls[1][0][0] == "zapa:queue:normal"
     assert calls[2][0][0] == "zapa:queue:low"
-    
+
     # Verify we got the low priority message
     assert message is not None
     assert message.content == "Low priority message"
@@ -158,7 +158,7 @@ async def test_retry_message(message_queue_service, mock_redis):
         content="Test message",
         retry_count=1,
     )
-    
+
     # Mock finding the message in processing
     mock_redis.lrange.return_value = [test_message.model_dump_json()]
 
@@ -174,7 +174,7 @@ async def test_retry_message(message_queue_service, mock_redis):
     # Verify message was re-queued
     mock_redis.lrem.assert_called_once()
     mock_redis.lpush.assert_called()
-    
+
     # Check it was added to low priority queue
     lpush_calls = mock_redis.lpush.call_args_list
     assert any("zapa:queue:low" in str(call) for call in lpush_calls)
@@ -191,7 +191,7 @@ async def test_retry_exceeds_max_retries(message_queue_service, mock_redis):
         retry_count=2,  # Will be 3 after increment
         max_retries=3,
     )
-    
+
     # Mock finding the message
     mock_redis.lrange.return_value = [test_message.model_dump_json()]
 

@@ -1,4 +1,5 @@
 """WhatsApp Bridge adapter for zapw service."""
+
 import httpx
 from typing import Optional, Dict, Any, List
 from pydantic import BaseModel, Field
@@ -10,29 +11,35 @@ logger = logging.getLogger(__name__)
 
 class WhatsAppBridgeError(Exception):
     """Base exception for WhatsApp Bridge errors."""
+
     pass
 
 
 class ConnectionError(WhatsAppBridgeError):
     """Connection error to WhatsApp Bridge."""
+
     pass
 
 
 class SessionError(WhatsAppBridgeError):
     """Session-related error."""
+
     pass
 
 
 # Pydantic models for WhatsApp Bridge API
 
+
 class QRCodeResponse(BaseModel):
     """QR code response from bridge."""
+
     qr_code: str
     timeout: int = Field(default=60, description="Seconds until QR expires")
 
 
 class SessionStatus(BaseModel):
     """Session status from bridge."""
+
     session_id: str
     status: str  # "qr_pending", "connected", "disconnected", "error"
     phone_number: Optional[str] = None
@@ -42,6 +49,7 @@ class SessionStatus(BaseModel):
 
 class SendMessageRequest(BaseModel):
     """Request to send a message."""
+
     session_id: str
     recipient_jid: str
     content: str
@@ -50,6 +58,7 @@ class SendMessageRequest(BaseModel):
 
 class SendMessageResponse(BaseModel):
     """Response after sending a message."""
+
     message_id: str
     timestamp: datetime
     status: str = "sent"
@@ -57,6 +66,7 @@ class SendMessageResponse(BaseModel):
 
 class IncomingMessage(BaseModel):
     """Incoming message from webhook."""
+
     session_id: str
     message_id: str
     sender_jid: str
@@ -72,7 +82,7 @@ class IncomingMessage(BaseModel):
 
 class WhatsAppBridge:
     """Adapter for zapw WhatsApp Bridge service."""
-    
+
     def __init__(
         self,
         base_url: str,
@@ -81,7 +91,7 @@ class WhatsAppBridge:
     ):
         """
         Initialize WhatsApp Bridge adapter.
-        
+
         Args:
             base_url: Base URL of zapw service (e.g., http://localhost:3000)
             timeout: Request timeout in seconds
@@ -91,7 +101,7 @@ class WhatsAppBridge:
         self.timeout = timeout
         self.webhook_url = webhook_url
         self._client: Optional[httpx.AsyncClient] = None
-    
+
     async def __aenter__(self):
         """Async context manager entry."""
         self._client = httpx.AsyncClient(
@@ -100,19 +110,19 @@ class WhatsAppBridge:
             headers={"Content-Type": "application/json"},
         )
         return self
-    
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit."""
         if self._client:
             await self._client.aclose()
-    
+
     @property
     def client(self) -> httpx.AsyncClient:
         """Get HTTP client."""
         if not self._client:
             raise RuntimeError("WhatsAppBridge must be used as async context manager")
         return self._client
-    
+
     async def health_check(self) -> Dict[str, Any]:
         """Check if WhatsApp Bridge is healthy."""
         try:
@@ -122,14 +132,14 @@ class WhatsAppBridge:
         except httpx.RequestError as e:
             logger.error(f"Health check failed: {e}")
             raise ConnectionError(f"Failed to connect to WhatsApp Bridge: {e}")
-    
+
     async def create_session(self, session_id: str) -> SessionStatus:
         """
         Create a new WhatsApp session.
-        
+
         Args:
             session_id: Unique identifier for the session
-            
+
         Returns:
             SessionStatus with current status
         """
@@ -147,7 +157,7 @@ class WhatsAppBridge:
             raise SessionError(f"Failed to create session: {e}") from e
         except httpx.RequestError as e:
             raise ConnectionError(f"Failed to connect to WhatsApp Bridge: {e}") from e
-    
+
     async def get_session_status(self, session_id: str) -> SessionStatus:
         """Get status of a WhatsApp session."""
         try:
@@ -160,14 +170,14 @@ class WhatsAppBridge:
             raise SessionError(f"Failed to get session status: {e}") from e
         except httpx.RequestError as e:
             raise ConnectionError(f"Failed to connect to WhatsApp Bridge: {e}") from e
-    
+
     async def get_qr_code(self, session_id: str) -> QRCodeResponse:
         """
         Get QR code for session authentication.
-        
+
         Args:
             session_id: Session to get QR code for
-            
+
         Returns:
             QRCodeResponse with base64 QR code
         """
@@ -183,7 +193,7 @@ class WhatsAppBridge:
             raise SessionError(f"Failed to get QR code: {e}") from e
         except httpx.RequestError as e:
             raise ConnectionError(f"Failed to connect to WhatsApp Bridge: {e}") from e
-    
+
     async def send_message(
         self,
         session_id: str,
@@ -193,20 +203,20 @@ class WhatsAppBridge:
     ) -> SendMessageResponse:
         """
         Send a text message.
-        
+
         Args:
             session_id: Session to send from
             recipient: Recipient phone number (with country code)
             content: Message content
             quoted_message_id: Optional message ID to quote/reply to
-            
+
         Returns:
             SendMessageResponse with message details
         """
         # Ensure recipient has WhatsApp suffix
         if not recipient.endswith("@s.whatsapp.net"):
             recipient = f"{recipient}@s.whatsapp.net"
-        
+
         try:
             request = SendMessageRequest(
                 session_id=session_id,
@@ -228,14 +238,14 @@ class WhatsAppBridge:
             raise WhatsAppBridgeError(f"Failed to send message: {e}") from e
         except httpx.RequestError as e:
             raise ConnectionError(f"Failed to connect to WhatsApp Bridge: {e}") from e
-    
+
     async def delete_session(self, session_id: str) -> bool:
         """
         Delete/disconnect a WhatsApp session.
-        
+
         Args:
             session_id: Session to delete
-            
+
         Returns:
             True if deleted successfully
         """
@@ -249,7 +259,7 @@ class WhatsAppBridge:
             raise SessionError(f"Failed to delete session: {e}") from e
         except httpx.RequestError as e:
             raise ConnectionError(f"Failed to connect to WhatsApp Bridge: {e}") from e
-    
+
     async def list_sessions(self) -> List[SessionStatus]:
         """List all active sessions."""
         try:

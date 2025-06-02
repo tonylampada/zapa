@@ -51,7 +51,7 @@ class UserDetailResponse(UserSummary):
 
 
 class UserCreate(BaseModel):
-    phone_number: str = Field(..., pattern=r'^\+[1-9]\d{1,14}$')
+    phone_number: str = Field(..., pattern=r"^\+[1-9]\d{1,14}$")
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     is_active: bool = True
@@ -106,7 +106,7 @@ class LLMConfigResponse(BaseModel):
 
 
 class LLMConfigCreate(BaseModel):
-    provider: str = Field(..., pattern=r'^(openai|anthropic|google)$')
+    provider: str = Field(..., pattern=r"^(openai|anthropic|google)$")
     api_key: str = Field(..., min_length=1)
     model_settings: Dict[str, Any] = Field(default_factory=dict)
     is_active: bool = True

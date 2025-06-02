@@ -37,9 +37,7 @@ class TestLLMTools:
         assert "get_conversation_stats" in tool_names
 
         # Check search_messages parameters
-        search_tool = next(
-            d for d in definitions if d["function"]["name"] == "search_messages"
-        )
+        search_tool = next(d for d in definitions if d["function"]["name"] == "search_messages")
         assert "query" in search_tool["function"]["parameters"]["required"]
         assert "limit" in search_tool["function"]["parameters"]["properties"]
 
@@ -60,9 +58,7 @@ class TestLLMTools:
         ]
         mock_message_service.search_messages.return_value = mock_messages
 
-        result = await llm_tools.execute_tool(
-            "search_messages", {"query": "test", "limit": 5}
-        )
+        result = await llm_tools.execute_tool("search_messages", {"query": "test", "limit": 5})
 
         assert len(result) == 1
         assert result[0]["content"] == "Test message"
@@ -202,9 +198,7 @@ class TestLLMTools:
 
         mock_message_service.get_conversation_stats.assert_called_once_with(1)
 
-    async def test_get_conversation_stats_no_messages(
-        self, llm_tools, mock_message_service
-    ):
+    async def test_get_conversation_stats_no_messages(self, llm_tools, mock_message_service):
         """Test conversation stats with no messages."""
         # Mock empty stats
         mock_stats = ConversationStats(

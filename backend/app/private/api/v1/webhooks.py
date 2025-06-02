@@ -22,11 +22,11 @@ def get_webhook_handler(db: Session = Depends(get_db)) -> WebhookHandlerService:
 @router.post("/whatsapp")
 async def whatsapp_webhook(
     event: WhatsAppWebhookEvent,
-    webhook_handler: WebhookHandlerService = Depends(get_webhook_handler)
+    webhook_handler: WebhookHandlerService = Depends(get_webhook_handler),
 ):
     """
     Receive webhook events from WhatsApp Bridge.
-    
+
     The Bridge service is on the internal network, so no authentication
     is required. Network isolation provides security.
     """
@@ -36,6 +36,7 @@ async def whatsapp_webhook(
     except Exception as e:
         # Log but don't fail - webhook delivery is critical
         import logging
+
         logging.error(f"Webhook processing error: {e}", exc_info=True)
         return {"status": "error", "message": str(e)}
 

@@ -1,4 +1,5 @@
 """Private entrypoint configuration."""
+
 from pydantic import Field
 
 from app.config import DatabaseConfig
@@ -19,7 +20,7 @@ class PrivateSettings(DatabaseConfig):
     WHATSAPP_BRIDGE_TIMEOUT: float = Field(
         default=30.0, ge=5.0, le=300.0, description="WhatsApp Bridge timeout"
     )
-    
+
     # WhatsApp Configuration
     WHATSAPP_SYSTEM_NUMBER: str = Field(
         default="+1234567890",
@@ -33,9 +34,7 @@ class PrivateSettings(DatabaseConfig):
     )
 
     # Admin Authentication
-    ADMIN_TOKEN_SECRET: str = Field(
-        ..., min_length=32, description="Admin JWT token secret"
-    )
+    ADMIN_TOKEN_SECRET: str = Field(..., min_length=32, description="Admin JWT token secret")
     ADMIN_TOKEN_EXPIRE_MINUTES: int = Field(
         default=60 * 24, ge=30, description="Admin token expiry in minutes"
     )

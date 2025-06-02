@@ -1,4 +1,5 @@
 """Encryption utilities for sensitive data."""
+
 import base64
 import secrets
 
@@ -87,6 +88,7 @@ def get_encryption_manager() -> EncryptionManager:
     if _encryption_manager is None:
         # In production, this should come from environment config
         import os
+
         encryption_key = os.getenv("ENCRYPTION_KEY", "test-encryption-key-32-chars-long")
         _encryption_manager = EncryptionManager(encryption_key)
     return _encryption_manager

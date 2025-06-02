@@ -1,4 +1,5 @@
 """Tests for Zapa Agent."""
+
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest

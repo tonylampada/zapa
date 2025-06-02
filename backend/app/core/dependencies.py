@@ -1,4 +1,5 @@
 """Common dependencies for the application."""
+
 from typing import Dict
 
 from fastapi import Depends, HTTPException, Security
@@ -24,7 +25,7 @@ async def get_current_user(
 ) -> Dict:
     """Get current user from JWT token."""
     token = credentials.credentials
-    
+
     try:
         payload = auth_service.verify_access_token(token)
         return {

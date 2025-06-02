@@ -112,7 +112,11 @@ class TestAgentIntegration:
             ("Can you remind me about my tasks?", "incoming", datetime.now() - timedelta(hours=1)),
             ("Sure! Let me help you with that.", "outgoing", datetime.now() - timedelta(hours=1)),
             ("What's the weather like?", "incoming", datetime.now() - timedelta(minutes=30)),
-            ("I don't have weather information.", "outgoing", datetime.now() - timedelta(minutes=30)),
+            (
+                "I don't have weather information.",
+                "outgoing",
+                datetime.now() - timedelta(minutes=30),
+            ),
         ]
 
         for content, direction, _ in messages_data:
@@ -142,7 +146,9 @@ class TestAgentIntegration:
         """Test agent processing with conversation context."""
         # Mock the agent response
         mock_result = AsyncMock()
-        mock_result.final_output = "Based on your conversation history, you asked about tasks and weather."
+        mock_result.final_output = (
+            "Based on your conversation history, you asked about tasks and weather."
+        )
         mock_runner.return_value = mock_result
 
         # Process message
@@ -183,9 +189,7 @@ class TestAgentIntegration:
 
     async def test_agent_without_llm_config(self, agent_service, test_user):
         """Test agent behavior when user has no LLM configuration."""
-        result = await agent_service.process_message(
-            user_id=test_user.id, message_content="Hello"
-        )
+        result = await agent_service.process_message(user_id=test_user.id, message_content="Hello")
 
         assert result.success is False
         assert result.error_message == "LLM configuration not found"
@@ -199,9 +203,7 @@ class TestAgentIntegration:
         mock_runner.side_effect = Exception("LLM API error")
 
         # Process message
-        result = await agent_service.process_message(
-            user_id=test_user.id, message_content="Hello"
-        )
+        result = await agent_service.process_message(user_id=test_user.id, message_content="Hello")
 
         # Verify error response
         assert result.success is False
@@ -228,9 +230,7 @@ class TestAgentIntegration:
         assert result.success is True
         assert len(result.content) > 0
         # The response should mention tasks or weather based on seed messages
-        assert any(
-            word in result.content.lower() for word in ["task", "weather", "help"]
-        )
+        assert any(word in result.content.lower() for word in ["task", "weather", "help"])
 
     async def test_message_storage_integration(
         self, agent_service, test_user, test_llm_config, db_session

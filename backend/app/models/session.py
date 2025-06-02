@@ -34,9 +34,7 @@ class Session(Base):
     __tablename__ = "session"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("user.id"), nullable=False, index=True
-    )
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False, index=True)
     session_type: Mapped[SessionType] = mapped_column(
         Enum(SessionType), nullable=False, default=SessionType.MAIN
     )

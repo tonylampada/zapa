@@ -21,7 +21,7 @@ class IntegrationOrchestrator:
         """Initialize the orchestrator."""
         self._initialized = False
         self._processor_workers: List[asyncio.Task] = []
-        self._worker_count = getattr(settings, 'MESSAGE_PROCESSOR_WORKERS', 3)
+        self._worker_count = getattr(settings, "MESSAGE_PROCESSOR_WORKERS", 3)
 
     async def initialize(self) -> Dict[str, Any]:
         """Initialize all integration components."""
@@ -59,35 +59,25 @@ class IntegrationOrchestrator:
             health = await integration_monitor.check_all_components()
             healthy_count = sum(1 for s in health.values() if s.healthy)
             total_count = len(health)
-            
+
             results["health_check"] = {
                 "healthy": healthy_count == total_count,
                 "components": {
-                    name: {
-                        "healthy": status.healthy,
-                        "details": status.details
-                    }
+                    name: {"healthy": status.healthy, "details": status.details}
                     for name, status in health.items()
-                }
+                },
             }
 
             self._initialized = True
             logger.info("WhatsApp integration initialized successfully")
-            
-            return {
-                "status": "initialized",
-                "results": results
-            }
+
+            return {"status": "initialized", "results": results}
 
         except Exception as e:
             logger.error(f"Failed to initialize integration: {e}", exc_info=True)
             # Clean up any started components
             await self._cleanup()
-            return {
-                "status": "failed",
-                "error": str(e),
-                "partial_results": results
-            }
+            return {"status": "failed", "error": str(e), "partial_results": results}
 
     async def shutdown(self) -> Dict[str, Any]:
         """Gracefully shutdown all integration components."""
@@ -95,43 +85,40 @@ class IntegrationOrchestrator:
             return {"status": "not_initialized"}
 
         logger.info("Shutting down WhatsApp integration...")
-        
+
         try:
             # Stop components in reverse order
             await self._cleanup()
-            
+
             self._initialized = False
             logger.info("WhatsApp integration shutdown complete")
-            
+
             return {"status": "shutdown_complete"}
-            
+
         except Exception as e:
             logger.error(f"Error during shutdown: {e}", exc_info=True)
-            return {
-                "status": "shutdown_error",
-                "error": str(e)
-            }
+            return {"status": "shutdown_error", "error": str(e)}
 
     async def _cleanup(self) -> None:
         """Clean up all started components."""
         # 1. Stop monitor
         await integration_monitor.stop_monitoring()
-        
+
         # 2. Stop message processors
         for worker in self._processor_workers:
             worker.cancel()
-        
+
         if self._processor_workers:
             await asyncio.gather(*self._processor_workers, return_exceptions=True)
         self._processor_workers.clear()
-        
+
         # 3. Close message queue connection
         await message_queue.close()
 
     async def _run_processor_worker(self, worker_id: int) -> None:
         """Run a message processor worker."""
         logger.info(f"Message processor worker {worker_id} started")
-        
+
         while True:
             try:
                 # Process messages continuously
@@ -139,7 +126,7 @@ class IntegrationOrchestrator:
                 if not processed:
                     # No messages, wait a bit
                     await asyncio.sleep(1)
-                    
+
             except asyncio.CancelledError:
                 logger.info(f"Message processor worker {worker_id} cancelled")
                 break
@@ -154,18 +141,18 @@ class IntegrationOrchestrator:
             "workers": {
                 "configured": self._worker_count,
                 "running": len([w for w in self._processor_workers if not w.done()]),
-            }
+            },
         }
 
         if self._initialized:
             # Get component health
             health = await integration_monitor.get_system_health()
             status["health"] = health
-            
+
             # Get queue stats
             queue_stats = await message_queue.get_queue_stats()
             status["queue"] = queue_stats
-            
+
             # Get bridge status
             bridge_health = await bridge_config.check_bridge_health()
             status["bridge"] = bridge_health
@@ -175,20 +162,17 @@ class IntegrationOrchestrator:
     async def reinitialize(self) -> Dict[str, Any]:
         """Reinitialize the integration (shutdown and restart)."""
         logger.info("Reinitializing WhatsApp integration...")
-        
+
         # Shutdown existing
         shutdown_result = await self.shutdown()
-        
+
         # Wait a moment
         await asyncio.sleep(2)
-        
+
         # Initialize again
         init_result = await self.initialize()
-        
-        return {
-            "shutdown": shutdown_result,
-            "initialize": init_result
-        }
+
+        return {"shutdown": shutdown_result, "initialize": init_result}
 
     @asynccontextmanager
     async def managed_integration(self):

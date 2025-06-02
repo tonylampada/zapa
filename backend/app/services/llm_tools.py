@@ -144,9 +144,7 @@ class LLMTools:
         start = datetime.fromisoformat(start_date)
         end = datetime.fromisoformat(end_date)
 
-        messages = await self.message_service.get_messages_by_date_range(
-            self.user_id, start, end
-        )
+        messages = await self.message_service.get_messages_by_date_range(self.user_id, start, end)
 
         return [
             {
@@ -166,11 +164,11 @@ class LLMTools:
             "total_messages": stats.total_messages,
             "messages_sent": stats.messages_sent,
             "messages_received": stats.messages_received,
-            "first_message_date": stats.first_message_date.isoformat()
-            if stats.first_message_date
-            else None,
-            "last_message_date": stats.last_message_date.isoformat()
-            if stats.last_message_date
-            else None,
+            "first_message_date": (
+                stats.first_message_date.isoformat() if stats.first_message_date else None
+            ),
+            "last_message_date": (
+                stats.last_message_date.isoformat() if stats.last_message_date else None
+            ),
             "average_messages_per_day": stats.average_messages_per_day,
         }

@@ -1,4 +1,5 @@
 """Tests for agent tools."""
+
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
 

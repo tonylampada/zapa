@@ -1,4 +1,5 @@
 """Integration tests for Zapa Agent."""
+
 import os
 
 import pytest

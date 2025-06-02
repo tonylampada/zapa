@@ -39,7 +39,7 @@ class TestAgentService:
     def sample_llm_config(self):
         """Create sample LLM configuration."""
         from app.models.llm_config import LLMProvider
-        
+
         return LLMConfig(
             id=1,
             user_id=1,
@@ -84,9 +84,7 @@ class TestAgentService:
         agent_service.message_service.get_recent_messages = AsyncMock(return_value=[])
 
         # Act
-        result = await agent_service.process_message(
-            user_id=1, message_content="Hello world"
-        )
+        result = await agent_service.process_message(user_id=1, message_content="Hello world")
 
         # Assert
         assert isinstance(result, AgentResponse)
@@ -109,9 +107,7 @@ class TestAgentService:
         # Verify messages were stored
         assert agent_service.message_service.store_message.call_count == 2
 
-    async def test_process_message_no_llm_config(
-        self, agent_service, mock_db, sample_user
-    ):
+    async def test_process_message_no_llm_config(self, agent_service, mock_db, sample_user):
         """Test message processing when user has no LLM config."""
         # Mock database queries
         mock_db.query.return_value.filter.return_value.first.side_effect = [
@@ -123,9 +119,7 @@ class TestAgentService:
         agent_service.message_service.store_message = AsyncMock()
 
         # Act
-        result = await agent_service.process_message(
-            user_id=1, message_content="Hello world"
-        )
+        result = await agent_service.process_message(user_id=1, message_content="Hello world")
 
         # Assert
         assert result.success is False
@@ -181,9 +175,7 @@ class TestAgentService:
                 created_at=datetime.now(),
             ),
         ]
-        agent_service.message_service.get_recent_messages = AsyncMock(
-            return_value=recent_messages
-        )
+        agent_service.message_service.get_recent_messages = AsyncMock(return_value=recent_messages)
         agent_service.message_service.store_message = AsyncMock()
 
         # Act
@@ -232,9 +224,7 @@ class TestAgentService:
         agent_service.message_service.get_recent_messages = AsyncMock(return_value=[])
 
         # Act
-        result = await agent_service.process_message(
-            user_id=1, message_content="Hello world"
-        )
+        result = await agent_service.process_message(user_id=1, message_content="Hello world")
 
         # Assert
         assert result.success is False
@@ -254,9 +244,7 @@ class TestAgentService:
 
         # Create tool calls
         tool_calls = [
-            ToolCall(
-                id="call_1", function_name="search_messages", arguments={"query": "test"}
-            ),
+            ToolCall(id="call_1", function_name="search_messages", arguments={"query": "test"}),
             ToolCall(id="call_2", function_name="get_conversation_stats", arguments={}),
         ]
 
@@ -279,9 +267,7 @@ class TestAgentService:
 
         # Create tool call
         tool_calls = [
-            ToolCall(
-                id="call_1", function_name="search_messages", arguments={"query": "test"}
-            )
+            ToolCall(id="call_1", function_name="search_messages", arguments={"query": "test"})
         ]
 
         # Act
@@ -294,9 +280,7 @@ class TestAgentService:
         assert "error" in results[0]["content"]
         assert "Tool error" in results[0]["content"]
 
-    async def test_build_conversation_context(
-        self, agent_service, mock_db
-    ):
+    async def test_build_conversation_context(self, agent_service, mock_db):
         """Test building conversation context from messages."""
         # Mock recent messages (newest first, as returned by get_recent_messages)
         recent_messages = [
@@ -331,9 +315,7 @@ class TestAgentService:
                 created_at=datetime.now(),
             ),
         ]
-        agent_service.message_service.get_recent_messages = AsyncMock(
-            return_value=recent_messages
-        )
+        agent_service.message_service.get_recent_messages = AsyncMock(return_value=recent_messages)
 
         # Act
         context = await agent_service._build_conversation_context(user_id=1)

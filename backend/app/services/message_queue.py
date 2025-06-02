@@ -108,7 +108,7 @@ class MessageQueueService:
             # Add to appropriate priority queue
             queue_key = self._get_queue_key(priority)
             await r.lpush(queue_key, message.model_dump_json())
-            
+
             # Set expiration on the message
             await r.expire(queue_key, redis_settings.message_queue_ttl)
 
@@ -133,11 +133,11 @@ class MessageQueueService:
                 if message_data:
                     message = QueuedMessage.model_validate_json(message_data)
                     message.last_attempt_at = datetime.now(timezone.utc)
-                    
+
                     # Update the message in the processing set
                     await r.lrem(processing_key, 1, message_data)
                     await r.lpush(processing_key, message.model_dump_json())
-                    
+
                     logger.info(f"Dequeued message {message.id} from {priority} queue")
                     return message
 
@@ -147,7 +147,7 @@ class MessageQueueService:
         """Acknowledge successful processing of a message."""
         async with self._get_redis() as r:
             processing_key = self._get_processing_key()
-            
+
             # Find and remove the message from processing
             messages = await r.lrange(processing_key, 0, -1)
             for msg_data in messages:
@@ -168,7 +168,7 @@ class MessageQueueService:
 
         async with self._get_redis() as r:
             processing_key = self._get_processing_key()
-            
+
             # Remove from processing queue
             messages = await r.lrange(processing_key, 0, -1)
             for msg_data in messages:
@@ -186,7 +186,7 @@ class MessageQueueService:
             else:
                 # Calculate exponential backoff delay
                 delay = redis_settings.message_queue_retry_delay * (2 ** (message.retry_count - 1))
-                
+
                 # Re-queue with lower priority after delay
                 await asyncio.sleep(delay)
                 queue_key = self._get_queue_key(MessagePriority.LOW)
@@ -238,7 +238,7 @@ class MessageQueueService:
                 msg = QueuedMessage.model_validate_json(msg_data)
                 msg.retry_count = 0  # Reset retry count
                 msg.error = None
-                
+
                 # Add back to normal priority queue
                 queue_key = self._get_queue_key(MessagePriority.NORMAL)
                 await r.lpush(queue_key, msg.model_dump_json())

@@ -46,13 +46,13 @@ class MessageProcessorService:
             try:
                 # Get next message from queue
                 message = await message_queue.dequeue()
-                
+
                 if message:
                     await self._process_message(message)
                 else:
                     # No messages, wait a bit
                     await asyncio.sleep(1)
-                    
+
             except Exception as e:
                 logger.error(f"Error in message processing loop: {e}", exc_info=True)
                 await asyncio.sleep(5)  # Wait longer on error
@@ -60,27 +60,27 @@ class MessageProcessorService:
     async def _process_message(self, queued_message: QueuedMessage) -> None:
         """Process a single message."""
         logger.info(f"Processing message {queued_message.id} for user {queued_message.user_id}")
-        
+
         try:
             # Create database session
             with self.database_manager.get_session() as db:
                 # Create agent service
                 agent_service = AgentService(db)
-                
+
                 # Process the message
                 await agent_service.process_message(
                     user_id=queued_message.user_id,
                     message_content=queued_message.content,
                     message_id=queued_message.metadata.get("message_id"),
                 )
-                
+
                 # Acknowledge successful processing
                 await message_queue.acknowledge(queued_message.id)
                 logger.info(f"Successfully processed message {queued_message.id}")
-                
+
         except Exception as e:
             logger.error(f"Error processing message {queued_message.id}: {e}", exc_info=True)
-            
+
             # Retry the message
             retry_success = await message_queue.retry(queued_message, str(e))
             if not retry_success:

@@ -38,8 +38,7 @@ def verify_token(token: str) -> dict:
 
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: Session = Depends(get_db)
+    credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)
 ) -> User:
     """Get current user from JWT token."""
     credentials_exception = HTTPException(
@@ -47,12 +46,12 @@ async def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     payload = verify_token(credentials.credentials)
     user_id: int = payload.get("sub")
     if user_id is None:
         raise credentials_exception
-    
+
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise credentials_exception
@@ -62,10 +61,7 @@ async def get_current_user(
 async def get_current_admin(current_user: User = Depends(get_current_user)) -> User:
     """Ensure current user is an admin."""
     if not current_user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not enough permissions"
-        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
     return current_user
 
 
@@ -74,6 +70,7 @@ def create_password_hash(password: str) -> str:
     # In production, use passlib or similar
     # This is just for demonstration
     import hashlib
+
     return hashlib.sha256(password.encode()).hexdigest()
 
 
@@ -81,4 +78,5 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against a hash (placeholder for now)."""
     # In production, use passlib or similar
     import hashlib
+
     return hashlib.sha256(plain_password.encode()).hexdigest() == hashed_password

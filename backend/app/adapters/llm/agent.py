@@ -1,4 +1,5 @@
 """Zapa Agent implementation using OpenAI Agents SDK."""
+
 import logging
 from typing import Optional
 

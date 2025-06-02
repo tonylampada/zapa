@@ -27,7 +27,7 @@ async def get_integration_status(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get integration status: {str(e)}"
+            detail=f"Failed to get integration status: {str(e)}",
         )
 
 
@@ -41,7 +41,7 @@ async def initialize_integration(
         if result["status"] == "failed":
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Integration initialization failed: {result.get('error', 'Unknown error')}"
+                detail=f"Integration initialization failed: {result.get('error', 'Unknown error')}",
             )
         return result
     except HTTPException:
@@ -49,7 +49,7 @@ async def initialize_integration(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to initialize integration: {str(e)}"
+            detail=f"Failed to initialize integration: {str(e)}",
         )
 
 
@@ -64,7 +64,7 @@ async def shutdown_integration(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to shutdown integration: {str(e)}"
+            detail=f"Failed to shutdown integration: {str(e)}",
         )
 
 
@@ -79,7 +79,7 @@ async def reinitialize_integration(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to reinitialize integration: {str(e)}"
+            detail=f"Failed to reinitialize integration: {str(e)}",
         )
 
 
@@ -94,7 +94,7 @@ async def get_integration_health(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get health status: {str(e)}"
+            detail=f"Failed to get health status: {str(e)}",
         )
 
 
@@ -108,8 +108,7 @@ async def get_component_health(
         health = await integration_monitor.get_component_health(component)
         if not health:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Component '{component}' not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"Component '{component}' not found"
             )
         return health
     except HTTPException:
@@ -117,7 +116,7 @@ async def get_component_health(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get component health: {str(e)}"
+            detail=f"Failed to get component health: {str(e)}",
         )
 
 
@@ -132,7 +131,7 @@ async def get_queue_statistics(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get queue statistics: {str(e)}"
+            detail=f"Failed to get queue statistics: {str(e)}",
         )
 
 
@@ -147,7 +146,7 @@ async def clear_failed_messages(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to clear failed messages: {str(e)}"
+            detail=f"Failed to clear failed messages: {str(e)}",
         )
 
 
@@ -162,7 +161,7 @@ async def requeue_failed_messages(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to requeue messages: {str(e)}"
+            detail=f"Failed to requeue messages: {str(e)}",
         )
 
 
@@ -177,7 +176,7 @@ async def get_bridge_health(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to check bridge health: {str(e)}"
+            detail=f"Failed to check bridge health: {str(e)}",
         )
 
 
@@ -192,7 +191,7 @@ async def ensure_system_session(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to ensure system session: {str(e)}"
+            detail=f"Failed to ensure system session: {str(e)}",
         )
 
 
@@ -207,5 +206,5 @@ async def test_webhook(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to test webhook: {str(e)}"
+            detail=f"Failed to test webhook: {str(e)}",
         )
