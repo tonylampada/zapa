@@ -65,7 +65,9 @@ class TestRetryHandler:
             sleep_calls.append(delay)
 
         with patch("asyncio.sleep", mock_sleep):
-            with pytest.raises(Exception):  # noqa: B017 - Testing retry behavior with generic exception
+            with pytest.raises(
+                Exception
+            ):  # noqa: B017 - Testing retry behavior with generic exception
                 await RetryHandler.with_retry(mock_func, max_retries=4, delay=0.5, backoff=3.0)
 
         # Verify exponential backoff
