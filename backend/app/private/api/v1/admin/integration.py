@@ -26,7 +26,7 @@ async def get_integration_status(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get integration status: {str(e)}",
-        )
+        ) from e
 
 
 @router.post("/initialize")
@@ -48,7 +48,7 @@ async def initialize_integration(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to initialize integration: {str(e)}",
-        )
+        ) from e
 
 
 @router.post("/shutdown")
@@ -63,7 +63,7 @@ async def shutdown_integration(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to shutdown integration: {str(e)}",
-        )
+        ) from e
 
 
 @router.post("/reinitialize")
@@ -78,7 +78,7 @@ async def reinitialize_integration(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to reinitialize integration: {str(e)}",
-        )
+        ) from e
 
 
 @router.get("/health")
@@ -93,7 +93,7 @@ async def get_integration_health(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get health status: {str(e)}",
-        )
+        ) from e
 
 
 @router.get("/health/{component}")
@@ -115,7 +115,7 @@ async def get_component_health(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get component health: {str(e)}",
-        )
+        ) from e
 
 
 @router.get("/queue/stats")
@@ -130,7 +130,7 @@ async def get_queue_statistics(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get queue statistics: {str(e)}",
-        )
+        ) from e
 
 
 @router.post("/queue/clear-failed")
@@ -145,7 +145,7 @@ async def clear_failed_messages(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to clear failed messages: {str(e)}",
-        )
+        ) from e
 
 
 @router.post("/queue/requeue-failed")
@@ -160,7 +160,7 @@ async def requeue_failed_messages(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to requeue messages: {str(e)}",
-        )
+        ) from e
 
 
 @router.get("/bridge/health")
@@ -175,7 +175,7 @@ async def get_bridge_health(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to check bridge health: {str(e)}",
-        )
+        ) from e
 
 
 @router.post("/bridge/ensure-system-session")
@@ -190,7 +190,7 @@ async def ensure_system_session(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to ensure system session: {str(e)}",
-        )
+        ) from e
 
 
 @router.post("/bridge/test-webhook")
@@ -205,4 +205,4 @@ async def test_webhook(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to test webhook: {str(e)}",
-        )
+        ) from e
