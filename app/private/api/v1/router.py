@@ -1,13 +1,13 @@
 """Main API router for private v1 endpoints."""
 from fastapi import APIRouter
 
-from app.private.api.v1.health import router as health_router
-from app.private.api.v1.auth import router as auth_router
-from app.private.api.v1.webhooks import router as webhooks_router
-from app.private.api.v1.admin.users import router as admin_users_router
+from app.private.api.v1.admin.integration import router as admin_integration_router
 from app.private.api.v1.admin.llm_config import router as admin_llm_router
 from app.private.api.v1.admin.system import router as admin_system_router
-from app.private.api.v1.admin.integration import router as admin_integration_router
+from app.private.api.v1.admin.users import router as admin_users_router
+from app.private.api.v1.auth import router as auth_router
+from app.private.api.v1.health import router as health_router
+from app.private.api.v1.webhooks import router as webhooks_router
 
 api_router = APIRouter()
 
