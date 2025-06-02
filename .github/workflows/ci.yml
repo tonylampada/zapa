@@ -39,18 +39,18 @@ jobs:
       run: |
         uv run black --check app models schemas tests *.py
         uv run ruff check app models schemas tests *.py
-        cd backend && uv run black --check app tests
-        cd backend && uv run ruff check app tests
+        cd backend && ../.venv/bin/black --check app tests
+        cd backend && ../.venv/bin/ruff check app tests
     
     - name: Run type checking
       run: |
         uv run mypy app models schemas
-        cd backend && uv run mypy app
+        cd backend && ../.venv/bin/mypy app
     
     - name: Run tests with coverage
       run: |
         uv run pytest -v --cov=app --cov=models --cov=schemas --cov-report=term-missing --cov-report=xml
-        cd backend && uv run pytest -v --cov=app --cov-report=term-missing --cov-report=xml:../backend-coverage.xml
+        cd backend && ../.venv/bin/pytest -v --cov=app --cov-report=term-missing --cov-report=xml:../backend-coverage.xml
     
     - name: Upload coverage
       uses: codecov/codecov-action@v3
