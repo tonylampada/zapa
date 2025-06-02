@@ -14,6 +14,7 @@ from app.schemas.admin import (
     UserCreate,
     UserDetailResponse,
     UserListResponse,
+    UserSummary,
     UserUpdate,
 )
 
@@ -96,20 +97,20 @@ async def get_user(
     # Get message counts
     messages_sent = (
         db.query(func.count(Message.id))
-        .filter(Message.user_id == user.id, Message.is_from_user == True)
+        .filter(Message.user_id == user.id, Message.is_from_user)
         .scalar()
     )
 
     messages_received = (
         db.query(func.count(Message.id))
-        .filter(Message.user_id == user.id, Message.is_from_user == False)
+        .filter(Message.user_id == user.id, not Message.is_from_user)
         .scalar()
     )
 
     # Check if LLM config exists
     llm_config_set = (
         db.query(LLMConfig)
-        .filter(LLMConfig.user_id == user.id, LLMConfig.is_active == True)
+        .filter(LLMConfig.user_id == user.id, LLMConfig.is_active)
         .first()
         is not None
     )
@@ -210,19 +211,19 @@ async def update_user(
     # Get updated stats
     messages_sent = (
         db.query(func.count(Message.id))
-        .filter(Message.user_id == user.id, Message.is_from_user == True)
+        .filter(Message.user_id == user.id, Message.is_from_user)
         .scalar()
     )
 
     messages_received = (
         db.query(func.count(Message.id))
-        .filter(Message.user_id == user.id, Message.is_from_user == False)
+        .filter(Message.user_id == user.id, not Message.is_from_user)
         .scalar()
     )
 
     llm_config_set = (
         db.query(LLMConfig)
-        .filter(LLMConfig.user_id == user.id, LLMConfig.is_active == True)
+        .filter(LLMConfig.user_id == user.id, LLMConfig.is_active)
         .first()
         is not None
     )

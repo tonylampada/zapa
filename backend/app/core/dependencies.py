@@ -32,12 +32,12 @@ async def get_current_user(
             "phone_number": payload["phone_number"],
             "is_admin": payload.get("is_admin", False),
         }
-    except (JWTError, KeyError, ValueError):
+    except (JWTError, KeyError, ValueError) as e:
         raise HTTPException(
             status_code=401,
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
-        )
+        ) from e
 
 
 async def get_current_active_user(

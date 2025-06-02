@@ -1,3 +1,5 @@
+import base64
+import hashlib
 import time
 from datetime import datetime
 
@@ -22,9 +24,6 @@ router = APIRouter(prefix="/admin/llm-config", tags=["admin-llm"])
 
 # Initialize Fernet for encryption/decryption
 # Generate a proper Fernet key from the configured encryption key
-import base64
-import hashlib
-
 key_bytes = hashlib.sha256(settings.ENCRYPTION_KEY.encode()).digest()
 fernet_key = base64.urlsafe_b64encode(key_bytes)
 fernet = Fernet(fernet_key)
@@ -68,7 +67,7 @@ async def get_user_llm_config(
     # Get active LLM config
     config = (
         db.query(LLMConfig)
-        .filter(LLMConfig.user_id == user_id, LLMConfig.is_active == True)
+        .filter(LLMConfig.user_id == user_id, LLMConfig.is_active)
         .first()
     )
 
@@ -160,7 +159,7 @@ async def update_user_llm_config(
     # Get existing config
     config = (
         db.query(LLMConfig)
-        .filter(LLMConfig.user_id == user_id, LLMConfig.is_active == True)
+        .filter(LLMConfig.user_id == user_id, LLMConfig.is_active)
         .first()
     )
 
@@ -217,7 +216,7 @@ async def test_user_llm_config(
 
     config = (
         db.query(LLMConfig)
-        .filter(LLMConfig.user_id == user_id, LLMConfig.is_active == True)
+        .filter(LLMConfig.user_id == user_id, LLMConfig.is_active)
         .first()
     )
 
@@ -243,7 +242,7 @@ async def test_user_llm_config(
         )
 
         # Make a simple test call
-        response = agent.run("Say 'Hello, the LLM configuration is working!' and nothing else.")
+        agent.run("Say 'Hello, the LLM configuration is working!' and nothing else.")
 
         # Calculate response time
         response_time_ms = int((time.time() - start_time) * 1000)

@@ -21,7 +21,7 @@ class BridgeConfigurationService:
         """Configure the WhatsApp Bridge with webhook settings."""
         try:
             # Get current configuration
-            current_config = await self._get_current_config()
+            await self._get_current_config()
 
             # Update webhook configuration
             webhook_config = {
@@ -90,7 +90,7 @@ class BridgeConfigurationService:
 
                 if not system_session:
                     # Create system session
-                    session = await adapter.create_session(system_number)
+                    await adapter.create_session(system_number)
                     logger.info(f"Created system session: {system_number}")
 
                     # Get QR code for connection

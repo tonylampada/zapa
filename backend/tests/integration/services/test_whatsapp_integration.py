@@ -135,7 +135,7 @@ async def test_message_queue_retry_logic(
         "app.services.agent_service.AgentService.process_message", side_effect=mock_process_message
     ):
         # Enqueue message
-        queued_msg = await message_queue.enqueue(
+        await message_queue.enqueue(
             user_id=user.id,
             content="Test retry message",
             priority=MessagePriority.NORMAL,

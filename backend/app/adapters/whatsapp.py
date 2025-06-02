@@ -132,7 +132,7 @@ class WhatsAppBridge:
             return response.json()
         except httpx.RequestError as e:
             logger.error(f"Health check failed: {e}")
-            raise ConnectionError(f"Failed to connect to WhatsApp Bridge: {e}")
+            raise ConnectionError(f"Failed to connect to WhatsApp Bridge: {e}") from e
 
     async def create_session(self, session_id: str) -> SessionStatus:
         """

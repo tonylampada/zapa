@@ -72,7 +72,7 @@ async def get_system_stats(db: Session = Depends(get_db), current_admin=Depends(
     """Get system-wide statistics."""
     # Get user counts
     total_users = db.query(func.count(User.id)).scalar()
-    active_users = db.query(func.count(User.id)).filter(User.is_active == True).scalar()
+    active_users = db.query(func.count(User.id)).filter(User.is_active).scalar()
 
     # Get message counts
     total_messages = db.query(func.count(Message.id)).scalar()
@@ -92,7 +92,7 @@ async def get_system_stats(db: Session = Depends(get_db), current_admin=Depends(
                 - func.extract("epoch", Message.created_at)
             )
         )
-        .filter(Message.is_from_user == False)
+        .filter(not Message.is_from_user)
         .scalar()
         or 0.0
     )
@@ -105,7 +105,7 @@ async def get_system_stats(db: Session = Depends(get_db), current_admin=Depends(
     # Get LLM provider usage
     provider_counts = (
         db.query(LLMConfig.provider, func.count(LLMConfig.id))
-        .filter(LLMConfig.is_active == True)
+        .filter(LLMConfig.is_active)
         .group_by(LLMConfig.provider)
         .all()
     )

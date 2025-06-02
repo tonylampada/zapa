@@ -165,7 +165,7 @@ class TestAuthIntegration:
         phone_number = "+5555555555"
 
         # Make 3 requests (should all succeed)
-        for i in range(3):
+        for _i in range(3):
             response = client.post("/api/v1/auth/request-code", json={"phone_number": phone_number})
             assert response.status_code == 200
 

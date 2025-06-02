@@ -133,7 +133,7 @@ class TestAuthService:
 
     def test_verify_auth_code_expired(self, auth_service, mock_db, test_user):
         """Test expired auth code verification."""
-        expired_code = AuthCode(
+        AuthCode(
             id=1,
             user_id=test_user.id,
             code="123456",

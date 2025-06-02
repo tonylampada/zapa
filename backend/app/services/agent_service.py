@@ -49,7 +49,7 @@ class AgentService:
             context = await self._build_conversation_context(user_id)
 
             # Initialize LLM tools
-            tools = LLMTools(user_id, self.message_service)
+            LLMTools(user_id, self.message_service)
 
             # Create agent with user's configuration
             model_settings = llm_config.model_settings or {}
@@ -120,7 +120,7 @@ class AgentService:
         """Get user's LLM configuration."""
         return (
             self.db.query(LLMConfig)
-            .filter(LLMConfig.user_id == user_id, LLMConfig.is_active == True)
+            .filter(LLMConfig.user_id == user_id, LLMConfig.is_active)
             .first()
         )
 

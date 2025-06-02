@@ -20,7 +20,7 @@ async def admin_login(login_data: AdminLogin, db: Session = Depends(get_db)):
     # Check if user exists and is admin
     user = (
         db.query(User)
-        .filter(User.phone_number == login_data.username, User.is_admin == True)
+        .filter(User.phone_number == login_data.username, User.is_admin)
         .first()
     )
 
@@ -29,7 +29,7 @@ async def admin_login(login_data: AdminLogin, db: Session = Depends(get_db)):
         # This is just for development - remove in production
         if login_data.username == "admin" and login_data.password == "admin123":
             # Check if any admin exists
-            admin_exists = db.query(User).filter(User.is_admin == True).first()
+            admin_exists = db.query(User).filter(User.is_admin).first()
             if not admin_exists:
                 # Create the first admin user
                 from datetime import datetime

@@ -51,7 +51,7 @@ class AuthService:
         db.query(AuthCode).filter(
             and_(
                 AuthCode.user_id == user.id,
-                AuthCode.used == False,
+                not AuthCode.used,
                 AuthCode.expires_at > datetime.utcnow(),
             )
         ).update({"used": True})
@@ -83,7 +83,7 @@ class AuthService:
                 and_(
                     AuthCode.user_id == user.id,
                     AuthCode.code == code,
-                    AuthCode.used == False,
+                    not AuthCode.used,
                     AuthCode.expires_at > datetime.utcnow(),
                 )
             )
@@ -119,8 +119,8 @@ class AuthService:
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
             return payload
-        except JWTError:
-            raise ValueError("Invalid token")
+        except JWTError as e:
+            raise ValueError("Invalid token") from e
 
     def check_rate_limit(self, db: Session, phone_number: str) -> bool:
         """Check if phone number has exceeded rate limit for auth codes.
