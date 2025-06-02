@@ -1,7 +1,7 @@
 """Unit tests for the authentication service."""
 
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
 import pytest
 from jose import jwt

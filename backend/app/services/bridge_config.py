@@ -1,7 +1,7 @@
 """WhatsApp Bridge configuration service."""
 
 import logging
-from typing import Dict, Any, Optional
+from typing import Any
 
 from app.adapters.whatsapp import WhatsAppBridgeAdapter
 from app.config.private import settings
@@ -17,7 +17,7 @@ class BridgeConfigurationService:
         self.webhook_url = f"{settings.HOST_URL}/api/v1/webhooks/whatsapp"
         self.bridge_adapter = WhatsAppBridgeAdapter(settings.WHATSAPP_API_URL)
 
-    async def setup_bridge(self) -> Dict[str, Any]:
+    async def setup_bridge(self) -> dict[str, Any]:
         """Configure the WhatsApp Bridge with webhook settings."""
         try:
             # Get current configuration
@@ -52,7 +52,7 @@ class BridgeConfigurationService:
             logger.error(f"Failed to configure WhatsApp Bridge: {e}", exc_info=True)
             return {"status": "error", "error": str(e)}
 
-    async def check_bridge_health(self) -> Dict[str, Any]:
+    async def check_bridge_health(self) -> dict[str, Any]:
         """Check WhatsApp Bridge health and connection status."""
         try:
             async with self.bridge_adapter as adapter:
@@ -78,7 +78,7 @@ class BridgeConfigurationService:
                 "bridge_url": settings.WHATSAPP_API_URL,
             }
 
-    async def ensure_system_session(self) -> Dict[str, Any]:
+    async def ensure_system_session(self) -> dict[str, Any]:
         """Ensure the system WhatsApp session exists and is connected."""
         try:
             system_number = settings.WHATSAPP_SYSTEM_NUMBER
@@ -126,19 +126,19 @@ class BridgeConfigurationService:
             logger.error(f"Failed to ensure system session: {e}", exc_info=True)
             return {"status": "error", "error": str(e)}
 
-    async def _get_current_config(self) -> Dict[str, Any]:
+    async def _get_current_config(self) -> dict[str, Any]:
         """Get current bridge configuration."""
         # This would call the bridge API to get current config
         # For now, return empty dict as the bridge may not have this endpoint
         return {}
 
-    async def _update_webhook_config(self, config: Dict[str, Any]) -> Dict[str, Any]:
+    async def _update_webhook_config(self, config: dict[str, Any]) -> dict[str, Any]:
         """Update webhook configuration on the bridge."""
         # This would call the bridge API to update webhook config
         # For now, just return the config as the bridge handles webhooks internally
         return config
 
-    async def test_webhook(self) -> Dict[str, Any]:
+    async def test_webhook(self) -> dict[str, Any]:
         """Send a test webhook to verify configuration."""
         try:
             # This would trigger a test webhook from the bridge

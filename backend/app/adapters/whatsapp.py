@@ -1,10 +1,11 @@
 """WhatsApp Bridge adapter for zapw service."""
 
-import httpx
-from typing import Optional, Dict, Any, List
-from pydantic import BaseModel, Field
 import logging
 from datetime import datetime
+from typing import Any
+
+import httpx
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
@@ -42,9 +43,9 @@ class SessionStatus(BaseModel):
 
     session_id: str
     status: str  # "qr_pending", "connected", "disconnected", "error"
-    phone_number: Optional[str] = None
-    connected_at: Optional[datetime] = None
-    error: Optional[str] = None
+    phone_number: str | None = None
+    connected_at: datetime | None = None
+    error: str | None = None
 
 
 class SendMessageRequest(BaseModel):
@@ -53,7 +54,7 @@ class SendMessageRequest(BaseModel):
     session_id: str
     recipient_jid: str
     content: str
-    quoted_message_id: Optional[str] = None
+    quoted_message_id: str | None = None
 
 
 class SendMessageResponse(BaseModel):
@@ -73,11 +74,11 @@ class IncomingMessage(BaseModel):
     recipient_jid: str
     timestamp: datetime
     message_type: str
-    content: Optional[str] = None
-    caption: Optional[str] = None
-    media_url: Optional[str] = None
-    quoted_message_id: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    content: str | None = None
+    caption: str | None = None
+    media_url: str | None = None
+    quoted_message_id: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class WhatsAppBridge:
@@ -87,7 +88,7 @@ class WhatsAppBridge:
         self,
         base_url: str,
         timeout: float = 30.0,
-        webhook_url: Optional[str] = None,
+        webhook_url: str | None = None,
     ):
         """
         Initialize WhatsApp Bridge adapter.
@@ -100,7 +101,7 @@ class WhatsAppBridge:
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self.webhook_url = webhook_url
-        self._client: Optional[httpx.AsyncClient] = None
+        self._client: httpx.AsyncClient | None = None
 
     async def __aenter__(self):
         """Async context manager entry."""
@@ -123,7 +124,7 @@ class WhatsAppBridge:
             raise RuntimeError("WhatsAppBridge must be used as async context manager")
         return self._client
 
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """Check if WhatsApp Bridge is healthy."""
         try:
             response = await self.client.get("/health")
@@ -199,7 +200,7 @@ class WhatsAppBridge:
         session_id: str,
         recipient: str,
         content: str,
-        quoted_message_id: Optional[str] = None,
+        quoted_message_id: str | None = None,
     ) -> SendMessageResponse:
         """
         Send a text message.
@@ -260,7 +261,7 @@ class WhatsAppBridge:
         except httpx.RequestError as e:
             raise ConnectionError(f"Failed to connect to WhatsApp Bridge: {e}") from e
 
-    async def list_sessions(self) -> List[SessionStatus]:
+    async def list_sessions(self) -> list[SessionStatus]:
         """List all active sessions."""
         try:
             response = await self.client.get("/sessions")

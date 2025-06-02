@@ -1,12 +1,12 @@
 """Unit tests for LLM tools."""
 
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 
-from app.services.llm_tools import LLMTools
 from app.schemas.message import ConversationStats, MessageDirection, MessageResponse, MessageType
+from app.services.llm_tools import LLMTools
 
 
 class TestLLMTools:

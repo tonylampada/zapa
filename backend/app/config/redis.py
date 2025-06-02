@@ -1,6 +1,5 @@
 """Redis configuration for the application."""
 
-from typing import Optional
 
 from pydantic import Field
 from pydantic_settings import BaseSettings

@@ -1,11 +1,12 @@
 """Integration tests for WhatsApp Bridge adapter."""
 
-import pytest
-import os
 import asyncio
+import os
 from datetime import datetime
 
-from app.adapters.whatsapp import WhatsAppBridge, SessionError
+import pytest
+
+from app.adapters.whatsapp import SessionError, WhatsAppBridge
 
 # Skip integration tests by default
 pytestmark = pytest.mark.skipif(

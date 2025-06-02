@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
 from datetime import datetime
+from typing import Any
+
+from pydantic import BaseModel, Field
 
 
 class PaginationParams(BaseModel):
@@ -21,11 +22,11 @@ class AdminTokenResponse(BaseModel):
 class UserSummary(BaseModel):
     id: int
     phone_number: str
-    first_name: Optional[str]
-    last_name: Optional[str]
+    first_name: str | None
+    last_name: str | None
     is_active: bool
     created_at: datetime
-    last_message_at: Optional[datetime]
+    last_message_at: datetime | None
     total_messages: int
 
     class Config:
@@ -33,7 +34,7 @@ class UserSummary(BaseModel):
 
 
 class UserListResponse(BaseModel):
-    users: List[UserSummary]
+    users: list[UserSummary]
     total: int
     page: int
     page_size: int
@@ -41,7 +42,7 @@ class UserListResponse(BaseModel):
 
 
 class UserDetailResponse(UserSummary):
-    user_metadata: Optional[Dict[str, Any]]
+    user_metadata: dict[str, Any] | None
     llm_config_set: bool
     messages_sent: int
     messages_received: int
@@ -52,17 +53,17 @@ class UserDetailResponse(UserSummary):
 
 class UserCreate(BaseModel):
     phone_number: str = Field(..., pattern=r"^\+[1-9]\d{1,14}$")
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
+    first_name: str | None = None
+    last_name: str | None = None
     is_active: bool = True
-    user_metadata: Optional[Dict[str, Any]] = None
+    user_metadata: dict[str, Any] | None = None
 
 
 class UserUpdate(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    is_active: Optional[bool] = None
-    user_metadata: Optional[Dict[str, Any]] = None
+    first_name: str | None = None
+    last_name: str | None = None
+    is_active: bool | None = None
+    user_metadata: dict[str, Any] | None = None
 
 
 class MessageSummary(BaseModel):
@@ -78,7 +79,7 @@ class MessageSummary(BaseModel):
 
 
 class ConversationHistoryResponse(BaseModel):
-    messages: List[MessageSummary]
+    messages: list[MessageSummary]
     total: int
     page: int
     page_size: int
@@ -88,7 +89,7 @@ class ConversationHistoryResponse(BaseModel):
 class LLMProviderInfo(BaseModel):
     provider: str
     name: str
-    models: List[str]
+    models: list[str]
     supports_function_calling: bool
 
 
@@ -96,7 +97,7 @@ class LLMConfigResponse(BaseModel):
     id: int
     user_id: int
     provider: str
-    model_settings: Dict[str, Any]
+    model_settings: dict[str, Any]
     is_active: bool
     created_at: datetime
     updated_at: datetime
@@ -108,19 +109,19 @@ class LLMConfigResponse(BaseModel):
 class LLMConfigCreate(BaseModel):
     provider: str = Field(..., pattern=r"^(openai|anthropic|google)$")
     api_key: str = Field(..., min_length=1)
-    model_settings: Dict[str, Any] = Field(default_factory=dict)
+    model_settings: dict[str, Any] = Field(default_factory=dict)
     is_active: bool = True
 
 
 class LLMConfigUpdate(BaseModel):
-    api_key: Optional[str] = None
-    model_settings: Optional[Dict[str, Any]] = None
-    is_active: Optional[bool] = None
+    api_key: str | None = None
+    model_settings: dict[str, Any] | None = None
+    is_active: bool | None = None
 
 
 class LLMConfigTestResponse(BaseModel):
     success: bool
-    error_message: Optional[str] = None
+    error_message: str | None = None
     response_time_ms: int
     model_used: str
 
@@ -131,7 +132,7 @@ class SystemStatsResponse(BaseModel):
     total_messages: int
     messages_today: int
     average_response_time_ms: float
-    llm_provider_usage: Dict[str, int]
+    llm_provider_usage: dict[str, int]
 
 
 class SystemHealthResponse(BaseModel):
@@ -146,5 +147,5 @@ class SystemHealthResponse(BaseModel):
 class ExportDataResponse(BaseModel):
     export_id: str
     status: str  # "pending", "processing", "completed", "failed"
-    download_url: Optional[str] = None
-    error_message: Optional[str] = None
+    download_url: str | None = None
+    error_message: str | None = None

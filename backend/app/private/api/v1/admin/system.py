@@ -1,18 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
-from sqlalchemy.orm import Session
-from sqlalchemy import func, text
-from datetime import datetime, timedelta, timezone
-import psutil
 import time
-import json
 import uuid
-import httpx
+from datetime import datetime, timezone
 
+import httpx
+import psutil
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from sqlalchemy import func, text
+from sqlalchemy.orm import Session
+
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import get_current_admin
-from app.core.config import settings
-from app.schemas.admin import SystemStatsResponse, SystemHealthResponse, ExportDataResponse
-from app.models import User, Message, Session as SessionModel, LLMConfig
+from app.models import LLMConfig, Message, User
+from app.schemas.admin import ExportDataResponse, SystemHealthResponse, SystemStatsResponse
 
 router = APIRouter(prefix="/admin/system", tags=["admin-system"])
 

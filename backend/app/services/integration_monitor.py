@@ -3,13 +3,12 @@
 import asyncio
 import logging
 from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 import redis.asyncio as redis
 from sqlalchemy import text
 
 from app.config.redis import redis_settings
-from app.config.private import settings
 from app.core.database import DatabaseManager
 from app.services.bridge_config import bridge_config
 from app.services.message_queue import message_queue
@@ -20,7 +19,7 @@ logger = logging.getLogger(__name__)
 class ComponentStatus:
     """Status of a system component."""
 
-    def __init__(self, name: str, healthy: bool, details: Optional[Dict[str, Any]] = None):
+    def __init__(self, name: str, healthy: bool, details: dict[str, Any] | None = None):
         self.name = name
         self.healthy = healthy
         self.details = details or {}
@@ -30,12 +29,12 @@ class ComponentStatus:
 class IntegrationMonitor:
     """Monitor health and status of all integration components."""
 
-    def __init__(self, database_manager: Optional[DatabaseManager] = None):
+    def __init__(self, database_manager: DatabaseManager | None = None):
         """Initialize the integration monitor."""
         self.database_manager = database_manager or DatabaseManager()
-        self._monitoring_task: Optional[asyncio.Task] = None
+        self._monitoring_task: asyncio.Task | None = None
         self._running = False
-        self._last_status: Dict[str, ComponentStatus] = {}
+        self._last_status: dict[str, ComponentStatus] = {}
 
     async def start_monitoring(self, interval: int = 60) -> None:
         """Start continuous health monitoring."""
@@ -65,7 +64,7 @@ class IntegrationMonitor:
                 logger.error(f"Error in monitoring loop: {e}", exc_info=True)
                 await asyncio.sleep(interval)
 
-    async def check_all_components(self) -> Dict[str, ComponentStatus]:
+    async def check_all_components(self) -> dict[str, ComponentStatus]:
         """Check health of all system components."""
         results = {}
 
@@ -82,7 +81,7 @@ class IntegrationMonitor:
         statuses = await asyncio.gather(*check_tasks, return_exceptions=True)
 
         # Process results
-        for (name, _), status in zip(checks, statuses):
+        for (name, _), status in zip(checks, statuses, strict=False):
             if isinstance(status, Exception):
                 results[name] = ComponentStatus(name, False, {"error": str(status)})
             else:
@@ -210,7 +209,7 @@ class IntegrationMonitor:
         except Exception as e:
             return ComponentStatus("message_queue", False, {"error": str(e)})
 
-    async def get_system_health(self) -> Dict[str, Any]:
+    async def get_system_health(self) -> dict[str, Any]:
         """Get overall system health summary."""
         # Get latest status or check now if none available
         if not self._last_status:
@@ -241,7 +240,7 @@ class IntegrationMonitor:
             "checked_at": datetime.now(timezone.utc).isoformat(),
         }
 
-    async def get_component_health(self, component: str) -> Optional[Dict[str, Any]]:
+    async def get_component_health(self, component: str) -> dict[str, Any] | None:
         """Get health status for a specific component."""
         status = self._last_status.get(component)
         if not status:

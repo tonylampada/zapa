@@ -1,11 +1,11 @@
 """Database utilities for dependency injection."""
 
+from collections.abc import Generator
+
 from sqlalchemy.orm import Session
-from typing import Generator
 
 from app.config.database import DatabaseConfig
 from app.core.config import settings
-
 
 # Create database configuration
 db_config = DatabaseConfig(

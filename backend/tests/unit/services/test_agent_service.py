@@ -5,11 +5,11 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from app.services.agent_service import AgentService
 from app.models import LLMConfig, User
 from app.models.llm_config import LLMProvider
 from app.schemas.agent import AgentResponse, ToolCall
 from app.schemas.message import MessageDirection, MessageResponse
+from app.services.agent_service import AgentService
 
 
 class TestAgentService:

@@ -1,23 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.orm import Session
-from sqlalchemy import func, or_
-from typing import List, Optional
-from datetime import datetime
 import math
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import func, or_
+from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.security import get_current_admin
-from app.services.message_service import MessageService
+from app.models import LLMConfig, Message, User
 from app.schemas.admin import (
-    UserListResponse,
-    UserDetailResponse,
-    UserCreate,
-    UserUpdate,
     ConversationHistoryResponse,
-    PaginationParams,
     MessageSummary,
+    UserCreate,
+    UserDetailResponse,
+    UserListResponse,
+    UserUpdate,
 )
-from app.models import User, Message, LLMConfig
 
 router = APIRouter(prefix="/admin/users", tags=["admin-users"])
 
@@ -26,7 +24,7 @@ router = APIRouter(prefix="/admin/users", tags=["admin-users"])
 async def list_users(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
-    search: Optional[str] = Query(None),
+    search: str | None = Query(None),
     db: Session = Depends(get_db),
     current_admin=Depends(get_current_admin),
 ):

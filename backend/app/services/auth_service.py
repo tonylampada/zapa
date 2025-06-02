@@ -2,7 +2,6 @@
 
 import secrets
 from datetime import datetime, timedelta
-from typing import Optional
 
 from jose import JWTError, jwt
 from sqlalchemy import and_
@@ -26,7 +25,7 @@ class AuthService:
         return "".join([str(secrets.randbelow(10)) for _ in range(6)])
 
     def create_auth_code(
-        self, db: Session, phone_number: str, user: Optional[User] = None
+        self, db: Session, phone_number: str, user: User | None = None
     ) -> tuple[AuthCode, bool]:
         """Create an auth code for a phone number.
 
@@ -70,7 +69,7 @@ class AuthService:
 
         return auth_code, is_new_user
 
-    def verify_auth_code(self, db: Session, phone_number: str, code: str) -> Optional[User]:
+    def verify_auth_code(self, db: Session, phone_number: str, code: str) -> User | None:
         """Verify an auth code and return the user if valid."""
         # Find user by phone number
         user = db.query(User).filter(User.phone_number == phone_number).first()

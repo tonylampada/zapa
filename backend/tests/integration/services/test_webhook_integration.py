@@ -1,17 +1,17 @@
 """Integration tests for complete webhook processing flow."""
 
-import pytest
 import asyncio
 from datetime import datetime
-from unittest.mock import patch, AsyncMock
+from unittest.mock import AsyncMock, patch
 
+import pytest
 from sqlalchemy.orm import Session
 
-from app.services.webhook_handler import WebhookHandlerService
-from app.services.message_service import MessageService
+from app.models import Message, User
+from app.schemas.webhook import WhatsAppWebhookEvent
 from app.services.agent_service import AgentService
-from app.schemas.webhook import WhatsAppWebhookEvent, WebhookEventType
-from app.models import User, Message, LLMConfig
+from app.services.message_service import MessageService
+from app.services.webhook_handler import WebhookHandlerService
 
 
 @pytest.mark.integration

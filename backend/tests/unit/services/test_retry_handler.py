@@ -1,8 +1,8 @@
 """Unit tests for retry handler."""
 
-import pytest
-import asyncio
 from unittest.mock import AsyncMock, patch
+
+import pytest
 
 from app.services.retry_handler import RetryHandler
 

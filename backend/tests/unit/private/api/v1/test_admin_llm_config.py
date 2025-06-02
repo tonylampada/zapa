@@ -1,11 +1,12 @@
+from datetime import datetime
+from unittest.mock import Mock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime
 from sqlalchemy.orm import Session
 
-from app.models import User, LLMConfig
 from app.core.security import create_access_token
+from app.models import LLMConfig, User
 
 
 class TestAdminLLMConfigEndpoints:

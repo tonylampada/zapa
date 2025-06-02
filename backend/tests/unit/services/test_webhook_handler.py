@@ -1,12 +1,13 @@
 """Unit tests for webhook handler service."""
 
-import pytest
-from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime
+from unittest.mock import AsyncMock, Mock, patch
 
-from app.services.webhook_handler import WebhookHandlerService
-from app.schemas.webhook import WhatsAppWebhookEvent, WebhookEventType
+import pytest
+
 from app.models import User
+from app.schemas.webhook import WebhookEventType, WhatsAppWebhookEvent
+from app.services.webhook_handler import WebhookHandlerService
 
 
 @pytest.fixture

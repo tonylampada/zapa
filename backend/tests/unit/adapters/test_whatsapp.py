@@ -1,18 +1,18 @@
 """Unit tests for WhatsApp Bridge adapter with mocked responses."""
 
-import pytest
 from unittest.mock import AsyncMock, Mock, patch
+
 import httpx
-from datetime import datetime
+import pytest
 
 from app.adapters.whatsapp import (
+    ConnectionError,
+    QRCodeResponse,
+    SendMessageResponse,
+    SessionError,
+    SessionStatus,
     WhatsAppBridge,
     WhatsAppBridgeError,
-    ConnectionError,
-    SessionError,
-    QRCodeResponse,
-    SessionStatus,
-    SendMessageResponse,
 )
 
 

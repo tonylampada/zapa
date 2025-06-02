@@ -1,9 +1,6 @@
 """Unit tests for the message queue service."""
 
-import asyncio
-import json
-from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 

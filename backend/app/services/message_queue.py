@@ -1,13 +1,13 @@
 """Message queue service for reliable message processing using Redis."""
 
 import asyncio
-import json
 import logging
 import time
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, AsyncGenerator, Dict, List, Optional
+from typing import Any
 
 import redis.asyncio as redis
 from pydantic import BaseModel, Field
@@ -35,9 +35,9 @@ class QueuedMessage(BaseModel):
     retry_count: int = Field(default=0)
     max_retries: int = Field(default=redis_settings.message_queue_max_retries)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    last_attempt_at: Optional[datetime] = None
-    error: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    last_attempt_at: datetime | None = None
+    error: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class MessageQueueService:
@@ -45,9 +45,9 @@ class MessageQueueService:
 
     def __init__(self) -> None:
         """Initialize the message queue service."""
-        self._redis: Optional[redis.Redis] = None
+        self._redis: redis.Redis | None = None
         self._is_connected = False
-        self._processing_lock: Optional[asyncio.Lock] = None
+        self._processing_lock: asyncio.Lock | None = None
 
     @asynccontextmanager
     async def _get_redis(self) -> AsyncGenerator[redis.Redis, None]:
@@ -93,7 +93,7 @@ class MessageQueueService:
         user_id: int,
         content: str,
         priority: MessagePriority = MessagePriority.NORMAL,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> QueuedMessage:
         """Add a message to the queue."""
         message = QueuedMessage(
@@ -116,8 +116,8 @@ class MessageQueueService:
         return message
 
     async def dequeue(
-        self, priorities: Optional[List[MessagePriority]] = None
-    ) -> Optional[QueuedMessage]:
+        self, priorities: list[MessagePriority] | None = None
+    ) -> QueuedMessage | None:
         """Get the next message from the queue."""
         if priorities is None:
             priorities = [MessagePriority.HIGH, MessagePriority.NORMAL, MessagePriority.LOW]
@@ -194,7 +194,7 @@ class MessageQueueService:
                 logger.info(f"Retrying message {message.id} (attempt {message.retry_count})")
                 return True
 
-    async def get_queue_stats(self) -> Dict[str, Any]:
+    async def get_queue_stats(self) -> dict[str, Any]:
         """Get statistics about the message queues."""
         async with self._get_redis() as r:
             stats = {

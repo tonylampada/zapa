@@ -1,8 +1,9 @@
 """Retry handler for resilient service operations."""
 
-from typing import Callable, Any, TypeVar, Coroutine
 import asyncio
 import logging
+from collections.abc import Callable, Coroutine
+from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)
 

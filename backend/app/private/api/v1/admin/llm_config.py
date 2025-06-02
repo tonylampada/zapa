@@ -1,22 +1,22 @@
+import time
+from datetime import datetime
+
+from cryptography.fernet import Fernet
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
-from datetime import datetime
-from cryptography.fernet import Fernet
-import time
 
+from app.adapters.llm.agent import create_agent
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import get_current_admin
-from app.core.config import settings
-from app.adapters.llm.agent import create_agent
+from app.models import LLMConfig, User
 from app.schemas.admin import (
-    LLMConfigResponse,
     LLMConfigCreate,
+    LLMConfigResponse,
+    LLMConfigTestResponse,
     LLMConfigUpdate,
     LLMProviderInfo,
-    LLMConfigTestResponse,
 )
-from app.models import User, LLMConfig
 
 router = APIRouter(prefix="/admin/llm-config", tags=["admin-llm"])
 
@@ -30,7 +30,7 @@ fernet_key = base64.urlsafe_b64encode(key_bytes)
 fernet = Fernet(fernet_key)
 
 
-@router.get("/providers", response_model=List[LLMProviderInfo])
+@router.get("/providers", response_model=list[LLMProviderInfo])
 async def get_available_providers(current_admin=Depends(get_current_admin)):
     """Get list of available LLM providers and their models."""
     return [

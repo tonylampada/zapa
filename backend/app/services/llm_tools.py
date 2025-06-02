@@ -1,8 +1,8 @@
 """LLM tools for accessing conversation history."""
 
-import json
-from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List
+from collections.abc import Callable
+from datetime import datetime
+from typing import Any
 
 from app.services.message_service import MessageService
 
@@ -16,14 +16,14 @@ class LLMTools:
         self.message_service = message_service
 
         # Map tool names to methods
-        self.tools: Dict[str, Callable] = {
+        self.tools: dict[str, Callable] = {
             "search_messages": self.search_messages,
             "get_recent_messages": self.get_recent_messages,
             "get_messages_by_date_range": self.get_messages_by_date_range,
             "get_conversation_stats": self.get_conversation_stats,
         }
 
-    def get_tool_definitions(self) -> List[Dict[str, Any]]:
+    def get_tool_definitions(self) -> list[dict[str, Any]]:
         """Return OpenAI-compatible tool definitions for function calling."""
         return [
             {
@@ -101,7 +101,7 @@ class LLMTools:
             },
         ]
 
-    async def execute_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Any:
+    async def execute_tool(self, tool_name: str, arguments: dict[str, Any]) -> Any:
         """Execute a tool by name with given arguments."""
         if tool_name not in self.tools:
             raise ValueError(f"Unknown tool: {tool_name}")
@@ -109,7 +109,7 @@ class LLMTools:
         tool_method = self.tools[tool_name]
         return await tool_method(**arguments)
 
-    async def search_messages(self, query: str, limit: int = 10) -> List[Dict[str, Any]]:
+    async def search_messages(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
         """Search through conversation history."""
         messages = await self.message_service.search_messages(self.user_id, query, limit)
 
@@ -123,7 +123,7 @@ class LLMTools:
             for msg in messages
         ]
 
-    async def get_recent_messages(self, count: int = 20) -> List[Dict[str, Any]]:
+    async def get_recent_messages(self, count: int = 20) -> list[dict[str, Any]]:
         """Get recent messages from conversation."""
         messages = await self.message_service.get_recent_messages(self.user_id, count)
 
@@ -139,7 +139,7 @@ class LLMTools:
 
     async def get_messages_by_date_range(
         self, start_date: str, end_date: str
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Get messages within a specific date range."""
         start = datetime.fromisoformat(start_date)
         end = datetime.fromisoformat(end_date)
@@ -156,7 +156,7 @@ class LLMTools:
             for msg in messages
         ]
 
-    async def get_conversation_stats(self) -> Dict[str, Any]:
+    async def get_conversation_stats(self) -> dict[str, Any]:
         """Get conversation statistics."""
         stats = await self.message_service.get_conversation_stats(self.user_id)
 

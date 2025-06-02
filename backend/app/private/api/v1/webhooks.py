@@ -3,11 +3,11 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app.schemas.webhook import WhatsAppWebhookEvent
-from app.services.webhook_handler import WebhookHandlerService
-from app.services.message_service import MessageService
-from app.services.agent_service import AgentService
 from app.core.database import get_db
+from app.schemas.webhook import WhatsAppWebhookEvent
+from app.services.agent_service import AgentService
+from app.services.message_service import MessageService
+from app.services.webhook_handler import WebhookHandlerService
 
 router = APIRouter(prefix="/webhooks", tags=["webhooks"])
 

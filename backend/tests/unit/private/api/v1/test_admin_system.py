@@ -1,11 +1,10 @@
+from datetime import datetime, timedelta, timezone
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime, timezone, timedelta
 from sqlalchemy.orm import Session
-from sqlalchemy import text
 
-from app.models import User, Message, LLMConfig
 from app.core.security import create_access_token
 
 

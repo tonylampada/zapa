@@ -1,12 +1,12 @@
 """Integration tests for webhook endpoints."""
 
-import pytest
 from datetime import datetime
-from httpx import AsyncClient
-from unittest.mock import patch, AsyncMock
+from unittest.mock import AsyncMock, patch
 
-from app.models import User, Message
-from app.schemas.message import MessageDirection
+import pytest
+from httpx import AsyncClient
+
+from app.models import Message, User
 
 
 @pytest.mark.integration

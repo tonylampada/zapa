@@ -9,13 +9,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from app.config.encryption import encrypt_api_key
-from app.services.agent_service import AgentService
-from app.services.message_service import MessageService
 from app.models import Base, LLMConfig, Message, Session, User
 from app.models.llm_config import LLMProvider
-from app.models.message import MessageType
 from app.models.session import SessionStatus, SessionType
 from app.schemas.message import MessageCreate
+from app.services.agent_service import AgentService
+from app.services.message_service import MessageService
 
 # Skip all tests if integration testing is not enabled
 pytestmark = pytest.mark.skipif(

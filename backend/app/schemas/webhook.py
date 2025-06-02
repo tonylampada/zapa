@@ -1,7 +1,8 @@
-from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
+from typing import Any
+
+from pydantic import BaseModel
 
 
 class WebhookEventType(str, Enum):
@@ -14,16 +15,16 @@ class WebhookEventType(str, Enum):
 class WhatsAppWebhookEvent(BaseModel):
     event_type: WebhookEventType
     timestamp: datetime
-    data: Dict[str, Any]
+    data: dict[str, Any]
 
 
 class MessageReceivedData(BaseModel):
     from_number: str
     to_number: str
     message_id: str
-    text: Optional[str] = None
-    media_url: Optional[str] = None
-    media_type: Optional[str] = None
+    text: str | None = None
+    media_url: str | None = None
+    media_type: str | None = None
     timestamp: datetime
 
 

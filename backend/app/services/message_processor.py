@@ -2,13 +2,10 @@
 
 import asyncio
 import logging
-from typing import Optional
 
-from sqlalchemy.orm import Session
-
-from app.services.message_queue import message_queue, QueuedMessage
-from app.services.agent_service import AgentService
 from app.core.database import DatabaseManager
+from app.services.agent_service import AgentService
+from app.services.message_queue import QueuedMessage, message_queue
 
 logger = logging.getLogger(__name__)
 
@@ -16,11 +13,11 @@ logger = logging.getLogger(__name__)
 class MessageProcessorService:
     """Service that processes messages from the queue."""
 
-    def __init__(self, database_manager: Optional[DatabaseManager] = None):
+    def __init__(self, database_manager: DatabaseManager | None = None):
         """Initialize the message processor."""
         self.database_manager = database_manager or DatabaseManager()
         self._running = False
-        self._task: Optional[asyncio.Task] = None
+        self._task: asyncio.Task | None = None
 
     async def start(self) -> None:
         """Start processing messages from the queue."""

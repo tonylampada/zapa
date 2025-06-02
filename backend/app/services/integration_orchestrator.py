@@ -3,13 +3,13 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
-from typing import Dict, Any, Optional, List
+from typing import Any
 
-from app.services.bridge_config import bridge_config
-from app.services.message_queue import message_queue
-from app.services.message_processor import message_processor
-from app.services.integration_monitor import integration_monitor
 from app.config.private import settings
+from app.services.bridge_config import bridge_config
+from app.services.integration_monitor import integration_monitor
+from app.services.message_processor import message_processor
+from app.services.message_queue import message_queue
 
 logger = logging.getLogger(__name__)
 
@@ -20,10 +20,10 @@ class IntegrationOrchestrator:
     def __init__(self):
         """Initialize the orchestrator."""
         self._initialized = False
-        self._processor_workers: List[asyncio.Task] = []
+        self._processor_workers: list[asyncio.Task] = []
         self._worker_count = getattr(settings, "MESSAGE_PROCESSOR_WORKERS", 3)
 
-    async def initialize(self) -> Dict[str, Any]:
+    async def initialize(self) -> dict[str, Any]:
         """Initialize all integration components."""
         if self._initialized:
             logger.warning("Integration already initialized")
@@ -79,7 +79,7 @@ class IntegrationOrchestrator:
             await self._cleanup()
             return {"status": "failed", "error": str(e), "partial_results": results}
 
-    async def shutdown(self) -> Dict[str, Any]:
+    async def shutdown(self) -> dict[str, Any]:
         """Gracefully shutdown all integration components."""
         if not self._initialized:
             return {"status": "not_initialized"}
@@ -134,7 +134,7 @@ class IntegrationOrchestrator:
                 logger.error(f"Error in processor worker {worker_id}: {e}", exc_info=True)
                 await asyncio.sleep(5)  # Wait before retrying
 
-    async def get_status(self) -> Dict[str, Any]:
+    async def get_status(self) -> dict[str, Any]:
         """Get current status of the integration."""
         status = {
             "initialized": self._initialized,
@@ -159,7 +159,7 @@ class IntegrationOrchestrator:
 
         return status
 
-    async def reinitialize(self) -> Dict[str, Any]:
+    async def reinitialize(self) -> dict[str, Any]:
         """Reinitialize the integration (shutdown and restart)."""
         logger.info("Reinitializing WhatsApp integration...")
 

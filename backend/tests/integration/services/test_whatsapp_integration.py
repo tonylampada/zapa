@@ -1,22 +1,22 @@
 """Integration tests for WhatsApp end-to-end message flow."""
 
 import asyncio
-import pytest
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, patch
 
+import pytest
 from sqlalchemy.orm import Session
 
-from app.models import User, LLMConfig
+from app.models import LLMConfig, User
 from app.schemas.webhook import (
-    WhatsAppWebhookEvent,
     WebhookEventType,
+    WhatsAppWebhookEvent,
 )
-from app.services.integration_orchestrator import integration_orchestrator
-from app.services.message_queue import message_queue, MessagePriority
-from app.services.webhook_handler import WebhookHandlerService
-from app.services.message_service import MessageService
 from app.services.agent_service import AgentService
+from app.services.integration_orchestrator import integration_orchestrator
+from app.services.message_queue import MessagePriority, message_queue
+from app.services.message_service import MessageService
+from app.services.webhook_handler import WebhookHandlerService
 
 
 @pytest.fixture

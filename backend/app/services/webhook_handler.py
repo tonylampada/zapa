@@ -1,26 +1,24 @@
 """Webhook handler service for processing WhatsApp events."""
 
-from typing import Dict, Any
 import logging
-from datetime import datetime
+from typing import Any
 
 from sqlalchemy.orm import Session
 
+from app.config.private import settings
+from app.models import User
+from app.schemas.message import MessageCreate, MessageDirection, MessageType
 from app.schemas.webhook import (
-    WhatsAppWebhookEvent,
-    WebhookEventType,
+    ConnectionStatusData,
+    MessageFailedData,
     MessageReceivedData,
     MessageSentData,
-    MessageFailedData,
-    ConnectionStatusData,
+    WebhookEventType,
+    WhatsAppWebhookEvent,
 )
-from app.schemas.message import MessageCreate, MessageDirection, MessageType
-from app.services.message_service import MessageService
 from app.services.agent_service import AgentService
-from app.services.retry_handler import RetryHandler
-from app.services.message_queue import message_queue, MessagePriority
-from app.models import User
-from app.config.private import settings
+from app.services.message_queue import MessagePriority, message_queue
+from app.services.message_service import MessageService
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +31,7 @@ class WebhookHandlerService:
         self.message_service = message_service
         self.agent_service = agent_service
 
-    async def handle_webhook(self, event: WhatsAppWebhookEvent) -> Dict[str, Any]:
+    async def handle_webhook(self, event: WhatsAppWebhookEvent) -> dict[str, Any]:
         """Process incoming webhook event."""
         logger.info(f"Processing webhook event: {event.event_type}")
 
@@ -51,7 +49,7 @@ class WebhookHandlerService:
 
         return await handler(event)
 
-    async def _handle_message_received(self, event: WhatsAppWebhookEvent) -> Dict[str, Any]:
+    async def _handle_message_received(self, event: WhatsAppWebhookEvent) -> dict[str, Any]:
         """Handle incoming message - either to system or to user's own number."""
         try:
             data = MessageReceivedData(**event.data)
@@ -170,7 +168,7 @@ class WebhookHandlerService:
             logger.error(f"Error handling message received: {e}", exc_info=True)
             return {"status": "error", "message": str(e)}
 
-    async def _handle_message_sent(self, event: WhatsAppWebhookEvent) -> Dict[str, Any]:
+    async def _handle_message_sent(self, event: WhatsAppWebhookEvent) -> dict[str, Any]:
         """Handle confirmation of sent message."""
         try:
             data = MessageSentData(**event.data)
@@ -191,7 +189,7 @@ class WebhookHandlerService:
             logger.error(f"Error handling message sent: {e}", exc_info=True)
             return {"status": "error", "message": str(e)}
 
-    async def _handle_message_failed(self, event: WhatsAppWebhookEvent) -> Dict[str, Any]:
+    async def _handle_message_failed(self, event: WhatsAppWebhookEvent) -> dict[str, Any]:
         """Handle failed message delivery."""
         try:
             data = MessageFailedData(**event.data)
@@ -212,7 +210,7 @@ class WebhookHandlerService:
             logger.error(f"Error handling message failed: {e}", exc_info=True)
             return {"status": "error", "message": str(e)}
 
-    async def _handle_connection_status(self, event: WhatsAppWebhookEvent) -> Dict[str, Any]:
+    async def _handle_connection_status(self, event: WhatsAppWebhookEvent) -> dict[str, Any]:
         """Handle WhatsApp connection status updates."""
         try:
             data = ConnectionStatusData(**event.data)

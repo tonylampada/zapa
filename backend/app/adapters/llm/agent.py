@@ -1,7 +1,6 @@
 """Zapa Agent implementation using OpenAI Agents SDK."""
 
 import logging
-from typing import Optional
 
 from agents import Agent, ModelSettings, OpenAIProvider, RunConfig, Runner
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,10 +33,10 @@ class ZapaAgent:
     def __init__(
         self,
         name: str = "Zapa Assistant",
-        instructions: Optional[str] = None,
+        instructions: str | None = None,
         model: str = "gpt-4o",
-        api_key: Optional[str] = None,
-        base_url: Optional[str] = None,
+        api_key: str | None = None,
+        base_url: str | None = None,
         temperature: float = 0.7,
     ):
         """
@@ -84,7 +83,7 @@ class ZapaAgent:
         message: str,
         db_session: AsyncSession,
         user_id: int,
-        conversation_history: Optional[list[dict[str, str]]] = None,
+        conversation_history: list[dict[str, str]] | None = None,
     ) -> str:
         """
         Process a user message and generate response.

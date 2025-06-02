@@ -1,16 +1,17 @@
 """Unit tests for webhook schemas."""
 
-import pytest
 from datetime import datetime
+
+import pytest
 from pydantic import ValidationError
 
 from app.schemas.webhook import (
-    WebhookEventType,
-    WhatsAppWebhookEvent,
+    ConnectionStatusData,
+    MessageFailedData,
     MessageReceivedData,
     MessageSentData,
-    MessageFailedData,
-    ConnectionStatusData,
+    WebhookEventType,
+    WhatsAppWebhookEvent,
 )
 
 

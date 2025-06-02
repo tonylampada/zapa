@@ -1,10 +1,9 @@
-import pytest
+from unittest.mock import Mock
+
 from fastapi.testclient import TestClient
-from unittest.mock import patch, Mock
 from sqlalchemy.orm import Session
 
 from app.models import User
-from app.schemas.admin import AdminLogin, AdminTokenResponse
 
 
 class TestAuthEndpoints:

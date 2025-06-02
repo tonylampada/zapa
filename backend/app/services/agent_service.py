@@ -2,17 +2,17 @@
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from sqlalchemy.orm import Session
 
 from app.adapters.llm.agent import create_agent
 from app.config.encryption import decrypt_api_key
+from app.models import LLMConfig, User
+from app.schemas.agent import AgentResponse, ToolCall
+from app.schemas.message import MessageCreate, MessageDirection, MessageType
 from app.services.llm_tools import LLMTools
 from app.services.message_service import MessageService
-from app.models import LLMConfig, User
-from app.schemas.agent import AgentRequest, AgentResponse, LLMResponse, ToolCall
-from app.schemas.message import MessageCreate, MessageDirection, MessageType
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +116,7 @@ class AgentService:
 
         await self.message_service.store_message(user_id, message_data)
 
-    async def _get_user_llm_config(self, user_id: int) -> Optional[LLMConfig]:
+    async def _get_user_llm_config(self, user_id: int) -> LLMConfig | None:
         """Get user's LLM configuration."""
         return (
             self.db.query(LLMConfig)
@@ -126,7 +126,7 @@ class AgentService:
 
     async def _build_conversation_context(
         self, user_id: int, max_messages: int = 20
-    ) -> List[Dict[str, str]]:
+    ) -> list[dict[str, str]]:
         """Build conversation context from recent messages."""
         recent_messages = await self.message_service.get_recent_messages(user_id, max_messages)
 
@@ -152,8 +152,8 @@ class AgentService:
         )
 
     async def execute_tool_calls(
-        self, tool_calls: List[ToolCall], tools: LLMTools
-    ) -> List[Dict[str, Any]]:
+        self, tool_calls: list[ToolCall], tools: LLMTools
+    ) -> list[dict[str, Any]]:
         """Execute LLM tool calls and return results."""
         results = []
 

@@ -1,6 +1,5 @@
 """Common dependencies for the application."""
 
-from typing import Dict
 
 from fastapi import Depends, HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -22,7 +21,7 @@ def get_auth_service() -> AuthService:
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Security(security),
     auth_service: AuthService = Depends(get_auth_service),
-) -> Dict:
+) -> dict:
     """Get current user from JWT token."""
     token = credentials.credentials
 
@@ -42,7 +41,7 @@ async def get_current_user(
 
 
 async def get_current_active_user(
-    current_user: Dict = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> User:
     """Get current active user from database."""

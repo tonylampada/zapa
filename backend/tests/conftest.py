@@ -1,11 +1,11 @@
 """Fixtures for adapter tests."""
 
-import pytest
 import os
 from unittest.mock import AsyncMock, MagicMock
-import redis.asyncio as redis
+
+import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import sessionmaker
 
 from app.models.base import Base
 
@@ -139,6 +139,7 @@ def admin_headers(db):
 def client():
     """Create test client for private API."""
     from fastapi.testclient import TestClient
+
     from app.private.main import app
 
     return TestClient(app)
