@@ -12,7 +12,7 @@ class PrivateSettings(DatabaseConfig):
     VERSION: str = Field(default="0.1.0")
 
     # External Services
-    WHATSAPP_BRIDGE_URL: str = Field(
+    WHATSAPP_API_URL: str = Field(
         default="http://localhost:3000",
         description="WhatsApp Bridge (zapw) service URL",
     )
@@ -24,6 +24,12 @@ class PrivateSettings(DatabaseConfig):
     WEBHOOK_BASE_URL: str = Field(
         default="http://localhost:8001",
         description="Base URL for webhooks from external services",
+    )
+    
+    # Service URLs (for internal use)
+    HOST_URL: str = Field(
+        default="http://localhost:8001",
+        description="Host URL for this service",
     )
 
     # Admin Authentication
@@ -43,6 +49,20 @@ class PrivateSettings(DatabaseConfig):
     INTEGRATION_TEST_OPENAI: bool = Field(default=False)
     INTEGRATION_TEST_ANTHROPIC: bool = Field(default=False)
     INTEGRATION_TEST_GOOGLE: bool = Field(default=False)
+    
+    # Message Processing
+    MESSAGE_PROCESSOR_WORKERS: int = Field(
+        default=3,
+        ge=1,
+        le=10,
+        description="Number of message processor workers",
+    )
+    
+    # WhatsApp Configuration
+    WHATSAPP_SYSTEM_NUMBER: str = Field(
+        default="+1234567890",
+        description="Main WhatsApp service number",
+    )
 
     @property
     def webhook_url(self) -> str:

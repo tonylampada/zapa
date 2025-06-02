@@ -34,6 +34,9 @@ dependencies = [
     # Utilities
     "python-dotenv>=1.0.0",
     "psutil>=5.9.0",
+    
+    # Redis
+    "redis>=5.0.0",
 ]
 
 [project.optional-dependencies]

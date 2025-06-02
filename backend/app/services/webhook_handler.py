@@ -18,6 +18,7 @@ from app.schemas.message import MessageCreate, MessageDirection, MessageType
 from app.services.message_service import MessageService
 from app.services.agent_service import AgentService
 from app.services.retry_handler import RetryHandler
+from app.services.message_queue import message_queue, MessagePriority
 from app.models import User
 from app.config.private import settings
 
@@ -150,22 +151,19 @@ class WebhookHandlerService:
             
             # Only trigger agent processing for text messages sent TO the system
             if is_system_message and data.text:
-                try:
-                    # Process with agent (non-critical - retry)
-                    await RetryHandler.with_retry(
-                        self.agent_service.process_message,
-                        user_id=user.id,
-                        message_content=data.text,
-                        message_id=message.id,
-                        max_retries=3,
-                        delay=1.0,
-                        backoff=2.0
-                    )
-                    return {"status": "processed", "message_id": message.id}
-                except Exception as e:
-                    logger.error(f"Agent processing failed after retries: {e}", exc_info=True)
-                    # Return success anyway - we stored the message
-                    return {"status": "stored", "message_id": message.id, "processing": "failed"}
+                # Queue the message for agent processing
+                queued_message = await message_queue.enqueue(
+                    user_id=user.id,
+                    content=data.text,
+                    priority=MessagePriority.NORMAL,
+                    metadata={
+                        "message_id": message.id,
+                        "whatsapp_message_id": data.message_id,
+                        "from_number": from_phone,
+                    }
+                )
+                logger.info(f"Queued message for processing: {queued_message.id}")
+                return {"status": "queued", "message_id": message.id, "queue_id": queued_message.id}
             else:
                 # Non-system message or non-text message, just store
                 logger.info(f"Stored {'user' if not is_system_message else 'non-text'} message: {message.id}")
