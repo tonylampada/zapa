@@ -1,4 +1,5 @@
 """Private entrypoint configuration."""
+
 from pydantic import Field
 
 from app.config import DatabaseConfig
@@ -25,7 +26,7 @@ class PrivateSettings(DatabaseConfig):
         default="http://localhost:8001",
         description="Base URL for webhooks from external services",
     )
-    
+
     # Service URLs (for internal use)
     HOST_URL: str = Field(
         default="http://localhost:8001",
@@ -49,7 +50,7 @@ class PrivateSettings(DatabaseConfig):
     INTEGRATION_TEST_OPENAI: bool = Field(default=False)
     INTEGRATION_TEST_ANTHROPIC: bool = Field(default=False)
     INTEGRATION_TEST_GOOGLE: bool = Field(default=False)
-    
+
     # Message Processing
     MESSAGE_PROCESSOR_WORKERS: int = Field(
         default=3,
@@ -57,7 +58,7 @@ class PrivateSettings(DatabaseConfig):
         le=10,
         description="Number of message processor workers",
     )
-    
+
     # WhatsApp Configuration
     WHATSAPP_SYSTEM_NUMBER: str = Field(
         default="+1234567890",
