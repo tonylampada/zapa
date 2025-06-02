@@ -65,11 +65,7 @@ async def get_user_llm_config(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     # Get active LLM config
-    config = (
-        db.query(LLMConfig)
-        .filter(LLMConfig.user_id == user_id, LLMConfig.is_active)
-        .first()
-    )
+    config = db.query(LLMConfig).filter(LLMConfig.user_id == user_id, LLMConfig.is_active).first()
 
     if not config:
         raise HTTPException(
@@ -157,11 +153,7 @@ async def update_user_llm_config(
 ):
     """Update LLM configuration for a user."""
     # Get existing config
-    config = (
-        db.query(LLMConfig)
-        .filter(LLMConfig.user_id == user_id, LLMConfig.is_active)
-        .first()
-    )
+    config = db.query(LLMConfig).filter(LLMConfig.user_id == user_id, LLMConfig.is_active).first()
 
     if not config:
         raise HTTPException(
@@ -214,11 +206,7 @@ async def test_user_llm_config(
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-    config = (
-        db.query(LLMConfig)
-        .filter(LLMConfig.user_id == user_id, LLMConfig.is_active)
-        .first()
-    )
+    config = db.query(LLMConfig).filter(LLMConfig.user_id == user_id, LLMConfig.is_active).first()
 
     if not config:
         raise HTTPException(

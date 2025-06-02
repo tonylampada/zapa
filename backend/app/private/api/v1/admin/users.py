@@ -109,9 +109,7 @@ async def get_user(
 
     # Check if LLM config exists
     llm_config_set = (
-        db.query(LLMConfig)
-        .filter(LLMConfig.user_id == user.id, LLMConfig.is_active)
-        .first()
+        db.query(LLMConfig).filter(LLMConfig.user_id == user.id, LLMConfig.is_active).first()
         is not None
     )
 
@@ -222,9 +220,7 @@ async def update_user(
     )
 
     llm_config_set = (
-        db.query(LLMConfig)
-        .filter(LLMConfig.user_id == user.id, LLMConfig.is_active)
-        .first()
+        db.query(LLMConfig).filter(LLMConfig.user_id == user.id, LLMConfig.is_active).first()
         is not None
     )
 

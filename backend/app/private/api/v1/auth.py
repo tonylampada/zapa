@@ -18,11 +18,7 @@ async def admin_login(login_data: AdminLogin, db: Session = Depends(get_db)):
     # In production, this should check against a proper admin user table
 
     # Check if user exists and is admin
-    user = (
-        db.query(User)
-        .filter(User.phone_number == login_data.username, User.is_admin)
-        .first()
-    )
+    user = db.query(User).filter(User.phone_number == login_data.username, User.is_admin).first()
 
     if not user:
         # For initial setup, create an admin user if none exists
