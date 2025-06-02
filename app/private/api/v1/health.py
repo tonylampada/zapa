@@ -66,11 +66,11 @@ async def readiness_check() -> dict[str, Any]:
     # WhatsApp Bridge check
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.get(f"{settings.WHATSAPP_BRIDGE_URL}/health")
+            response = await client.get(f"{settings.WHATSAPP_API_URL}/health")
             bridge_healthy = response.status_code == 200
             checks["whatsapp_bridge"] = {
                 "status": "healthy" if bridge_healthy else "unhealthy",
-                "url": settings.WHATSAPP_BRIDGE_URL,
+                "url": settings.WHATSAPP_API_URL,
                 "response_code": str(response.status_code),
             }
             if not bridge_healthy:
@@ -80,7 +80,7 @@ async def readiness_check() -> dict[str, Any]:
         checks["whatsapp_bridge"] = {
             "status": "error",
             "error": str(e),
-            "url": settings.WHATSAPP_BRIDGE_URL,
+            "url": settings.WHATSAPP_API_URL,
         }
         overall_status = "not_ready"
         logger.error(f"WhatsApp Bridge check error: {e}")
@@ -138,7 +138,7 @@ async def whatsapp_bridge_check() -> dict[str, Any]:
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             # Check health endpoint
-            health_response = await client.get(f"{settings.WHATSAPP_BRIDGE_URL}/health")
+            health_response = await client.get(f"{settings.WHATSAPP_API_URL}/health")
 
             if health_response.status_code != 200:
                 raise WhatsAppBridgeError(
@@ -148,7 +148,7 @@ async def whatsapp_bridge_check() -> dict[str, Any]:
             # Try to get bridge status if available
             try:
                 status_response = await client.get(
-                    f"{settings.WHATSAPP_BRIDGE_URL}/status"
+                    f"{settings.WHATSAPP_API_URL}/status"
                 )
                 bridge_data = (
                     status_response.json()
@@ -160,7 +160,7 @@ async def whatsapp_bridge_check() -> dict[str, Any]:
 
             return {
                 "status": "healthy",
-                "bridge_url": settings.WHATSAPP_BRIDGE_URL,
+                "bridge_url": settings.WHATSAPP_API_URL,
                 "health_check": "passed",
                 "bridge_data": bridge_data,
             }
