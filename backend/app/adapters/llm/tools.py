@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Message
+from app.models import Message, User
 
 logger = logging.getLogger(__name__)
 
@@ -67,8 +67,8 @@ async def search_messages_impl(
     Returns:
         List of messages matching the search query
     """
-    db: AsyncSession = ctx.context.get("db_session")
-    user_id: int = ctx.context.get("user_id")
+    db = ctx.context.get("db_session")
+    user_id = ctx.context.get("user_id")
 
     if not db or not user_id:
         logger.error("Missing database session or user_id in context")
@@ -80,19 +80,29 @@ async def search_messages_impl(
             select(Message)
             .where(Message.user_id == user_id)
             .where(Message.content.ilike(f"%{query}%"))
-            .order_by(desc(Message.created_at))
+            .order_by(desc(Message.timestamp))
             .limit(limit)
         )
 
         result = await db.execute(stmt)
         messages = result.scalars().all()
+        
+        # Get user to determine message direction
+        user_stmt = select(User).where(User.id == user_id)
+        user_result = await db.execute(user_stmt)
+        user = user_result.scalar_one_or_none()
+        
+        if not user:
+            return []
+            
+        user_jid = f"{user.phone_number}@s.whatsapp.net"
 
         return [
             MessageSearchResult(
                 message_id=msg.id,
                 content=msg.content,
-                sender="user" if msg.is_from_user else "assistant",
-                timestamp=msg.created_at,
+                sender="user" if msg.sender_jid == user_jid else "assistant",
+                timestamp=msg.timestamp,
             )
             for msg in messages
         ]
@@ -119,8 +129,8 @@ async def get_recent_messages_impl(
     Returns:
         List of recent messages in chronological order
     """
-    db: AsyncSession = ctx.context.get("db_session")
-    user_id: int = ctx.context.get("user_id")
+    db = ctx.context.get("db_session")
+    user_id = ctx.context.get("user_id")
 
     if not db or not user_id:
         logger.error("Missing database session or user_id in context")
@@ -130,22 +140,33 @@ async def get_recent_messages_impl(
         stmt = (
             select(Message)
             .where(Message.user_id == user_id)
-            .order_by(desc(Message.created_at))
+            .order_by(desc(Message.timestamp))
             .limit(count)
         )
 
         result = await db.execute(stmt)
         messages = result.scalars().all()
 
-        # Reverse to get chronological order
+        # Convert to list and reverse to get chronological order
+        messages = list(messages)
         messages.reverse()
+        
+        # Get user to determine message direction
+        user_stmt = select(User).where(User.id == user_id)
+        user_result = await db.execute(user_stmt)
+        user = user_result.scalar_one_or_none()
+        
+        if not user:
+            return []
+            
+        user_jid = f"{user.phone_number}@s.whatsapp.net"
 
         return [
             MessageSearchResult(
                 message_id=msg.id,
                 content=msg.content,
-                sender="user" if msg.is_from_user else "assistant",
-                timestamp=msg.created_at,
+                sender="user" if msg.sender_jid == user_jid else "assistant",
+                timestamp=msg.timestamp,
             )
             for msg in messages
         ]
@@ -270,8 +291,8 @@ async def get_conversation_stats_impl(
     Returns:
         Statistics including message counts and date ranges
     """
-    db: AsyncSession = ctx.context.get("db_session")
-    user_id: int = ctx.context.get("user_id")
+    db = ctx.context.get("db_session")
+    user_id = ctx.context.get("user_id")
 
     if not db or not user_id:
         logger.error("Missing database session or user_id in context")
@@ -289,19 +310,35 @@ async def get_conversation_stats_impl(
         total_result = await db.execute(total_stmt)
         total_messages = total_result.scalar() or 0
 
+        # Get user to determine message direction
+        user_stmt = select(User).where(User.id == user_id)
+        user_result = await db.execute(user_stmt)
+        user = user_result.scalar_one_or_none()
+        
+        if not user:
+            return ConversationStats(
+                total_messages=0,
+                user_messages=0,
+                assistant_messages=0,
+                date_range={},
+                average_messages_per_day=0.0,
+            )
+            
+        user_jid = f"{user.phone_number}@s.whatsapp.net"
+        
         # Get user message count
-        user_stmt = (
+        user_msg_stmt = (
             select(func.count(Message.id))
             .where(Message.user_id == user_id)
-            .where(Message.is_from_user.is_(True))
+            .where(Message.sender_jid == user_jid)
         )
-        user_result = await db.execute(user_stmt)
-        user_messages = user_result.scalar() or 0
+        user_msg_result = await db.execute(user_msg_stmt)
+        user_messages = user_msg_result.scalar() or 0
 
         # Get date range
         date_stmt = select(
-            func.min(Message.created_at).label("first"),
-            func.max(Message.created_at).label("last"),
+            func.min(Message.timestamp).label("first"),
+            func.max(Message.timestamp).label("last"),
         ).where(Message.user_id == user_id)
         date_result = await db.execute(date_stmt)
         date_row = date_result.one_or_none()
