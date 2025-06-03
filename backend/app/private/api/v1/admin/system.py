@@ -22,8 +22,7 @@ export_jobs = {}
 
 @router.get("/health", response_model=SystemHealthResponse)
 async def get_system_health(
-    db: Session = Depends(get_db), 
-    current_admin: User = Depends(get_current_admin)
+    db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin)
 ) -> SystemHealthResponse:
     """Get system health status."""
     # Check database connectivity
@@ -70,8 +69,7 @@ async def get_system_health(
 
 @router.get("/stats", response_model=SystemStatsResponse)
 async def get_system_stats(
-    db: Session = Depends(get_db), 
-    current_admin: User = Depends(get_current_admin)
+    db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin)
 ) -> SystemStatsResponse:
     """Get system-wide statistics."""
     # Get user counts
@@ -153,8 +151,7 @@ async def export_system_data(
 
 @router.get("/export/{export_id}", response_model=ExportDataResponse)
 async def get_export_status(
-    export_id: str, 
-    current_admin: User = Depends(get_current_admin)
+    export_id: str, current_admin: User = Depends(get_current_admin)
 ) -> ExportDataResponse:
     """Get the status of an export job."""
     if export_id not in export_jobs:
@@ -213,7 +210,7 @@ async def perform_export(
         if include_messages:
             if export_data["messages"] is None:
                 export_data["messages"] = []
-                
+
             messages = (
                 db.query(Message)
                 .filter(Message.timestamp >= start_date, Message.timestamp <= end_date)
@@ -225,7 +222,7 @@ async def perform_export(
                 user = db.query(User).filter(User.id == message.user_id).first()
                 user_jid = f"{user.phone_number}@s.whatsapp.net" if user else None
                 is_from_user = message.sender_jid == user_jid if user_jid else False
-                
+
                 export_data["messages"].append(
                     {
                         "id": message.id,

@@ -97,7 +97,7 @@ async def get_user(
 
     # Get message counts based on sender/recipient JIDs
     user_jid = f"{user.phone_number}@s.whatsapp.net"
-    
+
     messages_sent = (
         db.query(func.count(Message.id))
         .filter(Message.user_id == user.id, Message.sender_jid == user_jid)
@@ -142,7 +142,9 @@ async def get_user(
 
 @router.post("/", response_model=UserDetailResponse)
 async def create_user(
-    user_data: UserCreate, db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin)
+    user_data: UserCreate,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin),
 ) -> UserDetailResponse:
     """Create a new user."""
     # Check if user already exists
@@ -211,7 +213,7 @@ async def update_user(
 
     # Get updated stats based on sender/recipient JIDs
     user_jid = f"{user.phone_number}@s.whatsapp.net"
-    
+
     messages_sent = (
         db.query(func.count(Message.id))
         .filter(Message.user_id == user.id, Message.sender_jid == user_jid)
@@ -303,18 +305,18 @@ async def get_user_conversations(
 
     # Get user JID for determining message direction
     user_jid = f"{user.phone_number}@s.whatsapp.net"
-    
+
     # Convert to response format
     message_summaries = []
     for msg in messages:
         # Determine if message is from user based on sender_jid
         is_from_user = msg.sender_jid == user_jid
-        
+
         # Get status from metadata if available, otherwise default to "sent"
         status = "sent"
         if msg.media_metadata and "status" in msg.media_metadata:
             status = msg.media_metadata["status"]
-        
+
         message_summaries.append(
             MessageSummary(
                 id=msg.id,
