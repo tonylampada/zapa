@@ -7,7 +7,6 @@ from typing import Any
 from agents import RunContextWrapper, function_tool
 from pydantic import BaseModel, Field
 from sqlalchemy import desc, func, select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Message, User
 

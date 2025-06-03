@@ -132,7 +132,7 @@ class ZapaAgent:
             # Run agent
             result = await Runner.run(
                 self.agent,
-                user_messages[0] if user_messages else "",
+                message,
                 context=context,
                 run_config=run_config,
             )

@@ -29,9 +29,8 @@ class ComponentStatus:
 class IntegrationMonitor:
     """Monitor health and status of all integration components."""
 
-    def __init__(self, database_manager: DatabaseManager | None = None):
+    def __init__(self):
         """Initialize the integration monitor."""
-        self.database_manager = database_manager or DatabaseManager()
         self._monitoring_task: asyncio.Task | None = None
         self._running = False
         self._last_status: dict[str, ComponentStatus] = {}
@@ -116,7 +115,7 @@ class IntegrationMonitor:
     async def _check_database(self) -> ComponentStatus:
         """Check database connectivity."""
         try:
-            with self.database_manager.get_session() as db:
+            with SessionLocal() as db:
                 # Simple query to verify connection
                 result = db.execute(text("SELECT 1"))
                 result.scalar()
