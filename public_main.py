@@ -3,7 +3,7 @@
 import uvicorn
 
 # Create a minimal app for testing
-from fastapi import FastAPI, status
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
