@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config.public import settings
+
 # from app.core.logging import setup_logging  # TODO: Add logging module
 # from app.database.connection import DatabaseManager  # TODO: Fix import
 from app.public.api.v1.router import api_router
