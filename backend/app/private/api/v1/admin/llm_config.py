@@ -30,7 +30,9 @@ fernet = Fernet(fernet_key)
 
 
 @router.get("/providers", response_model=list[LLMProviderInfo])
-async def get_available_providers(current_admin: User = Depends(get_current_admin)) -> list[LLMProviderInfo]:
+async def get_available_providers(
+    current_admin: User = Depends(get_current_admin),
+) -> list[LLMProviderInfo]:
     """Get list of available LLM providers and their models."""
     return [
         LLMProviderInfo(
@@ -56,9 +58,7 @@ async def get_available_providers(current_admin: User = Depends(get_current_admi
 
 @router.get("/{user_id}", response_model=LLMConfigResponse)
 async def get_user_llm_config(
-    user_id: int, 
-    db: Session = Depends(get_db), 
-    current_admin: User = Depends(get_current_admin)
+    user_id: int, db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin)
 ) -> LLMConfigResponse:
     """Get LLM configuration for a user."""
     # Check if user exists

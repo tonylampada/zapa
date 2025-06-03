@@ -141,7 +141,11 @@ class ZapaAgent:
             if hasattr(result, "data") and isinstance(result.data, str):
                 return result.data
             elif hasattr(result, "messages") and result.messages:
-                return result.messages[-1].content if hasattr(result.messages[-1], "content") else str(result.messages[-1])
+                return (
+                    result.messages[-1].content
+                    if hasattr(result.messages[-1], "content")
+                    else str(result.messages[-1])
+                )
             else:
                 return str(result)
 
