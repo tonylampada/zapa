@@ -29,7 +29,7 @@ class ComponentStatus:
 class IntegrationMonitor:
     """Monitor health and status of all integration components."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the integration monitor."""
         self._monitoring_task: asyncio.Task | None = None
         self._running = False
@@ -107,7 +107,8 @@ class IntegrationMonitor:
     async def _run_check(self, name: str, check_func: Any) -> ComponentStatus:
         """Run a single health check with error handling."""
         try:
-            return await check_func()
+            result = await check_func()
+            return result
         except Exception as e:
             logger.error(f"Health check failed for {name}: {e}")
             return ComponentStatus(name, False, {"error": str(e)})

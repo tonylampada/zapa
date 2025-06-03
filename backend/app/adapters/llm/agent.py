@@ -137,7 +137,13 @@ class ZapaAgent:
                 run_config=run_config,
             )
 
-            return result.content
+            # Get the response content from the result
+            if hasattr(result, "data") and isinstance(result.data, str):
+                return result.data
+            elif hasattr(result, "messages") and result.messages:
+                return result.messages[-1].content if hasattr(result.messages[-1], "content") else str(result.messages[-1])
+            else:
+                return str(result)
 
         except Exception as e:
             logger.error(f"Error processing message with agent: {e}")
@@ -193,7 +199,8 @@ def create_agent(
         # Add more providers as needed
     }
 
-    config = provider_configs.get(provider, provider_configs["openai"]).copy()
+    base_config = provider_configs.get(provider, provider_configs["openai"])
+    config = dict(base_config)
     if kwargs:
         config.update(kwargs)
 

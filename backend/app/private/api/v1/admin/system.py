@@ -224,6 +224,8 @@ async def perform_export(
                 user_jid = f"{msg_user.phone_number}@s.whatsapp.net" if msg_user else None
                 is_from_user = message.sender_jid == user_jid if user_jid else False
 
+                # Type narrowing for mypy
+                assert export_data["messages"] is not None
                 export_data["messages"].append(
                     {
                         "id": message.id,

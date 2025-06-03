@@ -57,7 +57,7 @@ class BridgeConfigurationService:
         try:
             async with self.bridge_adapter as adapter:
                 # Get sessions to check if bridge is responsive
-                sessions = await adapter.get_sessions()
+                sessions = await adapter.list_sessions()
 
                 # Get active session count
                 active_sessions = [s for s in sessions if s.status == "connected"]
@@ -85,7 +85,7 @@ class BridgeConfigurationService:
 
             async with self.bridge_adapter as adapter:
                 # Check if system session exists
-                sessions = await adapter.get_sessions()
+                sessions = await adapter.list_sessions()
                 system_session = next((s for s in sessions if s.session_id == system_number), None)
 
                 if not system_session:

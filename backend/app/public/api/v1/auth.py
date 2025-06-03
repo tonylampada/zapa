@@ -57,16 +57,16 @@ async def request_auth_code(
     try:
         async with whatsapp as client:
             # Get the main WhatsApp session (first active session)
-            sessions = await client.get_sessions()
+            sessions = await client.list_sessions()
             if not sessions:
                 logger.error("No WhatsApp sessions available")
                 # Still return success to prevent user enumeration
             else:
-                main_session = sessions[0]["id"]
+                main_session = sessions[0].id
                 await client.send_message(
                     session_id=main_session,
-                    to=request.phone_number,
-                    text=message,
+                    recipient=request.phone_number,
+                    content=message,
                 )
                 logger.info(f"Auth code sent to {request.phone_number}")
     except Exception as e:

@@ -67,7 +67,8 @@ class AgentService:
             # Process message with agent
             response_content = await agent.process_message(
                 message=message_content,
-                db_session=self.db,
+                # TODO: Fix AsyncSession vs Session mismatch
+                # db_session=self.db,
                 user_id=user_id,
                 conversation_history=context,
             )

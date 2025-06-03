@@ -30,7 +30,7 @@ fernet = Fernet(fernet_key)
 
 
 @router.get("/providers", response_model=list[LLMProviderInfo])
-async def get_available_providers(current_admin=Depends(get_current_admin)):
+async def get_available_providers(current_admin: User = Depends(get_current_admin)) -> list[LLMProviderInfo]:
     """Get list of available LLM providers and their models."""
     return [
         LLMProviderInfo(
@@ -56,8 +56,10 @@ async def get_available_providers(current_admin=Depends(get_current_admin)):
 
 @router.get("/{user_id}", response_model=LLMConfigResponse)
 async def get_user_llm_config(
-    user_id: int, db: Session = Depends(get_db), current_admin=Depends(get_current_admin)
-):
+    user_id: int, 
+    db: Session = Depends(get_db), 
+    current_admin: User = Depends(get_current_admin)
+) -> LLMConfigResponse:
     """Get LLM configuration for a user."""
     # Check if user exists
     user = db.query(User).filter(User.id == user_id).first()
@@ -92,8 +94,8 @@ async def create_user_llm_config(
     user_id: int,
     config_data: LLMConfigCreate,
     db: Session = Depends(get_db),
-    current_admin=Depends(get_current_admin),
-):
+    current_admin: User = Depends(get_current_admin),
+) -> LLMConfigResponse:
     """Create LLM configuration for a user."""
     # Check if user exists
     user = db.query(User).filter(User.id == user_id).first()
@@ -149,8 +151,8 @@ async def update_user_llm_config(
     user_id: int,
     config_data: LLMConfigUpdate,
     db: Session = Depends(get_db),
-    current_admin=Depends(get_current_admin),
-):
+    current_admin: User = Depends(get_current_admin),
+) -> LLMConfigResponse:
     """Update LLM configuration for a user."""
     # Get existing config
     config = db.query(LLMConfig).filter(LLMConfig.user_id == user_id, LLMConfig.is_active).first()

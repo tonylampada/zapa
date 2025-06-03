@@ -129,8 +129,7 @@ class WhatsAppBridge:
         try:
             response = await self.client.get("/health")
             response.raise_for_status()
-            data = response.json()
-            return data
+            return dict(response.json())
         except httpx.RequestError as e:
             logger.error(f"Health check failed: {e}")
             raise ConnectionError(f"Failed to connect to WhatsApp Bridge: {e}") from e
