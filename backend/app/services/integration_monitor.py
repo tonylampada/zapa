@@ -9,7 +9,7 @@ import redis.asyncio as redis
 from sqlalchemy import text
 
 from app.config.redis import redis_settings
-from app.core.database import DatabaseManager
+from app.core.database import SessionLocal
 from app.services.bridge_config import bridge_config
 from app.services.message_queue import message_queue
 
@@ -82,10 +82,13 @@ class IntegrationMonitor:
 
         # Process results
         for (name, _), status in zip(checks, statuses, strict=False):
-            if isinstance(status, Exception):
+            if isinstance(status, BaseException):
                 results[name] = ComponentStatus(name, False, {"error": str(status)})
-            else:
+            elif isinstance(status, ComponentStatus):
                 results[name] = status
+            else:
+                # Shouldn't happen, but handle it gracefully
+                results[name] = ComponentStatus(name, False, {"error": "Unknown status type"})
 
         # Update last status
         self._last_status = results
@@ -102,7 +105,7 @@ class IntegrationMonitor:
 
         return results
 
-    async def _run_check(self, name: str, check_func) -> ComponentStatus:
+    async def _run_check(self, name: str, check_func: Any) -> ComponentStatus:
         """Run a single health check with error handling."""
         try:
             return await check_func()

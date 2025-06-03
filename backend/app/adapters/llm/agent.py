@@ -1,6 +1,7 @@
 """Zapa Agent implementation using OpenAI Agents SDK."""
 
 import logging
+from typing import Any
 
 from agents import Agent, ModelSettings, OpenAIProvider, RunConfig, Runner
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -131,12 +132,12 @@ class ZapaAgent:
             # Run agent
             result = await Runner.run(
                 self.agent,
-                messages=messages,
+                user_messages[0] if user_messages else "",
                 context=context,
                 run_config=run_config,
             )
 
-            return result.final_output
+            return result.content
 
         except Exception as e:
             logger.error(f"Error processing message with agent: {e}")
@@ -144,12 +145,12 @@ class ZapaAgent:
                 "I apologize, but I encountered an error processing your message. Please try again."
             )
 
-    def update_instructions(self, instructions: str):
+    def update_instructions(self, instructions: str) -> None:
         """Update agent instructions."""
         self.instructions = instructions
         self.agent.instructions = instructions
 
-    def update_model(self, model: str):
+    def update_model(self, model: str) -> None:
         """Update the model used by the agent."""
         self.model = model
         # Note: Agent model is immutable after creation in the SDK
@@ -157,7 +158,7 @@ class ZapaAgent:
 
 
 def create_agent(
-    provider: str = "openai", api_key: str = None, model: str = None, **kwargs
+    provider: str = "openai", api_key: str | None = None, model: str | None = None, **kwargs: Any
 ) -> ZapaAgent:
     """
     Factory function to create agents for different providers.
@@ -192,7 +193,8 @@ def create_agent(
         # Add more providers as needed
     }
 
-    config = provider_configs.get(provider, provider_configs["openai"])
-    config.update(kwargs)
+    config = provider_configs.get(provider, provider_configs["openai"]).copy()
+    if kwargs:
+        config.update(kwargs)
 
     return ZapaAgent(api_key=api_key, **config)
