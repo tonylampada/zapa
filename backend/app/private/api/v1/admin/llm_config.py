@@ -200,9 +200,7 @@ async def update_user_llm_config(
 
 @router.post("/{user_id}/test", response_model=LLMConfigTestResponse)
 async def test_user_llm_config(
-    user_id: int, 
-    db: Session = Depends(get_db), 
-    current_admin: User = Depends(get_current_admin)
+    user_id: int, db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin)
 ) -> LLMConfigTestResponse:
     """Test if the user's LLM configuration is working."""
     # Get user and config
@@ -238,7 +236,7 @@ async def test_user_llm_config(
             message="Say 'Hello, the LLM configuration is working!' and nothing else.",
             db_session=None,  # type: ignore
             user_id=user.id,
-            conversation_history=[]
+            conversation_history=[],
         )
 
         # Calculate response time
