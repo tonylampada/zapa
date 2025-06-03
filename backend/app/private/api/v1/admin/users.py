@@ -1,6 +1,5 @@
 import math
 from datetime import datetime
-from typing import Any, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, or_
@@ -257,7 +256,7 @@ async def update_user(
 @router.delete("/{user_id}")
 async def delete_user(
     user_id: int, db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin)
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """Delete a user and all their data."""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -340,7 +339,7 @@ async def get_user_conversations(
 @router.delete("/{user_id}/conversations")
 async def clear_user_conversations(
     user_id: int, db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin)
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """Clear all conversation history for a user."""
     # Check if user exists
     user = db.query(User).filter(User.id == user_id).first()

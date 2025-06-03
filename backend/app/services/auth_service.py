@@ -51,7 +51,7 @@ class AuthService:
         db.query(AuthCode).filter(
             and_(
                 AuthCode.user_id == user.id,
-                AuthCode.used == False,
+                AuthCode.used.is_(False),
                 AuthCode.expires_at > datetime.utcnow(),
             )
         ).update({"used": True})
@@ -83,7 +83,7 @@ class AuthService:
                 and_(
                     AuthCode.user_id == user.id,
                     AuthCode.code == code,
-                    AuthCode.used == False,
+                    AuthCode.used.is_(False),
                     AuthCode.expires_at > datetime.utcnow(),
                 )
             )
