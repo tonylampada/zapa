@@ -17,7 +17,7 @@ def test_private_service_settings_defaults():
 
     assert settings.SERVICE_NAME == "zapa-private"
     assert settings.VERSION == "0.1.0"
-    assert settings.WHATSAPP_BRIDGE_URL == "http://localhost:3000"
+    assert settings.WHATSAPP_API_URL == "http://localhost:3000"
     assert settings.WHATSAPP_BRIDGE_TIMEOUT == 30.0
     assert settings.ADMIN_TOKEN_EXPIRE_MINUTES == 60 * 24
     assert settings.RATE_LIMIT_ENABLED is True

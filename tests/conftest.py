@@ -56,17 +56,19 @@ def public_client():
 
 
 @pytest.fixture
-async def private_async_client():
+def private_async_client():
     """Create an async test client for private app."""
-    async with AsyncClient(app=private_app, base_url="http://test") as ac:
-        yield ac
+    # For testing async endpoints, we still use TestClient
+    # which handles async routes internally
+    return TestClient(private_app)
 
 
 @pytest.fixture
-async def public_async_client():
+def public_async_client():
     """Create an async test client for public app."""
-    async with AsyncClient(app=public_app, base_url="http://test") as ac:
-        yield ac
+    # For testing async endpoints, we still use TestClient
+    # which handles async routes internally
+    return TestClient(public_app)
 
 
 @pytest.fixture
