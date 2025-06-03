@@ -15,7 +15,7 @@ from app.models.user import User
 class AuthService:
     """Service for handling authentication operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.secret_key = settings.SECRET_KEY
         self.algorithm = "HS256"
         self.access_token_expire_minutes = 1440  # 24 hours
@@ -51,7 +51,7 @@ class AuthService:
         db.query(AuthCode).filter(
             and_(
                 AuthCode.user_id == user.id,
-                not AuthCode.used,
+                AuthCode.used == False,
                 AuthCode.expires_at > datetime.utcnow(),
             )
         ).update({"used": True})
@@ -83,7 +83,7 @@ class AuthService:
                 and_(
                     AuthCode.user_id == user.id,
                     AuthCode.code == code,
-                    not AuthCode.used,
+                    AuthCode.used == False,
                     AuthCode.expires_at > datetime.utcnow(),
                 )
             )

@@ -197,7 +197,7 @@ class MessageQueueService:
     async def get_queue_stats(self) -> dict[str, Any]:
         """Get statistics about the message queues."""
         async with self._get_redis() as r:
-            stats = {
+            stats: dict[str, Any] = {
                 "queues": {},
                 "processing": 0,
                 "failed": 0,
