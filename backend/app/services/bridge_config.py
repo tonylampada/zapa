@@ -3,7 +3,7 @@
 import logging
 from typing import Any
 
-from app.adapters.whatsapp import WhatsAppBridgeAdapter
+from app.adapters.whatsapp import WhatsAppBridge
 from app.config.private import settings
 
 logger = logging.getLogger(__name__)
@@ -12,10 +12,10 @@ logger = logging.getLogger(__name__)
 class BridgeConfigurationService:
     """Service for managing WhatsApp Bridge configuration."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the bridge configuration service."""
         self.webhook_url = f"{settings.HOST_URL}/api/v1/webhooks/whatsapp"
-        self.bridge_adapter = WhatsAppBridgeAdapter(settings.WHATSAPP_API_URL)
+        self.bridge_adapter = WhatsAppBridge(settings.WHATSAPP_BRIDGE_URL)
 
     async def setup_bridge(self) -> dict[str, Any]:
         """Configure the WhatsApp Bridge with webhook settings."""
@@ -66,7 +66,7 @@ class BridgeConfigurationService:
                     "status": "healthy",
                     "total_sessions": len(sessions),
                     "active_sessions": len(active_sessions),
-                    "bridge_url": settings.WHATSAPP_API_URL,
+                    "bridge_url": settings.WHATSAPP_BRIDGE_URL,
                     "webhook_url": self.webhook_url,
                 }
 
@@ -75,7 +75,7 @@ class BridgeConfigurationService:
             return {
                 "status": "unhealthy",
                 "error": str(e),
-                "bridge_url": settings.WHATSAPP_API_URL,
+                "bridge_url": settings.WHATSAPP_BRIDGE_URL,
             }
 
     async def ensure_system_session(self) -> dict[str, Any]:

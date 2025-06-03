@@ -12,7 +12,7 @@ from app.models import User
 security = HTTPBearer()
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     """Create a JWT access token."""
     to_encode = data.copy()
     if expires_delta:
@@ -48,8 +48,8 @@ async def get_current_user(
     )
 
     payload = verify_token(credentials.credentials)
-    user_id: int = payload.get("sub")
-    if user_id is None:
+    user_id = payload.get("sub")
+    if user_id is None or not isinstance(user_id, int):
         raise credentials_exception
 
     user = db.query(User).filter(User.id == user_id).first()

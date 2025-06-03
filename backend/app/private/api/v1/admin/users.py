@@ -1,5 +1,6 @@
 import math
 from datetime import datetime
+from typing import Any, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, or_
@@ -27,8 +28,8 @@ async def list_users(
     page_size: int = Query(20, ge=1, le=100),
     search: str | None = Query(None),
     db: Session = Depends(get_db),
-    current_admin=Depends(get_current_admin),
-):
+    current_admin: User = Depends(get_current_admin),
+) -> UserListResponse:
     """List all users with pagination and optional search."""
     query = db.query(User)
 
@@ -63,7 +64,7 @@ async def list_users(
         last_message = (
             db.query(Message)
             .filter(Message.user_id == user.id)
-            .order_by(Message.created_at.desc())
+            .order_by(Message.timestamp.desc())
             .first()
         )
 
@@ -75,7 +76,7 @@ async def list_users(
                 last_name=user.last_name,
                 is_active=user.is_active,
                 created_at=user.first_seen,
-                last_message_at=last_message.created_at if last_message else None,
+                last_message_at=last_message.timestamp if last_message else None,
                 total_messages=message_count,
             )
         )
@@ -87,23 +88,25 @@ async def list_users(
 
 @router.get("/{user_id}", response_model=UserDetailResponse)
 async def get_user(
-    user_id: int, db: Session = Depends(get_db), current_admin=Depends(get_current_admin)
-):
+    user_id: int, db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin)
+) -> UserDetailResponse:
     """Get detailed information about a specific user."""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-    # Get message counts
+    # Get message counts based on sender/recipient JIDs
+    user_jid = f"{user.phone_number}@s.whatsapp.net"
+    
     messages_sent = (
         db.query(func.count(Message.id))
-        .filter(Message.user_id == user.id, Message.is_from_user)
+        .filter(Message.user_id == user.id, Message.sender_jid == user_jid)
         .scalar()
     )
 
     messages_received = (
         db.query(func.count(Message.id))
-        .filter(Message.user_id == user.id, not Message.is_from_user)
+        .filter(Message.user_id == user.id, Message.recipient_jid == user_jid)
         .scalar()
     )
 
@@ -117,7 +120,7 @@ async def get_user(
     last_message = (
         db.query(Message)
         .filter(Message.user_id == user.id)
-        .order_by(Message.created_at.desc())
+        .order_by(Message.timestamp.desc())
         .first()
     )
 
@@ -128,7 +131,7 @@ async def get_user(
         last_name=user.last_name,
         is_active=user.is_active,
         created_at=user.first_seen,
-        last_message_at=last_message.created_at if last_message else None,
+        last_message_at=last_message.timestamp if last_message else None,
         total_messages=messages_sent + messages_received,
         user_metadata=user.user_metadata,
         llm_config_set=llm_config_set,
@@ -139,8 +142,8 @@ async def get_user(
 
 @router.post("/", response_model=UserDetailResponse)
 async def create_user(
-    user_data: UserCreate, db: Session = Depends(get_db), current_admin=Depends(get_current_admin)
-):
+    user_data: UserCreate, db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin)
+) -> UserDetailResponse:
     """Create a new user."""
     # Check if user already exists
     existing_user = db.query(User).filter(User.phone_number == user_data.phone_number).first()
@@ -186,8 +189,8 @@ async def update_user(
     user_id: int,
     user_data: UserUpdate,
     db: Session = Depends(get_db),
-    current_admin=Depends(get_current_admin),
-):
+    current_admin: User = Depends(get_current_admin),
+) -> UserDetailResponse:
     """Update an existing user."""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -206,16 +209,18 @@ async def update_user(
     db.commit()
     db.refresh(user)
 
-    # Get updated stats
+    # Get updated stats based on sender/recipient JIDs
+    user_jid = f"{user.phone_number}@s.whatsapp.net"
+    
     messages_sent = (
         db.query(func.count(Message.id))
-        .filter(Message.user_id == user.id, Message.is_from_user)
+        .filter(Message.user_id == user.id, Message.sender_jid == user_jid)
         .scalar()
     )
 
     messages_received = (
         db.query(func.count(Message.id))
-        .filter(Message.user_id == user.id, not Message.is_from_user)
+        .filter(Message.user_id == user.id, Message.recipient_jid == user_jid)
         .scalar()
     )
 
@@ -227,7 +232,7 @@ async def update_user(
     last_message = (
         db.query(Message)
         .filter(Message.user_id == user.id)
-        .order_by(Message.created_at.desc())
+        .order_by(Message.timestamp.desc())
         .first()
     )
 
@@ -238,7 +243,7 @@ async def update_user(
         last_name=user.last_name,
         is_active=user.is_active,
         created_at=user.first_seen,
-        last_message_at=last_message.created_at if last_message else None,
+        last_message_at=last_message.timestamp if last_message else None,
         total_messages=messages_sent + messages_received,
         user_metadata=user.user_metadata,
         llm_config_set=llm_config_set,
@@ -249,8 +254,8 @@ async def update_user(
 
 @router.delete("/{user_id}")
 async def delete_user(
-    user_id: int, db: Session = Depends(get_db), current_admin=Depends(get_current_admin)
-):
+    user_id: int, db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin)
+) -> Dict[str, str]:
     """Delete a user and all their data."""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
@@ -275,8 +280,8 @@ async def get_user_conversations(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
-    current_admin=Depends(get_current_admin),
-):
+    current_admin: User = Depends(get_current_admin),
+) -> ConversationHistoryResponse:
     """Get conversation history for a specific user."""
     # Check if user exists
     user = db.query(User).filter(User.id == user_id).first()
@@ -294,20 +299,32 @@ async def get_user_conversations(
     offset = (page - 1) * page_size
 
     # Get paginated messages
-    messages = query.order_by(Message.created_at.desc()).offset(offset).limit(page_size).all()
+    messages = query.order_by(Message.timestamp.desc()).offset(offset).limit(page_size).all()
 
+    # Get user JID for determining message direction
+    user_jid = f"{user.phone_number}@s.whatsapp.net"
+    
     # Convert to response format
-    message_summaries = [
-        MessageSummary(
-            id=msg.id,
-            content=msg.content,
-            is_from_user=msg.is_from_user,
-            message_type=msg.message_type.value,
-            created_at=msg.created_at,
-            status=msg.status.value,
+    message_summaries = []
+    for msg in messages:
+        # Determine if message is from user based on sender_jid
+        is_from_user = msg.sender_jid == user_jid
+        
+        # Get status from metadata if available, otherwise default to "sent"
+        status = "sent"
+        if msg.media_metadata and "status" in msg.media_metadata:
+            status = msg.media_metadata["status"]
+        
+        message_summaries.append(
+            MessageSummary(
+                id=msg.id,
+                content=msg.content or "",
+                is_from_user=is_from_user,
+                message_type=msg.message_type.value,
+                created_at=msg.timestamp,
+                status=status,
+            )
         )
-        for msg in messages
-    ]
 
     return ConversationHistoryResponse(
         messages=message_summaries,
@@ -320,8 +337,8 @@ async def get_user_conversations(
 
 @router.delete("/{user_id}/conversations")
 async def clear_user_conversations(
-    user_id: int, db: Session = Depends(get_db), current_admin=Depends(get_current_admin)
-):
+    user_id: int, db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin)
+) -> Dict[str, str]:
     """Clear all conversation history for a user."""
     # Check if user exists
     user = db.query(User).filter(User.id == user_id).first()

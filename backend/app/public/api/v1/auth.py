@@ -26,7 +26,6 @@ def get_whatsapp_adapter() -> WhatsAppBridge:
     """Get WhatsApp adapter instance."""
     return WhatsAppBridge(
         base_url=settings.WHATSAPP_API_URL,
-        api_key=settings.WHATSAPP_API_KEY if hasattr(settings, "WHATSAPP_API_KEY") else None,
     )
 
 
@@ -36,7 +35,7 @@ async def request_auth_code(
     db: Session = Depends(get_db),
     auth_service: AuthService = Depends(get_auth_service),
     whatsapp: WhatsAppBridge = Depends(get_whatsapp_adapter),
-):
+) -> dict:
     """Request authentication code via WhatsApp."""
     # Check rate limit
     if not auth_service.check_rate_limit(db, request.phone_number):
@@ -86,7 +85,7 @@ async def verify_auth_code(
     request: AuthCodeVerify,
     db: Session = Depends(get_db),
     auth_service: AuthService = Depends(get_auth_service),
-):
+) -> AuthTokenResponse:
     """Verify authentication code and receive JWT token."""
     # Verify code
     user = auth_service.verify_auth_code(db, request.phone_number, request.code)
@@ -115,7 +114,7 @@ async def verify_auth_code(
 @router.get("/me", response_model=dict)
 async def get_current_user_info(
     current_user: dict = Depends(get_current_user),
-):
+) -> dict:
     """Get current authenticated user info."""
     return {
         "user_id": current_user["user_id"],
