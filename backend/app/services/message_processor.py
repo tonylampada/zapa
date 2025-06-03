@@ -3,7 +3,7 @@
 import asyncio
 import logging
 
-from app.core.database import DatabaseManager
+from app.core.database import SessionLocal
 from app.services.agent_service import AgentService
 from app.services.message_queue import QueuedMessage, message_queue
 
@@ -13,9 +13,8 @@ logger = logging.getLogger(__name__)
 class MessageProcessorService:
     """Service that processes messages from the queue."""
 
-    def __init__(self, database_manager: DatabaseManager | None = None):
+    def __init__(self):
         """Initialize the message processor."""
-        self.database_manager = database_manager or DatabaseManager()
         self._running = False
         self._task: asyncio.Task | None = None
 
@@ -60,7 +59,7 @@ class MessageProcessorService:
 
         try:
             # Create database session
-            with self.database_manager.get_session() as db:
+            with SessionLocal() as db:
                 # Create agent service
                 agent_service = AgentService(db)
 
@@ -68,7 +67,6 @@ class MessageProcessorService:
                 await agent_service.process_message(
                     user_id=queued_message.user_id,
                     message_content=queued_message.content,
-                    message_id=queued_message.metadata.get("message_id"),
                 )
 
                 # Acknowledge successful processing

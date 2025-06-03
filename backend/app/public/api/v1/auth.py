@@ -62,7 +62,7 @@ async def request_auth_code(
                 logger.error("No WhatsApp sessions available")
                 # Still return success to prevent user enumeration
             else:
-                main_session = sessions[0].id
+                main_session = sessions[0].session_id
                 await client.send_message(
                     session_id=main_session,
                     recipient=request.phone_number,

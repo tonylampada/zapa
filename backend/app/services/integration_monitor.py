@@ -108,6 +108,8 @@ class IntegrationMonitor:
         """Run a single health check with error handling."""
         try:
             result = await check_func()
+            if not isinstance(result, ComponentStatus):
+                raise TypeError(f"Check function {check_func.__name__} did not return ComponentStatus")
             return result
         except Exception as e:
             logger.error(f"Health check failed for {name}: {e}")

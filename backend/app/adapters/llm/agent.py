@@ -141,11 +141,11 @@ class ZapaAgent:
             if hasattr(result, "data") and isinstance(result.data, str):
                 return result.data
             elif hasattr(result, "messages") and result.messages:
-                return (
-                    result.messages[-1].content
-                    if hasattr(result.messages[-1], "content")
-                    else str(result.messages[-1])
-                )
+                last_msg = result.messages[-1]
+                if hasattr(last_msg, "content"):
+                    return str(last_msg.content)
+                else:
+                    return str(last_msg)
             else:
                 return str(result)
 
@@ -204,6 +204,8 @@ def create_agent(
     }
 
     base_config = provider_configs.get(provider, provider_configs["openai"])
+    if not isinstance(base_config, dict):
+        raise ValueError(f"Invalid provider config for {provider}")
     config = dict(base_config)
     if kwargs:
         config.update(kwargs)
