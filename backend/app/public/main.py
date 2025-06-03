@@ -1,6 +1,7 @@
 """FastAPI application for Zapa Public entrypoint."""
 
 import logging
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan events."""
     # Startup
     logger.info("Starting Zapa Public entrypoint...")
@@ -62,7 +63,7 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 # Health check endpoints
 @app.get("/health")
-async def health_check():
+async def health_check() -> dict[str, str]:
     """Basic health check endpoint."""
     return {
         "status": "healthy",

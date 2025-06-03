@@ -103,7 +103,7 @@ class WhatsAppBridge:
         self.webhook_url = webhook_url
         self._client: httpx.AsyncClient | None = None
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "WhatsAppBridge":
         """Async context manager entry."""
         self._client = httpx.AsyncClient(
             base_url=self.base_url,
@@ -112,7 +112,7 @@ class WhatsAppBridge:
         )
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Async context manager exit."""
         if self._client:
             await self._client.aclose()
@@ -129,7 +129,8 @@ class WhatsAppBridge:
         try:
             response = await self.client.get("/health")
             response.raise_for_status()
-            return response.json()
+            data = response.json()
+            return data
         except httpx.RequestError as e:
             logger.error(f"Health check failed: {e}")
             raise ConnectionError(f"Failed to connect to WhatsApp Bridge: {e}") from e

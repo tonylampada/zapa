@@ -12,7 +12,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/login", response_model=AdminTokenResponse)
-async def admin_login(login_data: AdminLogin, db: Session = Depends(get_db)):
+async def admin_login(login_data: AdminLogin, db: Session = Depends(get_db)) -> AdminTokenResponse:
     """Admin login endpoint."""
     # For now, we'll use a simple hardcoded admin check
     # In production, this should check against a proper admin user table

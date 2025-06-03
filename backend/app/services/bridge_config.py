@@ -14,7 +14,7 @@ class BridgeConfigurationService:
 
     def __init__(self) -> None:
         """Initialize the bridge configuration service."""
-        self.webhook_url = f"{settings.HOST_URL}/api/v1/webhooks/whatsapp"
+        self.webhook_url = f"{settings.WEBHOOK_BASE_URL}/api/v1/webhooks/whatsapp"
         self.bridge_adapter = WhatsAppBridge(settings.WHATSAPP_BRIDGE_URL)
 
     async def setup_bridge(self) -> dict[str, Any]:

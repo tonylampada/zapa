@@ -1,6 +1,7 @@
 import time
 import uuid
 from datetime import datetime, timezone
+from typing import Any
 
 import httpx
 import psutil
@@ -175,7 +176,7 @@ async def perform_export(
         export_jobs[export_id]["status"] = "processing"
 
         # Prepare export data
-        export_data = {
+        export_data: dict[str, Any] = {
             "export_info": {
                 "export_id": export_id,
                 "start_date": start_date.isoformat(),
@@ -219,8 +220,8 @@ async def perform_export(
 
             for message in messages:
                 # Determine if message is from user (simplified)
-                user = db.query(User).filter(User.id == message.user_id).first()
-                user_jid = f"{user.phone_number}@s.whatsapp.net" if user else None
+                msg_user = db.query(User).filter(User.id == message.user_id).first()
+                user_jid = f"{msg_user.phone_number}@s.whatsapp.net" if msg_user else None
                 is_from_user = message.sender_jid == user_jid if user_jid else False
 
                 export_data["messages"].append(
