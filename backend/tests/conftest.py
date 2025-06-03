@@ -7,6 +7,13 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+# Set test environment variables before any imports
+os.environ["ENVIRONMENT"] = "test"
+os.environ["SECRET_KEY"] = "test_secret_key_for_testing_12345678901234567890"
+os.environ["ENCRYPTION_KEY"] = "test_encryption_key_for_testing_1234567890123456"
+os.environ["ADMIN_TOKEN_SECRET"] = "test_admin_token_secret_for_testing_123456789012"
+os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/test"
+
 from app.models.base import Base
 
 
