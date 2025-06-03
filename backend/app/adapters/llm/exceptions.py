@@ -6,7 +6,9 @@ from typing import Optional
 class LLMError(Exception):
     """Base exception for LLM operations."""
 
-    def __init__(self, message: str, provider: str = "unknown", original_error: Optional[Exception] = None):
+    def __init__(
+        self, message: str, provider: str = "unknown", original_error: Optional[Exception] = None
+    ):
         self.provider = provider
         self.original_error = original_error
         super().__init__(message)
