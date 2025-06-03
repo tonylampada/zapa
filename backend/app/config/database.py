@@ -1,7 +1,7 @@
 """Database configuration."""
 
 from pydantic import Field, field_validator
-from sqlalchemy import create_engine
+from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import sessionmaker
 
 from .base import BaseSettings
@@ -27,7 +27,7 @@ class DatabaseConfig(BaseSettings):
 
     @field_validator("DATABASE_URL")
     @classmethod
-    def validate_database_url(cls, v):
+    def validate_database_url(cls, v: str) -> str:
         """Validate database URL format."""
         if not v.startswith(("postgresql://", "postgresql+psycopg2://")):
             raise ValueError("DATABASE_URL must be a PostgreSQL URL")
@@ -35,13 +35,13 @@ class DatabaseConfig(BaseSettings):
 
     @field_validator("REDIS_URL")
     @classmethod
-    def validate_redis_url(cls, v):
+    def validate_redis_url(cls, v: str) -> str:
         """Validate Redis URL format."""
         if not v.startswith("redis://"):
             raise ValueError("REDIS_URL must be a Redis URL")
         return v
 
-    def get_database_engine(self):
+    def get_database_engine(self) -> Engine:
         """Create SQLAlchemy engine."""
         return create_engine(
             self.DATABASE_URL,
@@ -50,7 +50,7 @@ class DatabaseConfig(BaseSettings):
             echo=self.DATABASE_ECHO,
         )
 
-    def get_session_maker(self):
+    def get_session_maker(self) -> sessionmaker:
         """Create SQLAlchemy session maker."""
         engine = self.get_database_engine()
         return sessionmaker(autocommit=False, autoflush=False, bind=engine)

@@ -51,7 +51,7 @@ class PublicSettings(DatabaseConfig):
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
-    def set_public_cors_origins(cls, v):
+    def set_public_cors_origins(cls, v: str | list[str]) -> list[str]:
         """Set CORS origins for public service."""
         if isinstance(v, str):
             origins = [origin.strip() for origin in v.split(",")]

@@ -34,7 +34,7 @@ class BaseSettings(PydanticBaseSettings):
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
-    def parse_cors_origins(cls, v):
+    def parse_cors_origins(cls, v: str | list[str]) -> list[str]:
         """Parse CORS origins from string or list."""
         if isinstance(v, str):
             return [origin.strip() for origin in v.split(",")]
@@ -42,7 +42,7 @@ class BaseSettings(PydanticBaseSettings):
 
     @field_validator("SECRET_KEY", "ENCRYPTION_KEY")
     @classmethod
-    def validate_keys(cls, v):
+    def validate_keys(cls, v: str) -> str:
         """Validate that keys are strong enough."""
         if len(v) < 32:
             raise ValueError("Key must be at least 32 characters long")

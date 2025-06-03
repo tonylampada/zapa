@@ -16,11 +16,11 @@ class RetryHandler:
     @staticmethod
     async def with_retry(
         func: Callable[..., Coroutine[Any, Any, T]],
-        *args,
+        *args: Any,
         max_retries: int = 3,
         delay: float = 1.0,
         backoff: float = 2.0,
-        **kwargs,
+        **kwargs: Any,
     ) -> T:
         """
         Execute async function with exponential backoff retry.
@@ -39,7 +39,7 @@ class RetryHandler:
         Raises:
             Last exception if all retries fail
         """
-        last_exception = None
+        last_exception: Exception | None = None
 
         for attempt in range(max_retries):
             try:
@@ -56,4 +56,7 @@ class RetryHandler:
                 else:
                     logger.error(f"All {max_retries} attempts failed for {func.__name__}: {e}")
 
-        raise last_exception
+        if last_exception is not None:
+            raise last_exception
+        else:
+            raise RuntimeError("Retry failed but no exception was captured")
