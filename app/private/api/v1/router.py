@@ -1,4 +1,5 @@
 """Main API router for private v1 endpoints."""
+
 from fastapi import APIRouter
 
 from app.private.api.v1.admin.integration import router as admin_integration_router

@@ -1,4 +1,5 @@
 """Tests for database configuration."""
+
 from unittest.mock import MagicMock, patch
 
 import pytest

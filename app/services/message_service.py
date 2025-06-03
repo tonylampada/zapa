@@ -62,9 +62,9 @@ class MessageService:
         if message_data.whatsapp_message_id:
             if not db_message.media_metadata:
                 db_message.media_metadata = {}
-            db_message.media_metadata[
-                "whatsapp_message_id"
-            ] = message_data.whatsapp_message_id
+            db_message.media_metadata["whatsapp_message_id"] = (
+                message_data.whatsapp_message_id
+            )
 
         self.db.add(db_message)
         self.db.commit()

@@ -105,6 +105,11 @@ disallow_untyped_defs = true
 ignore_missing_imports = true
 plugins = ["pydantic.mypy"]
 
+[[tool.mypy.overrides]]
+module = "app.services.message_queue"
+# Redis async type stubs are incomplete
+disable_error_code = ["misc", "no-any-return"]
+
 [tool.coverage.run]
 source = ["app", "models", "schemas"]
 omit = ["*/tests/*", "*/alembic/*"]

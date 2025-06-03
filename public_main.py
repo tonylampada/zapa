@@ -1,4 +1,5 @@
 """Entry point for Zapa Public API."""
+
 import uvicorn
 
 if __name__ == "__main__":

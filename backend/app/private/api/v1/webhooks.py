@@ -23,7 +23,7 @@ def get_webhook_handler(db: Session = Depends(get_db)) -> WebhookHandlerService:
 async def whatsapp_webhook(
     event: WhatsAppWebhookEvent,
     webhook_handler: WebhookHandlerService = Depends(get_webhook_handler),
-):
+) -> dict[str, str]:
     """
     Receive webhook events from WhatsApp Bridge.
 
@@ -42,6 +42,6 @@ async def whatsapp_webhook(
 
 
 @router.get("/whatsapp/health")
-async def webhook_health():
+async def webhook_health() -> dict[str, str]:
     """Health check endpoint for webhook service."""
     return {"status": "healthy", "service": "webhook_handler"}

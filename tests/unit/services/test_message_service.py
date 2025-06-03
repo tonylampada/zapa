@@ -131,12 +131,16 @@ class TestMessageService:
                 id=i,
                 user_id=sample_user.id,
                 session_id=1,
-                sender_jid=f"{sample_user.phone_number}@s.whatsapp.net"
-                if i % 2 == 0
-                else "service@s.whatsapp.net",
-                recipient_jid="service@s.whatsapp.net"
-                if i % 2 == 0
-                else f"{sample_user.phone_number}@s.whatsapp.net",
+                sender_jid=(
+                    f"{sample_user.phone_number}@s.whatsapp.net"
+                    if i % 2 == 0
+                    else "service@s.whatsapp.net"
+                ),
+                recipient_jid=(
+                    "service@s.whatsapp.net"
+                    if i % 2 == 0
+                    else f"{sample_user.phone_number}@s.whatsapp.net"
+                ),
                 message_type="text",
                 content=f"Message {i}",
                 timestamp=datetime.utcnow() - timedelta(minutes=i),
@@ -158,8 +162,8 @@ class TestMessageService:
         user_query.first.return_value = sample_user
 
         # Set up mock_db to return different queries based on the model
-        mock_db.query.side_effect = (
-            lambda model: messages_query if model == Message else user_query
+        mock_db.query.side_effect = lambda model: (
+            messages_query if model == Message else user_query
         )
 
         # Act
@@ -347,8 +351,8 @@ class TestMessageService:
         mock_user_query.first.return_value = sample_user
 
         # Set up mock_db to return different queries based on the model
-        mock_db.query.side_effect = (
-            lambda model: mock_message_query if model == Message else mock_user_query
+        mock_db.query.side_effect = lambda model: (
+            mock_message_query if model == Message else mock_user_query
         )
 
         # Act

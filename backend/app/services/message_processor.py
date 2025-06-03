@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class MessageProcessorService:
     """Service that processes messages from the queue."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the message processor."""
         self._running = False
         self._task: asyncio.Task | None = None

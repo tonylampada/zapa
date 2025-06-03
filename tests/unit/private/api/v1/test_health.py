@@ -1,4 +1,5 @@
 """Tests for private API health endpoints."""
+
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest

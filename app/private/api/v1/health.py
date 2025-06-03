@@ -1,4 +1,5 @@
 """Health check endpoints for private API."""
+
 import logging
 from typing import Any
 
@@ -48,9 +49,11 @@ async def readiness_check() -> dict[str, Any]:
         database_healthy = await db_manager.health_check()
         checks["database"] = {
             "status": "healthy" if database_healthy else "unhealthy",
-            "url": settings.DATABASE_URL.split("@")[-1]
-            if "@" in settings.DATABASE_URL
-            else "masked",
+            "url": (
+                settings.DATABASE_URL.split("@")[-1]
+                if "@" in settings.DATABASE_URL
+                else "masked"
+            ),
         }
         if not database_healthy:
             overall_status = "not_ready"
@@ -117,9 +120,11 @@ async def database_check(
 
         return {
             "status": "healthy",
-            "database_url": settings.DATABASE_URL.split("@")[-1]
-            if "@" in settings.DATABASE_URL
-            else "masked",
+            "database_url": (
+                settings.DATABASE_URL.split("@")[-1]
+                if "@" in settings.DATABASE_URL
+                else "masked"
+            ),
             "connection_test": "passed",
         }
 

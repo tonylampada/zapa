@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import Any
 
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 class IntegrationOrchestrator:
     """Orchestrate all WhatsApp integration components."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the orchestrator."""
         self._initialized = False
         self._processor_workers: list[asyncio.Task] = []
@@ -175,7 +176,7 @@ class IntegrationOrchestrator:
         return {"shutdown": shutdown_result, "initialize": init_result}
 
     @asynccontextmanager
-    async def managed_integration(self):
+    async def managed_integration(self) -> AsyncGenerator["IntegrationOrchestrator", None]:
         """Context manager for managed integration lifecycle."""
         try:
             await self.initialize()

@@ -1,4 +1,5 @@
 """Test fixtures and sample data creation."""
+
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session
@@ -44,9 +45,9 @@ def create_test_session(
         user_id=user.id,
         session_type=session_type,
         status=status,
-        connected_at=datetime.now(timezone.utc)
-        if status == SessionStatus.CONNECTED
-        else None,
+        connected_at=(
+            datetime.now(timezone.utc) if status == SessionStatus.CONNECTED else None
+        ),
         metadata=kwargs.get("metadata", {"device": "iPhone"}),
         **kwargs,
     )

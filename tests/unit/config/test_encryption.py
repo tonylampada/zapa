@@ -1,4 +1,5 @@
 """Tests for encryption utilities."""
+
 import base64
 
 import pytest

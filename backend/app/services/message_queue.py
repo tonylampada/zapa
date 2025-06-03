@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
 
-import redis.asyncio as redis
+import redis.asyncio as redis  # type: ignore[import]
 from pydantic import BaseModel, Field
 
 from app.config.redis import redis_settings

@@ -1,4 +1,5 @@
 """Tests for database fixtures."""
+
 from datetime import datetime, timezone
 
 import pytest

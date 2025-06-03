@@ -1,4 +1,5 @@
 """Database configuration."""
+
 from pydantic import Field, field_validator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker

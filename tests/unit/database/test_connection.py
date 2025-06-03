@@ -1,4 +1,5 @@
 """Tests for database connection utilities."""
+
 from unittest.mock import MagicMock, patch
 
 import pytest

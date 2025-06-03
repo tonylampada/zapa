@@ -1,4 +1,5 @@
 """Encryption utilities for sensitive data."""
+
 import base64
 import secrets
 

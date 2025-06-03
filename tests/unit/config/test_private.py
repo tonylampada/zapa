@@ -1,4 +1,5 @@
 """Tests for private entrypoint configuration."""
+
 import pytest
 from pydantic import ValidationError
 

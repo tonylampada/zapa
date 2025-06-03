@@ -1,4 +1,5 @@
 """Custom exceptions for Zapa applications."""
+
 from typing import Any
 
 

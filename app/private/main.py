@@ -1,4 +1,5 @@
 """FastAPI application for Zapa Private entrypoint."""
+
 import logging
 import time
 from contextlib import asynccontextmanager
@@ -143,9 +144,9 @@ async def general_exception_handler(request: Request, exc: Exception):
         content={
             "error": "INTERNAL_SERVER_ERROR",
             "message": "An unexpected error occurred",
-            "details": {}
-            if settings.ENVIRONMENT == "production"
-            else {"exception": str(exc)},
+            "details": (
+                {} if settings.ENVIRONMENT == "production" else {"exception": str(exc)}
+            ),
         },
     )
 

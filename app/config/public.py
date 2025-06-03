@@ -1,4 +1,5 @@
 """Public entrypoint configuration."""
+
 from pydantic import Field, field_validator
 
 from app.config import DatabaseConfig

@@ -1,4 +1,5 @@
 """Logging configuration for Zapa applications."""
+
 import logging
 import logging.config
 import sys

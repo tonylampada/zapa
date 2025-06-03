@@ -1,6 +1,5 @@
 """Common dependencies for the application."""
 
-
 from fastapi import Depends, HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError
