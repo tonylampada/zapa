@@ -86,15 +86,15 @@ async def search_messages_impl(
 
         result = await db.execute(stmt)
         messages = result.scalars().all()
-        
+
         # Get user to determine message direction
         user_stmt = select(User).where(User.id == user_id)
         user_result = await db.execute(user_stmt)
         user = user_result.scalar_one_or_none()
-        
+
         if not user:
             return []
-            
+
         user_jid = f"{user.phone_number}@s.whatsapp.net"
 
         return [
@@ -150,15 +150,15 @@ async def get_recent_messages_impl(
         # Convert to list and reverse to get chronological order
         messages = list(messages)
         messages.reverse()
-        
+
         # Get user to determine message direction
         user_stmt = select(User).where(User.id == user_id)
         user_result = await db.execute(user_stmt)
         user = user_result.scalar_one_or_none()
-        
+
         if not user:
             return []
-            
+
         user_jid = f"{user.phone_number}@s.whatsapp.net"
 
         return [
@@ -314,7 +314,7 @@ async def get_conversation_stats_impl(
         user_stmt = select(User).where(User.id == user_id)
         user_result = await db.execute(user_stmt)
         user = user_result.scalar_one_or_none()
-        
+
         if not user:
             return ConversationStats(
                 total_messages=0,
@@ -323,9 +323,9 @@ async def get_conversation_stats_impl(
                 date_range={},
                 average_messages_per_day=0.0,
             )
-            
+
         user_jid = f"{user.phone_number}@s.whatsapp.net"
-        
+
         # Get user message count
         user_msg_stmt = (
             select(func.count(Message.id))
