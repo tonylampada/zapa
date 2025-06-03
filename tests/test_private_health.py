@@ -36,10 +36,10 @@ def test_private_readiness_check(private_client):
         assert data["service"] == "zapa-private"
 
 
-@pytest.mark.asyncio
-async def test_private_health_check_async(private_async_client):
+def test_private_health_check_async(private_async_client):
     """Test private health check with async client."""
-    response = await private_async_client.get("/api/v1/health")
+    # TestClient handles async endpoints synchronously
+    response = private_async_client.get("/api/v1/health")
     assert response.status_code == status.HTTP_200_OK
 
     data = response.json()

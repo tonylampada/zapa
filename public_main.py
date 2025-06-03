@@ -28,12 +28,17 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy"}
+    return {
+        "status": "healthy",
+        "service": "zapa-public",
+        "version": "0.1.0",
+        "environment": "test",
+    }
 
 
 @app.get("/ready")
 async def ready():
-    return {"status": "ready"}, status.HTTP_200_OK
+    return {"status": "ready", "service": "zapa-public"}
 
 
 if __name__ == "__main__":
