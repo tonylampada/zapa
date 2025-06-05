@@ -37,6 +37,12 @@ class LLMConfigUpdate(BaseModel):
     is_active: bool | None = None
 
 
+class LLMConfigRequest(LLMConfigBase):
+    """Schema for LLM config request (create/update)."""
+
+    api_key: str = Field(..., min_length=1)  # Will be encrypted before storage
+
+
 class LLMConfigResponse(LLMConfigBase):
     """Schema for LLM config response."""
 
@@ -47,3 +53,13 @@ class LLMConfigResponse(LLMConfigBase):
     # Note: api_key_encrypted is never returned in API responses
     created_at: datetime
     updated_at: datetime | None
+
+
+class LLMTestResponse(BaseModel):
+    """Schema for LLM configuration test response."""
+
+    success: bool
+    message: str
+    response_time_ms: int | None = None
+    provider: str | None = None
+    model: str | None = None

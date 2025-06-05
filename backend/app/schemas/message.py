@@ -89,3 +89,7 @@ class ConversationStats(BaseModel):
     first_message_date: datetime | None
     last_message_date: datetime | None
     average_messages_per_day: float
+
+
+# Alias for API consistency
+MessageStats = ConversationStats

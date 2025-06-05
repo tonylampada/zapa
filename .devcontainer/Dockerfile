@@ -1,10 +1,12 @@
 FROM python:3.11-slim
 
-# Install system dependencies
+# Install system dependencies including Node.js for frontend
 RUN apt-get update && apt-get install -y \
     curl \
     git \
     postgresql-client \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv
