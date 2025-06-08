@@ -37,8 +37,8 @@ jobs:
     
     - name: Run linting
       run: |
-        .venv/bin/black --check .
-        .venv/bin/ruff check backend/app backend/tests
+        cd backend && ../.venv/bin/black --check app/ tests/
+        cd backend && ../.venv/bin/ruff check app/ tests/
     
     - name: Run type checking
       run: |
