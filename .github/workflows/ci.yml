@@ -37,24 +37,20 @@ jobs:
     
     - name: Run linting
       run: |
-        uv run black --check app models schemas tests *.py
-        uv run ruff check app models schemas tests *.py
-        .venv/bin/black --check backend/app backend/tests
+        .venv/bin/black --check .
         .venv/bin/ruff check backend/app backend/tests
     
     - name: Run type checking
       run: |
-        uv run mypy app models schemas
         cd backend && PYTHONPATH=. ../.venv/bin/mypy app
     
     - name: Run tests with coverage
       run: |
-        uv run pytest -v --cov=app --cov=models --cov=schemas --cov-report=term-missing --cov-report=xml
-        cd backend && PYTHONPATH=. ../.venv/bin/pytest -v --cov=app --cov-report=term-missing --cov-report=xml:../backend-coverage.xml
+        cd backend && PYTHONPATH=. ../.venv/bin/pytest -v --cov=app --cov-report=term-missing --cov-report=xml
     
     - name: Upload coverage
       uses: codecov/codecov-action@v3
       with:
-        file: ./coverage.xml
+        file: ./backend/coverage.xml
         flags: backend
         name: backend-coverage
