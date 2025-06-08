@@ -23,7 +23,9 @@ class MessageService:
         """Initialize MessageService with database session."""
         self.db = db
 
-    async def store_message(self, user_id: int, message_data: MessageCreate) -> MessageResponse:
+    async def store_message(
+        self, user_id: int, message_data: MessageCreate
+    ) -> MessageResponse:
         """Store a new message in the database."""
         # Get or create session
         session = await self.get_or_create_session(user_id)
@@ -65,7 +67,9 @@ class MessageService:
         if message_data.whatsapp_message_id:
             if not db_message.media_metadata:
                 db_message.media_metadata = {}
-            db_message.media_metadata["whatsapp_message_id"] = message_data.whatsapp_message_id
+            db_message.media_metadata["whatsapp_message_id"] = (
+                message_data.whatsapp_message_id
+            )
 
         self.db.add(db_message)
         self.db.commit()
@@ -74,7 +78,9 @@ class MessageService:
         # Convert to response
         return self._message_to_response(db_message, user.phone_number)
 
-    async def get_recent_messages(self, user_id: int, count: int = 20) -> list[MessageResponse]:
+    async def get_recent_messages(
+        self, user_id: int, count: int = 20
+    ) -> list[MessageResponse]:
         """Get the N most recent messages for a user."""
         messages = (
             self.db.query(Message)
@@ -126,7 +132,10 @@ class MessageService:
         """Get statistics about the user's conversation."""
         # Total messages
         total_messages = (
-            self.db.query(func.count(Message.id)).filter(Message.user_id == user_id).scalar() or 0
+            self.db.query(func.count(Message.id))
+            .filter(Message.user_id == user_id)
+            .scalar()
+            or 0
         )
 
         if total_messages == 0:
@@ -177,11 +186,15 @@ class MessageService:
 
         # First and last message dates
         first_message_date = (
-            self.db.query(func.min(Message.timestamp)).filter(Message.user_id == user_id).scalar()
+            self.db.query(func.min(Message.timestamp))
+            .filter(Message.user_id == user_id)
+            .scalar()
         )
 
         last_message_date = (
-            self.db.query(func.max(Message.timestamp)).filter(Message.user_id == user_id).scalar()
+            self.db.query(func.max(Message.timestamp))
+            .filter(Message.user_id == user_id)
+            .scalar()
         )
 
         # Calculate average messages per day
@@ -234,7 +247,10 @@ class MessageService:
         # Find message by WhatsApp ID in metadata
         message = (
             self.db.query(Message)
-            .filter(Message.media_metadata.op("->>")("whatsapp_message_id") == whatsapp_message_id)
+            .filter(
+                Message.media_metadata.op("->>")("whatsapp_message_id")
+                == whatsapp_message_id
+            )
             .first()
         )
 
@@ -276,7 +292,9 @@ class MessageService:
                 )
             )
 
-        messages = query.order_by(desc(Message.timestamp)).offset(skip).limit(limit).all()
+        messages = (
+            query.order_by(desc(Message.timestamp)).offset(skip).limit(limit).all()
+        )
 
         # Get user phone for direction determination
         user = db.query(User).filter(User.id == user_id).first()
@@ -284,7 +302,6 @@ class MessageService:
             return []
 
         return [self._message_to_response(msg, user.phone_number) for msg in messages]
-
 
     def search_user_messages(
         self, db: Session, user_id: int, query: str, skip: int = 0, limit: int = 20
@@ -320,7 +337,8 @@ class MessageService:
         """Get user's message statistics."""
         # Total messages
         total_messages = (
-            db.query(func.count(Message.id)).filter(Message.user_id == user_id).scalar() or 0
+            db.query(func.count(Message.id)).filter(Message.user_id == user_id).scalar()
+            or 0
         )
 
         if total_messages == 0:
@@ -371,11 +389,15 @@ class MessageService:
 
         # First and last message dates
         first_message_date = (
-            db.query(func.min(Message.timestamp)).filter(Message.user_id == user_id).scalar()
+            db.query(func.min(Message.timestamp))
+            .filter(Message.user_id == user_id)
+            .scalar()
         )
 
         last_message_date = (
-            db.query(func.max(Message.timestamp)).filter(Message.user_id == user_id).scalar()
+            db.query(func.max(Message.timestamp))
+            .filter(Message.user_id == user_id)
+            .scalar()
         )
 
         # Calculate average messages per day
@@ -397,7 +419,10 @@ class MessageService:
     def export_user_messages(self, db: Session, user_id: int, format: str = "json"):
         """Export user's messages in specified format."""
         messages = (
-            db.query(Message).filter(Message.user_id == user_id).order_by(Message.timestamp).all()
+            db.query(Message)
+            .filter(Message.user_id == user_id)
+            .order_by(Message.timestamp)
+            .all()
         )
 
         # Get user phone for direction determination
@@ -405,7 +430,9 @@ class MessageService:
         if not user:
             return [] if format == "json" else ""
 
-        message_responses = [self._message_to_response(msg, user.phone_number) for msg in messages]
+        message_responses = [
+            self._message_to_response(msg, user.phone_number) for msg in messages
+        ]
 
         if format == "json":
             return [msg.model_dump() for msg in message_responses]
@@ -478,7 +505,9 @@ class MessageService:
 
         return session
 
-    def _message_to_response(self, message: Message, user_phone: str) -> MessageResponse:
+    def _message_to_response(
+        self, message: Message, user_phone: str
+    ) -> MessageResponse:
         """Convert Message model to MessageResponse schema."""
         # Determine direction based on sender/recipient
         user_jid = f"{user_phone}@s.whatsapp.net"

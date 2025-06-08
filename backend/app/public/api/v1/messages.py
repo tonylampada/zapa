@@ -39,7 +39,9 @@ async def get_messages(
         return messages
     except Exception as e:
         logger.error(f"Failed to get messages for user {user_id}: {e}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve messages") from e
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve messages"
+        ) from e
 
 
 @router.get("/recent", response_model=list[MessageResponse])
@@ -53,11 +55,15 @@ async def get_recent_messages(
     user_id = current_user["user_id"]
 
     try:
-        messages = message_service.get_recent_messages(db=db, user_id=user_id, count=count)
+        messages = message_service.get_recent_messages(
+            db=db, user_id=user_id, count=count
+        )
         return messages
     except Exception as e:
         logger.error(f"Failed to get recent messages for user {user_id}: {e}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve recent messages") from e
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve recent messages"
+        ) from e
 
 
 @router.get("/search", response_model=list[MessageResponse])
@@ -96,7 +102,9 @@ async def get_message_stats(
         return stats
     except Exception as e:
         logger.error(f"Failed to get message stats for user {user_id}: {e}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve message statistics") from e
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve message statistics"
+        ) from e
 
 
 @router.get("/export")
@@ -110,13 +118,17 @@ async def export_messages(
     user_id = current_user["user_id"]
 
     try:
-        export_data = message_service.export_user_messages(db=db, user_id=user_id, format=format)
+        export_data = message_service.export_user_messages(
+            db=db, user_id=user_id, format=format
+        )
 
         if format == "json":
             return {
                 "format": "json",
                 "data": export_data,
-                "total_messages": (len(export_data) if isinstance(export_data, list) else 0),
+                "total_messages": (
+                    len(export_data) if isinstance(export_data, list) else 0
+                ),
             }
         else:  # CSV
             return {"format": "csv", "data": export_data, "content_type": "text/csv"}

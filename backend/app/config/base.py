@@ -14,15 +14,21 @@ class BaseSettings(PydanticBaseSettings):
         default="development", description="Application environment"
     )
     DEBUG: bool = Field(default=True, description="Debug mode")
-    LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(default="INFO")
+    LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
+        default="INFO"
+    )
 
     # API Settings
     API_V1_STR: str = Field(default="/api/v1", description="API version prefix")
     PROJECT_NAME: str = Field(default="Zapa", description="Project name")
 
     # Security
-    SECRET_KEY: str = Field(..., min_length=32, description="Secret key for JWT signing")
-    ENCRYPTION_KEY: str = Field(..., min_length=32, description="Key for encrypting user API keys")
+    SECRET_KEY: str = Field(
+        ..., min_length=32, description="Secret key for JWT signing"
+    )
+    ENCRYPTION_KEY: str = Field(
+        ..., min_length=32, description="Key for encrypting user API keys"
+    )
 
     # CORS
     CORS_ORIGINS: list[str] = Field(

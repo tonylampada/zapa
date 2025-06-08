@@ -204,7 +204,9 @@ class TestAgentIntegration:
 
     async def test_agent_without_llm_config(self, agent_service, test_user):
         """Test agent behavior when user has no LLM configuration."""
-        result = await agent_service.process_message(user_id=test_user.id, message_content="Hello")
+        result = await agent_service.process_message(
+            user_id=test_user.id, message_content="Hello"
+        )
 
         assert result.success is False
         assert result.error_message == "LLM configuration not found"
@@ -218,7 +220,9 @@ class TestAgentIntegration:
         mock_runner.side_effect = Exception("LLM API error")
 
         # Process message
-        result = await agent_service.process_message(user_id=test_user.id, message_content="Hello")
+        result = await agent_service.process_message(
+            user_id=test_user.id, message_content="Hello"
+        )
 
         # Verify error response
         assert result.success is False
@@ -245,7 +249,9 @@ class TestAgentIntegration:
         assert result.success is True
         assert len(result.content) > 0
         # The response should mention tasks or weather based on seed messages
-        assert any(word in result.content.lower() for word in ["task", "weather", "help"])
+        assert any(
+            word in result.content.lower() for word in ["task", "weather", "help"]
+        )
 
     async def test_message_storage_integration(
         self, agent_service, test_user, test_llm_config, db_session
@@ -262,11 +268,15 @@ class TestAgentIntegration:
             )
 
             # Verify messages were stored
-            messages = db_session.query(Message).filter(Message.user_id == test_user.id).all()
+            messages = (
+                db_session.query(Message).filter(Message.user_id == test_user.id).all()
+            )
             assert len(messages) == 2  # Input and response
 
             # Check input message
-            input_msg = next(m for m in messages if m.sender_jid == test_user.phone_number)
+            input_msg = next(
+                m for m in messages if m.sender_jid == test_user.phone_number
+            )
             assert input_msg.content == "Test message"
 
             # Check response message

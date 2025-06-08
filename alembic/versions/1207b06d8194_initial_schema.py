@@ -1,10 +1,11 @@
 """Initial schema
 
 Revision ID: 1207b06d8194
-Revises: 
+Revises:
 Create Date: 2025-05-25 22:39:58.027914
 
 """
+
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -52,18 +53,26 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(["user_id"], ["user.id"], name=op.f("fk_auth_code_user_id_user")),
+        sa.ForeignKeyConstraint(
+            ["user_id"], ["user.id"], name=op.f("fk_auth_code_user_id_user")
+        ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_auth_code")),
     )
     op.create_index(op.f("ix_auth_code_code"), "auth_code", ["code"], unique=False)
-    op.create_index(op.f("ix_auth_code_expires_at"), "auth_code", ["expires_at"], unique=False)
-    op.create_index(op.f("ix_auth_code_user_id"), "auth_code", ["user_id"], unique=False)
+    op.create_index(
+        op.f("ix_auth_code_expires_at"), "auth_code", ["expires_at"], unique=False
+    )
+    op.create_index(
+        op.f("ix_auth_code_user_id"), "auth_code", ["user_id"], unique=False
+    )
     op.create_table(
         "llm_config",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=False),
         sa.Column(
-            "provider", sa.Enum("OPENAI", "ANTHROPIC", "GOOGLE", name="llmprovider"), nullable=False
+            "provider",
+            sa.Enum("OPENAI", "ANTHROPIC", "GOOGLE", name="llmprovider"),
+            nullable=False,
         ),
         sa.Column("api_key_encrypted", sa.String(length=500), nullable=False),
         sa.Column("model_settings", sa.JSON(), nullable=False),
@@ -75,18 +84,26 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(["user_id"], ["user.id"], name=op.f("fk_llm_config_user_id_user")),
+        sa.ForeignKeyConstraint(
+            ["user_id"], ["user.id"], name=op.f("fk_llm_config_user_id_user")
+        ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_llm_config")),
     )
-    op.create_index(op.f("ix_llm_config_user_id"), "llm_config", ["user_id"], unique=False)
+    op.create_index(
+        op.f("ix_llm_config_user_id"), "llm_config", ["user_id"], unique=False
+    )
     op.create_table(
         "session",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("user_id", sa.Integer(), nullable=False),
-        sa.Column("session_type", sa.Enum("MAIN", "USER", name="sessiontype"), nullable=False),
+        sa.Column(
+            "session_type", sa.Enum("MAIN", "USER", name="sessiontype"), nullable=False
+        ),
         sa.Column(
             "status",
-            sa.Enum("QR_PENDING", "CONNECTED", "DISCONNECTED", "ERROR", name="sessionstatus"),
+            sa.Enum(
+                "QR_PENDING", "CONNECTED", "DISCONNECTED", "ERROR", name="sessionstatus"
+            ),
             nullable=False,
         ),
         sa.Column("connected_at", sa.DateTime(timezone=True), nullable=True),
@@ -99,7 +116,9 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.Column("updated_at", sa.DateTime(timezone=True), nullable=True),
-        sa.ForeignKeyConstraint(["user_id"], ["user.id"], name=op.f("fk_session_user_id_user")),
+        sa.ForeignKeyConstraint(
+            ["user_id"], ["user.id"], name=op.f("fk_session_user_id_user")
+        ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_session")),
     )
     op.create_index(op.f("ix_session_user_id"), "session", ["user_id"], unique=False)
@@ -133,13 +152,23 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["session_id"], ["session.id"], name=op.f("fk_message_session_id_session")
         ),
-        sa.ForeignKeyConstraint(["user_id"], ["user.id"], name=op.f("fk_message_user_id_user")),
+        sa.ForeignKeyConstraint(
+            ["user_id"], ["user.id"], name=op.f("fk_message_user_id_user")
+        ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_message")),
     )
-    op.create_index(op.f("ix_message_reply_to_id"), "message", ["reply_to_id"], unique=False)
-    op.create_index(op.f("ix_message_sender_jid"), "message", ["sender_jid"], unique=False)
-    op.create_index(op.f("ix_message_session_id"), "message", ["session_id"], unique=False)
-    op.create_index(op.f("ix_message_timestamp"), "message", ["timestamp"], unique=False)
+    op.create_index(
+        op.f("ix_message_reply_to_id"), "message", ["reply_to_id"], unique=False
+    )
+    op.create_index(
+        op.f("ix_message_sender_jid"), "message", ["sender_jid"], unique=False
+    )
+    op.create_index(
+        op.f("ix_message_session_id"), "message", ["session_id"], unique=False
+    )
+    op.create_index(
+        op.f("ix_message_timestamp"), "message", ["timestamp"], unique=False
+    )
     op.create_index(op.f("ix_message_user_id"), "message", ["user_id"], unique=False)
     # ### end Alembic commands ###
 

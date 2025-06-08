@@ -54,7 +54,9 @@ class RetryHandler:
                     )
                     await asyncio.sleep(wait_time)
                 else:
-                    logger.error(f"All {max_retries} attempts failed for {func.__name__}: {e}")
+                    logger.error(
+                        f"All {max_retries} attempts failed for {func.__name__}: {e}"
+                    )
 
         if last_exception is not None:
             raise last_exception

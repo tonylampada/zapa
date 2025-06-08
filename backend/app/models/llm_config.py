@@ -24,9 +24,13 @@ class LLMConfig(Base):
     __tablename__ = "llm_config"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id"), nullable=False, index=True
+    )
     provider: Mapped[LLMProvider] = mapped_column(Enum(LLMProvider), nullable=False)
-    api_key_encrypted: Mapped[str] = mapped_column(String(500), nullable=False)  # Encrypted API key
+    api_key_encrypted: Mapped[str] = mapped_column(
+        String(500), nullable=False
+    )  # Encrypted API key
     model_settings: Mapped[dict[str, Any]] = mapped_column(
         JSON, default=dict  # model, temperature, max_tokens, etc.
     )

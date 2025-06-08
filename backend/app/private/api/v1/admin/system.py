@@ -42,7 +42,9 @@ async def get_system_health(
     whatsapp_bridge_connected = False
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(f"{settings.WHATSAPP_BRIDGE_URL}/health", timeout=5.0)
+            response = await client.get(
+                f"{settings.WHATSAPP_BRIDGE_URL}/health", timeout=5.0
+            )
             whatsapp_bridge_connected = response.status_code == 200
     except Exception:
         pass
@@ -57,7 +59,11 @@ async def get_system_health(
     # Determine overall status
     if not database_connected:
         status = "unhealthy"
-    elif not whatsapp_bridge_connected or memory_usage_percent > 90 or disk_usage_percent > 90:
+    elif (
+        not whatsapp_bridge_connected
+        or memory_usage_percent > 90
+        or disk_usage_percent > 90
+    ):
         status = "degraded"
     else:
         status = "healthy"
@@ -85,9 +91,13 @@ async def get_system_stats(
     total_messages = db.query(func.count(Message.id)).scalar()
 
     # Messages today (using UTC)
-    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    today_start = datetime.now(timezone.utc).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
     messages_today = (
-        db.query(func.count(Message.id)).filter(Message.timestamp >= today_start).scalar()
+        db.query(func.count(Message.id))
+        .filter(Message.timestamp >= today_start)
+        .scalar()
     )
 
     # Calculate average response time (simplified)
@@ -151,7 +161,9 @@ async def export_system_data(
     }
 
     # Start background export task
-    background_tasks.add_task(perform_export, export_id, start_date, end_date, include_messages, db)
+    background_tasks.add_task(
+        perform_export, export_id, start_date, end_date, include_messages, db
+    )
 
     return ExportDataResponse(
         export_id=export_id, status="pending", download_url=None, error_message=None
@@ -201,7 +213,9 @@ async def perform_export(
 
         # Export users
         users = (
-            db.query(User).filter(User.first_seen >= start_date, User.first_seen <= end_date).all()
+            db.query(User)
+            .filter(User.first_seen >= start_date, User.first_seen <= end_date)
+            .all()
         )
 
         for user in users:
@@ -212,8 +226,12 @@ async def perform_export(
                     "display_name": user.display_name,
                     "first_name": user.first_name,
                     "last_name": user.last_name,
-                    "first_seen": (user.first_seen.isoformat() if user.first_seen else None),
-                    "last_active": (user.last_active.isoformat() if user.last_active else None),
+                    "first_seen": (
+                        user.first_seen.isoformat() if user.first_seen else None
+                    ),
+                    "last_active": (
+                        user.last_active.isoformat() if user.last_active else None
+                    ),
                     "is_active": user.is_active,
                     "is_admin": user.is_admin,
                 }
@@ -233,7 +251,9 @@ async def perform_export(
             for message in messages:
                 # Determine if message is from user (simplified)
                 msg_user = db.query(User).filter(User.id == message.user_id).first()
-                user_jid = f"{msg_user.phone_number}@s.whatsapp.net" if msg_user else None
+                user_jid = (
+                    f"{msg_user.phone_number}@s.whatsapp.net" if msg_user else None
+                )
                 is_from_user = message.sender_jid == user_jid if user_jid else False
 
                 # Type narrowing for mypy
@@ -254,7 +274,9 @@ async def perform_export(
         # In production, save to S3 or file storage
         # For now, we'll just mark as completed
         export_jobs[export_id]["status"] = "completed"
-        export_jobs[export_id]["download_url"] = f"/api/v1/admin/system/export/{export_id}/download"
+        export_jobs[export_id][
+            "download_url"
+        ] = f"/api/v1/admin/system/export/{export_id}/download"
 
     except Exception as e:
         export_jobs[export_id]["status"] = "failed"

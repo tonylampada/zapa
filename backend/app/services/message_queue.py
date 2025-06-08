@@ -185,17 +185,23 @@ class MessageQueueService:
                 # Move to failed queue
                 failed_key = self._get_failed_key()
                 await r.lpush(failed_key, message.model_dump_json())
-                logger.error(f"Message {message.id} exceeded max retries, moved to failed queue")
+                logger.error(
+                    f"Message {message.id} exceeded max retries, moved to failed queue"
+                )
                 return False
             else:
                 # Calculate exponential backoff delay
-                delay = redis_settings.message_queue_retry_delay * (2 ** (message.retry_count - 1))
+                delay = redis_settings.message_queue_retry_delay * (
+                    2 ** (message.retry_count - 1)
+                )
 
                 # Re-queue with lower priority after delay
                 await asyncio.sleep(delay)
                 queue_key = self._get_queue_key(MessagePriority.LOW)
                 await r.lpush(queue_key, message.model_dump_json())
-                logger.info(f"Retrying message {message.id} (attempt {message.retry_count})")
+                logger.info(
+                    f"Retrying message {message.id} (attempt {message.retry_count})"
+                )
                 return True
 
     async def get_queue_stats(self) -> dict[str, Any]:

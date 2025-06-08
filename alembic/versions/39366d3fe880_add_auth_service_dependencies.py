@@ -5,6 +5,7 @@ Revises: add_admin_profile_fields
 Create Date: 2025-06-01 10:34:13.955294
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -12,8 +13,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '39366d3fe880'
-down_revision: Union[str, None] = 'add_admin_profile_fields'
+revision: str = "39366d3fe880"
+down_revision: Union[str, None] = "add_admin_profile_fields"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

@@ -58,7 +58,9 @@ async def list_users(
     user_summaries = []
     for user in users:
         # Get message count and last message
-        message_count = db.query(func.count(Message.id)).filter(Message.user_id == user.id).scalar()
+        message_count = (
+            db.query(func.count(Message.id)).filter(Message.user_id == user.id).scalar()
+        )
 
         last_message = (
             db.query(Message)
@@ -98,7 +100,9 @@ async def get_user(
     """Get detailed information about a specific user."""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
 
     # Get message counts based on sender/recipient JIDs
     user_jid = f"{user.phone_number}@s.whatsapp.net"
@@ -117,7 +121,9 @@ async def get_user(
 
     # Check if LLM config exists
     llm_config_set = (
-        db.query(LLMConfig).filter(LLMConfig.user_id == user.id, LLMConfig.is_active).first()
+        db.query(LLMConfig)
+        .filter(LLMConfig.user_id == user.id, LLMConfig.is_active)
+        .first()
         is not None
     )
 
@@ -153,7 +159,9 @@ async def create_user(
 ) -> UserDetailResponse:
     """Create a new user."""
     # Check if user already exists
-    existing_user = db.query(User).filter(User.phone_number == user_data.phone_number).first()
+    existing_user = (
+        db.query(User).filter(User.phone_number == user_data.phone_number).first()
+    )
 
     if existing_user:
         raise HTTPException(
@@ -201,7 +209,9 @@ async def update_user(
     """Update an existing user."""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
 
     # Update fields if provided
     if user_data.first_name is not None:
@@ -232,7 +242,9 @@ async def update_user(
     )
 
     llm_config_set = (
-        db.query(LLMConfig).filter(LLMConfig.user_id == user.id, LLMConfig.is_active).first()
+        db.query(LLMConfig)
+        .filter(LLMConfig.user_id == user.id, LLMConfig.is_active)
+        .first()
         is not None
     )
 
@@ -268,7 +280,9 @@ async def delete_user(
     """Delete a user and all their data."""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
 
     # Don't allow deleting admin users
     if user.is_admin:
@@ -295,7 +309,9 @@ async def get_user_conversations(
     # Check if user exists
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
 
     # Query messages
     query = db.query(Message).filter(Message.user_id == user_id)
@@ -308,7 +324,9 @@ async def get_user_conversations(
     offset = (page - 1) * page_size
 
     # Get paginated messages
-    messages = query.order_by(Message.timestamp.desc()).offset(offset).limit(page_size).all()
+    messages = (
+        query.order_by(Message.timestamp.desc()).offset(offset).limit(page_size).all()
+    )
 
     # Get user JID for determining message direction
     user_jid = f"{user.phone_number}@s.whatsapp.net"
@@ -354,7 +372,9 @@ async def clear_user_conversations(
     # Check if user exists
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+        )
 
     # Delete all messages for the user
     deleted_count = db.query(Message).filter(Message.user_id == user_id).delete()

@@ -128,7 +128,9 @@ class TestAuthService:
             test_user,  # User exists
             None,  # Code doesn't exist
         ]
-        result = auth_service.verify_auth_code(mock_db, test_user.phone_number, "999999")
+        result = auth_service.verify_auth_code(
+            mock_db, test_user.phone_number, "999999"
+        )
         assert result is None
 
     def test_verify_auth_code_expired(self, auth_service, mock_db, test_user):
@@ -146,7 +148,9 @@ class TestAuthService:
             None,  # Query won't return expired codes
         ]
 
-        result = auth_service.verify_auth_code(mock_db, test_user.phone_number, "123456")
+        result = auth_service.verify_auth_code(
+            mock_db, test_user.phone_number, "123456"
+        )
         assert result is None
 
     def test_create_access_token(self, auth_service):
@@ -158,7 +162,9 @@ class TestAuthService:
         token = auth_service.create_access_token(user_id, phone_number, is_admin)
 
         # Decode token to verify contents
-        decoded = jwt.decode(token, auth_service.secret_key, algorithms=[auth_service.algorithm])
+        decoded = jwt.decode(
+            token, auth_service.secret_key, algorithms=[auth_service.algorithm]
+        )
 
         assert decoded["user_id"] == user_id
         assert decoded["phone_number"] == phone_number
@@ -215,7 +221,9 @@ class TestAuthService:
         """Test rate limit check within limit."""
         # Mock user found and count under limit
         mock_db.query.return_value.filter.return_value.first.return_value = test_user
-        mock_db.query.return_value.filter.return_value.count.return_value = 2  # Under limit of 3
+        mock_db.query.return_value.filter.return_value.count.return_value = (
+            2  # Under limit of 3
+        )
 
         result = auth_service.check_rate_limit(mock_db, test_user.phone_number)
         assert result is True
@@ -224,7 +232,9 @@ class TestAuthService:
         """Test rate limit check when exceeded."""
         # Mock user found and count at limit
         mock_db.query.return_value.filter.return_value.first.return_value = test_user
-        mock_db.query.return_value.filter.return_value.count.return_value = 3  # At limit
+        mock_db.query.return_value.filter.return_value.count.return_value = (
+            3  # At limit
+        )
 
         result = auth_service.check_rate_limit(mock_db, test_user.phone_number)
         assert result is False

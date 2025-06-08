@@ -25,7 +25,9 @@ class AgentService:
         self.db = db
         self.message_service = MessageService(db)
 
-    async def process_message(self, user_id: int, message_content: str) -> AgentResponse:
+    async def process_message(
+        self, user_id: int, message_content: str
+    ) -> AgentResponse:
         """
         Process a user message and generate an AI response.
 
@@ -129,7 +131,9 @@ class AgentService:
         self, user_id: int, max_messages: int = 20
     ) -> list[dict[str, str]]:
         """Build conversation context from recent messages."""
-        recent_messages = await self.message_service.get_recent_messages(user_id, max_messages)
+        recent_messages = await self.message_service.get_recent_messages(
+            user_id, max_messages
+        )
 
         context = []
         for msg in reversed(recent_messages):  # Oldest first
@@ -160,7 +164,9 @@ class AgentService:
 
         for tool_call in tool_calls:
             try:
-                result = await tools.execute_tool(tool_call.function_name, tool_call.arguments)
+                result = await tools.execute_tool(
+                    tool_call.function_name, tool_call.arguments
+                )
                 results.append(
                     {
                         "role": "tool",

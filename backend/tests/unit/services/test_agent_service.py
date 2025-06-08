@@ -68,7 +68,9 @@ class TestAgentService:
         # Setup mocks
         mock_decrypt.return_value = "decrypted_api_key"
         mock_agent = Mock()
-        mock_agent.process_message = AsyncMock(return_value="Hello! How can I help you?")
+        mock_agent.process_message = AsyncMock(
+            return_value="Hello! How can I help you?"
+        )
         mock_agent.update_instructions = Mock()
         mock_create_agent.return_value = mock_agent
 
@@ -84,7 +86,9 @@ class TestAgentService:
         agent_service.message_service.get_recent_messages = AsyncMock(return_value=[])
 
         # Act
-        result = await agent_service.process_message(user_id=1, message_content="Hello world")
+        result = await agent_service.process_message(
+            user_id=1, message_content="Hello world"
+        )
 
         # Assert
         assert isinstance(result, AgentResponse)
@@ -107,7 +111,9 @@ class TestAgentService:
         # Verify messages were stored
         assert agent_service.message_service.store_message.call_count == 2
 
-    async def test_process_message_no_llm_config(self, agent_service, mock_db, sample_user):
+    async def test_process_message_no_llm_config(
+        self, agent_service, mock_db, sample_user
+    ):
         """Test message processing when user has no LLM config."""
         # Mock database queries
         mock_db.query.return_value.filter.return_value.first.side_effect = [
@@ -119,7 +125,9 @@ class TestAgentService:
         agent_service.message_service.store_message = AsyncMock()
 
         # Act
-        result = await agent_service.process_message(user_id=1, message_content="Hello world")
+        result = await agent_service.process_message(
+            user_id=1, message_content="Hello world"
+        )
 
         # Assert
         assert result.success is False
@@ -141,7 +149,9 @@ class TestAgentService:
         # Setup mocks
         mock_decrypt.return_value = "decrypted_api_key"
         mock_agent = Mock()
-        mock_agent.process_message = AsyncMock(return_value="I see you mentioned that earlier.")
+        mock_agent.process_message = AsyncMock(
+            return_value="I see you mentioned that earlier."
+        )
         mock_agent.update_instructions = Mock()
         mock_create_agent.return_value = mock_agent
 
@@ -175,7 +185,9 @@ class TestAgentService:
                 created_at=datetime.now(),
             ),
         ]
-        agent_service.message_service.get_recent_messages = AsyncMock(return_value=recent_messages)
+        agent_service.message_service.get_recent_messages = AsyncMock(
+            return_value=recent_messages
+        )
         agent_service.message_service.store_message = AsyncMock()
 
         # Act
@@ -224,7 +236,9 @@ class TestAgentService:
         agent_service.message_service.get_recent_messages = AsyncMock(return_value=[])
 
         # Act
-        result = await agent_service.process_message(user_id=1, message_content="Hello world")
+        result = await agent_service.process_message(
+            user_id=1, message_content="Hello world"
+        )
 
         # Assert
         assert result.success is False
@@ -323,7 +337,9 @@ class TestAgentService:
                 created_at=datetime.now(),
             ),
         ]
-        agent_service.message_service.get_recent_messages = AsyncMock(return_value=recent_messages)
+        agent_service.message_service.get_recent_messages = AsyncMock(
+            return_value=recent_messages
+        )
 
         # Act
         context = await agent_service._build_conversation_context(user_id=1)

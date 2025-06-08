@@ -12,13 +12,19 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/login", response_model=AdminTokenResponse)
-async def admin_login(login_data: AdminLogin, db: Session = Depends(get_db)) -> AdminTokenResponse:
+async def admin_login(
+    login_data: AdminLogin, db: Session = Depends(get_db)
+) -> AdminTokenResponse:
     """Admin login endpoint."""
     # For now, we'll use a simple hardcoded admin check
     # In production, this should check against a proper admin user table
 
     # Check if user exists and is admin
-    user = db.query(User).filter(User.phone_number == login_data.username, User.is_admin).first()
+    user = (
+        db.query(User)
+        .filter(User.phone_number == login_data.username, User.is_admin)
+        .first()
+    )
 
     if not user:
         # For initial setup, create an admin user if none exists
@@ -64,4 +70,6 @@ async def admin_login(login_data: AdminLogin, db: Session = Depends(get_db)) -> 
 
         return AdminTokenResponse(access_token=access_token)
 
-    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+    )

@@ -132,7 +132,9 @@ class IntegrationOrchestrator:
                 logger.info(f"Message processor worker {worker_id} cancelled")
                 break
             except Exception as e:
-                logger.error(f"Error in processor worker {worker_id}: {e}", exc_info=True)
+                logger.error(
+                    f"Error in processor worker {worker_id}: {e}", exc_info=True
+                )
                 await asyncio.sleep(5)  # Wait before retrying
 
     async def get_status(self) -> dict[str, Any]:

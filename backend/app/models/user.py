@@ -19,11 +19,15 @@ class User(Base):
     __tablename__ = "user"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    phone_number: Mapped[str] = mapped_column(String(20), unique=True, nullable=False, index=True)
+    phone_number: Mapped[str] = mapped_column(
+        String(20), unique=True, nullable=False, index=True
+    )
     display_name: Mapped[str | None] = mapped_column(String(255))
     first_name: Mapped[str | None] = mapped_column(String(100))
     last_name: Mapped[str | None] = mapped_column(String(100))
-    first_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    first_seen: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )
     last_active: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     preferences: Mapped[dict[str, Any] | None] = mapped_column(JSON, default=dict)
     user_metadata: Mapped[dict[str, Any] | None] = mapped_column(JSON, default=dict)

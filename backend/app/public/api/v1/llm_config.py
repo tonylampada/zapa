@@ -34,7 +34,9 @@ async def get_llm_config(
         return config
     except Exception as e:
         logger.error(f"Failed to get LLM config for user {user_id}: {e}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve LLM configuration") from e
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve LLM configuration"
+        ) from e
 
 
 @router.post("/", response_model=LLMConfigResponse)
@@ -57,13 +59,17 @@ async def create_or_update_llm_config(
             )
 
         # Save the configuration
-        saved_config = llm_service.save_user_config(db=db, user_id=user_id, config=config)
+        saved_config = llm_service.save_user_config(
+            db=db, user_id=user_id, config=config
+        )
         return saved_config
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to save LLM config for user {user_id}: {e}")
-        raise HTTPException(status_code=500, detail="Failed to save LLM configuration") from e
+        raise HTTPException(
+            status_code=500, detail="Failed to save LLM configuration"
+        ) from e
 
 
 @router.post("/test", response_model=LLMTestResponse)
@@ -91,7 +97,9 @@ async def test_llm_config(
         raise
     except Exception as e:
         logger.error(f"Failed to test LLM config for user {user_id}: {e}")
-        raise HTTPException(status_code=500, detail="Failed to test LLM configuration") from e
+        raise HTTPException(
+            status_code=500, detail="Failed to test LLM configuration"
+        ) from e
 
 
 @router.delete("/")
@@ -106,14 +114,18 @@ async def delete_llm_config(
     try:
         success = llm_service.delete_user_config(db=db, user_id=user_id)
         if not success:
-            raise HTTPException(status_code=404, detail="No LLM configuration found to delete")
+            raise HTTPException(
+                status_code=404, detail="No LLM configuration found to delete"
+            )
 
         return {"success": True, "message": "LLM configuration deleted successfully"}
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to delete LLM config for user {user_id}: {e}")
-        raise HTTPException(status_code=500, detail="Failed to delete LLM configuration") from e
+        raise HTTPException(
+            status_code=500, detail="Failed to delete LLM configuration"
+        ) from e
 
 
 @router.get("/providers", response_model=list)

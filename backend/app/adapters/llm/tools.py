@@ -207,7 +207,9 @@ async def summarize_chat_impl(
     # conversation_text = "\n".join([f"{msg.sender}: {msg.content}" for msg in messages])
 
     # Simple summary (in production, use another LLM call)
-    summary = f"Conversation between user and assistant covering {len(messages)} messages."
+    summary = (
+        f"Conversation between user and assistant covering {len(messages)} messages."
+    )
 
     # Extract date range
     date_range = {

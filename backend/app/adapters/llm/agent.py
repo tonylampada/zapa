@@ -151,9 +151,7 @@ class ZapaAgent:
 
         except Exception as e:
             logger.error(f"Error processing message with agent: {e}")
-            return (
-                "I apologize, but I encountered an error processing your message. Please try again."
-            )
+            return "I apologize, but I encountered an error processing your message. Please try again."
 
     def update_instructions(self, instructions: str) -> None:
         """Update agent instructions."""

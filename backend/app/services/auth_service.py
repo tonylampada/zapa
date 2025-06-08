@@ -69,7 +69,9 @@ class AuthService:
 
         return auth_code, is_new_user
 
-    def verify_auth_code(self, db: Session, phone_number: str, code: str) -> User | None:
+    def verify_auth_code(
+        self, db: Session, phone_number: str, code: str
+    ) -> User | None:
         """Verify an auth code and return the user if valid."""
         # Find user by phone number
         user = db.query(User).filter(User.phone_number == phone_number).first()
@@ -99,7 +101,9 @@ class AuthService:
 
         return user
 
-    def create_access_token(self, user_id: int, phone_number: str, is_admin: bool = False) -> str:
+    def create_access_token(
+        self, user_id: int, phone_number: str, is_admin: bool = False
+    ) -> str:
         """Create a JWT access token."""
         expires_delta = timedelta(minutes=self.access_token_expire_minutes)
         expire = datetime.utcnow() + expires_delta
