@@ -58,6 +58,19 @@ omit = ["*/tests/*", "*/conftest.py"]
 [tool.black]
 line-length = 88
 target-version = ["py310"]
+include = '(alembic/.*\.py|app/.*\.py|backend/.*\.py|models/.*\.py|schemas/.*\.py|tests/.*\.py|.*\.py)'
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | \.env
+  | \.pytest_cache
+  | __pycache__
+  | frontend
+  | htmlcov
+  | .*\.egg-info
+)/ | .*\.mako$
+'''
 
 [tool.ruff]
 line-length = 88
