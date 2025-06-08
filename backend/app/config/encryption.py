@@ -89,9 +89,7 @@ def get_encryption_manager() -> EncryptionManager:
         # In production, this should come from environment config
         import os
 
-        encryption_key = os.getenv(
-            "ENCRYPTION_KEY", "test-encryption-key-32-chars-long"
-        )
+        encryption_key = os.getenv("ENCRYPTION_KEY", "test-encryption-key-32-chars-long")
         _encryption_manager = EncryptionManager(encryption_key)
     return _encryption_manager
 

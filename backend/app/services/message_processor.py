@@ -55,9 +55,7 @@ class MessageProcessorService:
 
     async def _process_message(self, queued_message: QueuedMessage) -> None:
         """Process a single message."""
-        logger.info(
-            f"Processing message {queued_message.id} for user {queued_message.user_id}"
-        )
+        logger.info(f"Processing message {queued_message.id} for user {queued_message.user_id}")
 
         try:
             # Create database session
@@ -76,9 +74,7 @@ class MessageProcessorService:
                 logger.info(f"Successfully processed message {queued_message.id}")
 
         except Exception as e:
-            logger.error(
-                f"Error processing message {queued_message.id}: {e}", exc_info=True
-            )
+            logger.error(f"Error processing message {queued_message.id}: {e}", exc_info=True)
 
             # Retry the message
             retry_success = await message_queue.retry(queued_message, str(e))

@@ -66,16 +66,10 @@ async def get_user_llm_config(
     # Check if user exists
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     # Get active LLM config
-    config = (
-        db.query(LLMConfig)
-        .filter(LLMConfig.user_id == user_id, LLMConfig.is_active)
-        .first()
-    )
+    config = db.query(LLMConfig).filter(LLMConfig.user_id == user_id, LLMConfig.is_active).first()
 
     if not config:
         raise HTTPException(
@@ -109,14 +103,10 @@ async def create_user_llm_config(
     # Check if user exists
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     # Deactivate any existing configs
-    db.query(LLMConfig).filter(LLMConfig.user_id == user_id).update(
-        {"is_active": False}
-    )
+    db.query(LLMConfig).filter(LLMConfig.user_id == user_id).update({"is_active": False})
 
     # Encrypt the API key
     encrypted_api_key = fernet.encrypt(config_data.api_key.encode()).decode()
@@ -172,11 +162,7 @@ async def update_user_llm_config(
 ) -> LLMConfigResponse:
     """Update LLM configuration for a user."""
     # Get existing config
-    config = (
-        db.query(LLMConfig)
-        .filter(LLMConfig.user_id == user_id, LLMConfig.is_active)
-        .first()
-    )
+    config = db.query(LLMConfig).filter(LLMConfig.user_id == user_id, LLMConfig.is_active).first()
 
     if not config:
         raise HTTPException(
@@ -229,15 +215,9 @@ async def test_user_llm_config(
     # Get user and config
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-    config = (
-        db.query(LLMConfig)
-        .filter(LLMConfig.user_id == user_id, LLMConfig.is_active)
-        .first()
-    )
+    config = db.query(LLMConfig).filter(LLMConfig.user_id == user_id, LLMConfig.is_active).first()
 
     if not config:
         raise HTTPException(
@@ -253,9 +233,7 @@ async def test_user_llm_config(
         decrypted_settings = config.model_settings.copy()
         encrypted_key = config.model_settings.get("api_key")
         if encrypted_key:
-            decrypted_settings["api_key"] = fernet.decrypt(
-                encrypted_key.encode()
-            ).decode()
+            decrypted_settings["api_key"] = fernet.decrypt(encrypted_key.encode()).decode()
 
         # Create agent with decrypted settings
         agent = create_agent(

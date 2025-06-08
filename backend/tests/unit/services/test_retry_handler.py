@@ -15,9 +15,7 @@ class TestRetryHandler:
         """Test function succeeds on first attempt."""
         mock_func = AsyncMock(return_value="success")
 
-        result = await RetryHandler.with_retry(
-            mock_func, "arg1", kwarg1="value1", max_retries=3
-        )
+        result = await RetryHandler.with_retry(mock_func, "arg1", kwarg1="value1", max_retries=3)
 
         assert result == "success"
         mock_func.assert_called_once_with("arg1", kwarg1="value1")
@@ -33,9 +31,7 @@ class TestRetryHandler:
         ]
 
         with patch("asyncio.sleep") as mock_sleep:
-            result = await RetryHandler.with_retry(
-                mock_func, max_retries=3, delay=1.0, backoff=2.0
-            )
+            result = await RetryHandler.with_retry(mock_func, max_retries=3, delay=1.0, backoff=2.0)
 
         assert result == "success"
         assert mock_func.call_count == 3
@@ -76,9 +72,7 @@ class TestRetryHandler:
             with pytest.raises(
                 Exception
             ):  # noqa: B017 - Testing retry behavior with generic exception
-                await RetryHandler.with_retry(
-                    mock_func, max_retries=4, delay=0.5, backoff=3.0
-                )
+                await RetryHandler.with_retry(mock_func, max_retries=4, delay=0.5, backoff=3.0)
 
         # Verify exponential backoff
         assert len(sleep_calls) == 3

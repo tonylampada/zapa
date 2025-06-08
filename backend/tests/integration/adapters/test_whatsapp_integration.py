@@ -20,9 +20,7 @@ async def bridge():
     """Create real WhatsApp Bridge connection."""
     # Use actual WhatsApp Bridge URL from environment or default
     bridge_url = os.getenv("WHATSAPP_BRIDGE_URL", "http://localhost:3000")
-    webhook_url = os.getenv(
-        "WEBHOOK_URL", "http://localhost:8001/api/v1/webhooks/whatsapp"
-    )
+    webhook_url = os.getenv("WEBHOOK_URL", "http://localhost:8001/api/v1/webhooks/whatsapp")
 
     async with WhatsAppBridge(
         base_url=bridge_url,
@@ -140,9 +138,7 @@ async def test_real_send_message(bridge):
 @pytest.mark.asyncio
 async def test_real_concurrent_operations(bridge):
     """Test concurrent operations don't interfere."""
-    session_ids = [
-        f"test-concurrent-{i}-{datetime.now().timestamp()}" for i in range(3)
-    ]
+    session_ids = [f"test-concurrent-{i}-{datetime.now().timestamp()}" for i in range(3)]
 
     try:
         # Create multiple sessions concurrently

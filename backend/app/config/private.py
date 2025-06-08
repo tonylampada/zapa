@@ -34,9 +34,7 @@ class PrivateSettings(DatabaseConfig):
     )
 
     # Admin Authentication
-    ADMIN_TOKEN_SECRET: str = Field(
-        ..., min_length=32, description="Admin JWT token secret"
-    )
+    ADMIN_TOKEN_SECRET: str = Field(..., min_length=32, description="Admin JWT token secret")
     ADMIN_TOKEN_EXPIRE_MINUTES: int = Field(
         default=60 * 24, ge=30, description="Admin token expiry in minutes"
     )

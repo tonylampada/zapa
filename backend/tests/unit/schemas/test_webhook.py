@@ -105,9 +105,7 @@ class TestWebhookSchemas:
     def test_invalid_event_type(self):
         """Test invalid event type raises error."""
         with pytest.raises(ValidationError):
-            WhatsAppWebhookEvent(
-                event_type="invalid.event", timestamp=datetime.utcnow(), data={}
-            )
+            WhatsAppWebhookEvent(event_type="invalid.event", timestamp=datetime.utcnow(), data={})
 
     def test_missing_required_fields(self):
         """Test missing required fields raise errors."""

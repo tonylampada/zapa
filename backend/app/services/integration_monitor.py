@@ -87,9 +87,7 @@ class IntegrationMonitor:
                 results[name] = status
             else:
                 # Shouldn't happen, but handle it gracefully
-                results[name] = ComponentStatus(
-                    name, False, {"error": "Unknown status type"}
-                )
+                results[name] = ComponentStatus(name, False, {"error": "Unknown status type"})
 
         # Update last status
         self._last_status = results
@@ -129,9 +127,7 @@ class IntegrationMonitor:
 
                 # Get some basic stats
                 user_count = db.execute(text("SELECT COUNT(*) FROM users")).scalar()
-                message_count = db.execute(
-                    text("SELECT COUNT(*) FROM messages")
-                ).scalar()
+                message_count = db.execute(text("SELECT COUNT(*) FROM messages")).scalar()
 
                 return ComponentStatus(
                     "database",

@@ -77,9 +77,7 @@ def mock_redis(monkeypatch):
         return mock_redis_instance
 
     monkeypatch.setattr("app.services.message_queue.redis.from_url", mock_from_url)
-    monkeypatch.setattr(
-        "app.services.integration_monitor.redis.from_url", mock_from_url
-    )
+    monkeypatch.setattr("app.services.integration_monitor.redis.from_url", mock_from_url)
 
     return mock_redis_instance
 
@@ -115,12 +113,8 @@ def mock_whatsapp_adapter(monkeypatch):
     def mock_adapter_init(*args, **kwargs):
         return mock_adapter
 
-    monkeypatch.setattr(
-        "app.adapters.whatsapp.WhatsAppBridgeAdapter", mock_adapter_init
-    )
-    monkeypatch.setattr(
-        "app.services.agent_service.WhatsAppBridgeAdapter", mock_adapter_init
-    )
+    monkeypatch.setattr("app.adapters.whatsapp.WhatsAppBridgeAdapter", mock_adapter_init)
+    monkeypatch.setattr("app.services.agent_service.WhatsAppBridgeAdapter", mock_adapter_init)
 
     return mock_adapter
 

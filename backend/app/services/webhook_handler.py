@@ -26,9 +26,7 @@ logger = logging.getLogger(__name__)
 class WebhookHandlerService:
     """Service for handling WhatsApp webhook events."""
 
-    def __init__(
-        self, db: Session, message_service: MessageService, agent_service: AgentService
-    ):
+    def __init__(self, db: Session, message_service: MessageService, agent_service: AgentService):
         self.db = db
         self.message_service = message_service
         self.agent_service = agent_service
@@ -51,9 +49,7 @@ class WebhookHandlerService:
 
         return await handler(event)
 
-    async def _handle_message_received(
-        self, event: WhatsAppWebhookEvent
-    ) -> dict[str, Any]:
+    async def _handle_message_received(self, event: WhatsAppWebhookEvent) -> dict[str, Any]:
         """Handle incoming message - either to system or to user's own number."""
         try:
             data = MessageReceivedData(**event.data)
@@ -187,9 +183,7 @@ class WebhookHandlerService:
             )
 
             if updated_message:
-                logger.info(
-                    f"Updated message status: {data.message_id} -> {data.status}"
-                )
+                logger.info(f"Updated message status: {data.message_id} -> {data.status}")
                 return {"status": "updated", "message_id": data.message_id}
             else:
                 logger.warning(f"Message not found for update: {data.message_id}")
@@ -199,9 +193,7 @@ class WebhookHandlerService:
             logger.error(f"Error handling message sent: {e}", exc_info=True)
             return {"status": "error", "message": str(e)}
 
-    async def _handle_message_failed(
-        self, event: WhatsAppWebhookEvent
-    ) -> dict[str, Any]:
+    async def _handle_message_failed(self, event: WhatsAppWebhookEvent) -> dict[str, Any]:
         """Handle failed message delivery."""
         try:
             data = MessageFailedData(**event.data)
@@ -212,9 +204,7 @@ class WebhookHandlerService:
             )
 
             if updated_message:
-                logger.error(
-                    f"Message delivery failed: {data.message_id} - {data.error}"
-                )
+                logger.error(f"Message delivery failed: {data.message_id} - {data.error}")
                 return {
                     "status": "updated",
                     "message_id": data.message_id,
@@ -228,16 +218,12 @@ class WebhookHandlerService:
             logger.error(f"Error handling message failed: {e}", exc_info=True)
             return {"status": "error", "message": str(e)}
 
-    async def _handle_connection_status(
-        self, event: WhatsAppWebhookEvent
-    ) -> dict[str, Any]:
+    async def _handle_connection_status(self, event: WhatsAppWebhookEvent) -> dict[str, Any]:
         """Handle WhatsApp connection status updates."""
         try:
             data = ConnectionStatusData(**event.data)
 
-            logger.info(
-                f"WhatsApp connection status: {data.status} (session: {data.session_id})"
-            )
+            logger.info(f"WhatsApp connection status: {data.status} (session: {data.session_id})")
 
             # TODO: Could store in Redis or database for monitoring
             # For now, just log and acknowledge

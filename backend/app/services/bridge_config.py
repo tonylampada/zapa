@@ -86,9 +86,7 @@ class BridgeConfigurationService:
             async with self.bridge_adapter as adapter:
                 # Check if system session exists
                 sessions = await adapter.list_sessions()
-                system_session = next(
-                    (s for s in sessions if s.session_id == system_number), None
-                )
+                system_session = next((s for s in sessions if s.session_id == system_number), None)
 
                 if not system_session:
                     # Create system session

@@ -22,9 +22,7 @@ class LLMConfigService:
     def get_user_config(self, db: Session, user_id: int) -> LLMConfigResponse | None:
         """Get user's LLM configuration."""
         config = (
-            db.query(LLMConfig)
-            .filter(LLMConfig.user_id == user_id, LLMConfig.is_active)
-            .first()
+            db.query(LLMConfig).filter(LLMConfig.user_id == user_id, LLMConfig.is_active).first()
         )
 
         if not config:
@@ -37,14 +35,10 @@ class LLMConfigService:
     ) -> LLMConfigResponse:
         """Save or update user's LLM configuration."""
         # Encrypt the API key
-        encrypted_key = self.encryption_manager.encrypt(
-            config.api_key.encode()
-        ).decode()
+        encrypted_key = self.encryption_manager.encrypt(config.api_key.encode()).decode()
 
         # Check if user already has a config
-        existing_config = (
-            db.query(LLMConfig).filter(LLMConfig.user_id == user_id).first()
-        )
+        existing_config = db.query(LLMConfig).filter(LLMConfig.user_id == user_id).first()
 
         if existing_config:
             # Update existing config
@@ -93,23 +87,17 @@ class LLMConfigService:
             # Provider-specific validation
             if config.provider == "openai":
                 if not config.api_key.startswith("sk-"):
-                    return ValidationResult(
-                        False, "OpenAI API key must start with 'sk-'"
-                    )
+                    return ValidationResult(False, "OpenAI API key must start with 'sk-'")
 
             elif config.provider == "anthropic":
                 if not config.api_key.startswith("sk-ant-"):
-                    return ValidationResult(
-                        False, "Anthropic API key must start with 'sk-ant-'"
-                    )
+                    return ValidationResult(False, "Anthropic API key must start with 'sk-ant-'")
 
             # Validate model settings
             required_fields = ["model"]
             for field in required_fields:
                 if field not in config.model_settings:
-                    return ValidationResult(
-                        False, f"'{field}' is required in model_settings"
-                    )
+                    return ValidationResult(False, f"'{field}' is required in model_settings")
 
             return ValidationResult(True, None)
 
@@ -130,9 +118,7 @@ class LLMConfigService:
             if config.provider == "openai":
                 success, message = await self._test_openai_config(config, test_message)
             elif config.provider == "anthropic":
-                success, message = await self._test_anthropic_config(
-                    config, test_message
-                )
+                success, message = await self._test_anthropic_config(config, test_message)
             elif config.provider == "google":
                 success, message = await self._test_google_config(config, test_message)
             else:

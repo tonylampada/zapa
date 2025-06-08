@@ -109,13 +109,9 @@ class LLMTools:
         tool_method = self.tools[tool_name]
         return await tool_method(**arguments)
 
-    async def search_messages(
-        self, query: str, limit: int = 10
-    ) -> list[dict[str, Any]]:
+    async def search_messages(self, query: str, limit: int = 10) -> list[dict[str, Any]]:
         """Search through conversation history."""
-        messages = await self.message_service.search_messages(
-            self.user_id, query, limit
-        )
+        messages = await self.message_service.search_messages(self.user_id, query, limit)
 
         return [
             {
@@ -148,9 +144,7 @@ class LLMTools:
         start = datetime.fromisoformat(start_date)
         end = datetime.fromisoformat(end_date)
 
-        messages = await self.message_service.get_messages_by_date_range(
-            self.user_id, start, end
-        )
+        messages = await self.message_service.get_messages_by_date_range(self.user_id, start, end)
 
         return [
             {
@@ -171,9 +165,7 @@ class LLMTools:
             "messages_sent": stats.messages_sent,
             "messages_received": stats.messages_received,
             "first_message_date": (
-                stats.first_message_date.isoformat()
-                if stats.first_message_date
-                else None
+                stats.first_message_date.isoformat() if stats.first_message_date else None
             ),
             "last_message_date": (
                 stats.last_message_date.isoformat() if stats.last_message_date else None
