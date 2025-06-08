@@ -37,7 +37,7 @@ jobs:
     
     - name: Run linting
       run: |
-        .venv/bin/black --check .
+        .venv/bin/black --check alembic/ app/ backend/app/ backend/tests/ models/ schemas/ tests/ *.py
         .venv/bin/ruff check backend/app backend/tests
     
     - name: Run type checking
