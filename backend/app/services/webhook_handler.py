@@ -156,7 +156,11 @@ class WebhookHandlerService:
                     },
                 )
                 logger.info(f"Queued message for processing: {queued_message.id}")
-                return {"status": "queued", "message_id": message.id, "queue_id": queued_message.id}
+                return {
+                    "status": "queued",
+                    "message_id": message.id,
+                    "queue_id": queued_message.id,
+                }
             else:
                 # Non-system message or non-text message, just store
                 logger.info(
@@ -201,7 +205,11 @@ class WebhookHandlerService:
 
             if updated_message:
                 logger.error(f"Message delivery failed: {data.message_id} - {data.error}")
-                return {"status": "updated", "message_id": data.message_id, "error": data.error}
+                return {
+                    "status": "updated",
+                    "message_id": data.message_id,
+                    "error": data.error,
+                }
             else:
                 logger.warning(f"Failed message not found: {data.message_id}")
                 return {"status": "not_found", "message_id": data.message_id}

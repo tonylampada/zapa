@@ -81,13 +81,19 @@ async def list_users(
         )
 
     return UserListResponse(
-        users=user_summaries, total=total, page=page, page_size=page_size, total_pages=total_pages
+        users=user_summaries,
+        total=total,
+        page=page,
+        page_size=page_size,
+        total_pages=total_pages,
     )
 
 
 @router.get("/{user_id}", response_model=UserDetailResponse)
 async def get_user(
-    user_id: int, db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin)
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin),
 ) -> UserDetailResponse:
     """Get detailed information about a specific user."""
     user = db.query(User).filter(User.id == user_id).first()
@@ -255,7 +261,9 @@ async def update_user(
 
 @router.delete("/{user_id}")
 async def delete_user(
-    user_id: int, db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin)
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin),
 ) -> dict[str, str]:
     """Delete a user and all their data."""
     user = db.query(User).filter(User.id == user_id).first()
@@ -338,7 +346,9 @@ async def get_user_conversations(
 
 @router.delete("/{user_id}/conversations")
 async def clear_user_conversations(
-    user_id: int, db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin)
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin),
 ) -> dict[str, str]:
     """Clear all conversation history for a user."""
     # Check if user exists

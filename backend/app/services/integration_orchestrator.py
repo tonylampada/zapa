@@ -176,7 +176,9 @@ class IntegrationOrchestrator:
         return {"shutdown": shutdown_result, "initialize": init_result}
 
     @asynccontextmanager
-    async def managed_integration(self) -> AsyncGenerator["IntegrationOrchestrator", None]:
+    async def managed_integration(
+        self,
+    ) -> AsyncGenerator["IntegrationOrchestrator", None]:
         """Context manager for managed integration lifecycle."""
         try:
             await self.initialize()

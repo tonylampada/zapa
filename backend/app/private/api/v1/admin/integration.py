@@ -106,7 +106,8 @@ async def get_component_health(
         health = await integration_monitor.get_component_health(component)
         if not health:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail=f"Component '{component}' not found"
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Component '{component}' not found",
             )
         return health
     except HTTPException:

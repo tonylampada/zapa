@@ -10,7 +10,9 @@ from app.core.config import settings
 # Create database configuration
 db_config = DatabaseConfig(
     DATABASE_URL=getattr(
-        settings, "DATABASE_URL", "postgresql://myuser:mypassword@localhost:5432/whatsapp_agent"
+        settings,
+        "DATABASE_URL",
+        "postgresql://myuser:mypassword@localhost:5432/whatsapp_agent",
     )
 )
 

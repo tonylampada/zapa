@@ -93,7 +93,11 @@ class TestWebhookSchemas:
 
     def test_connection_status_data(self):
         """Test ConnectionStatusData validation."""
-        data = {"status": "connected", "session_id": "session_123", "timestamp": datetime.utcnow()}
+        data = {
+            "status": "connected",
+            "session_id": "session_123",
+            "timestamp": datetime.utcnow(),
+        }
         status_data = ConnectionStatusData(**data)
         assert status_data.status == "connected"
         assert status_data.session_id == "session_123"
@@ -108,7 +112,9 @@ class TestWebhookSchemas:
         # Missing from_number
         with pytest.raises(ValidationError):
             MessageReceivedData(
-                to_number="+1234567890", message_id="msg_123", timestamp=datetime.utcnow()
+                to_number="+1234567890",
+                message_id="msg_123",
+                timestamp=datetime.utcnow(),
             )
 
         # Missing message_id

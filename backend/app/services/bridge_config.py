@@ -151,7 +151,11 @@ class BridgeConfigurationService:
                     "message": "Bridge is healthy and webhook URL is configured",
                 }
             else:
-                return {"status": "failed", "message": "Bridge is not healthy", "details": health}
+                return {
+                    "status": "failed",
+                    "message": "Bridge is not healthy",
+                    "details": health,
+                }
 
         except Exception as e:
             logger.error(f"Webhook test failed: {e}")

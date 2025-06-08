@@ -13,7 +13,11 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import get_current_admin
 from app.models import LLMConfig, Message, User
-from app.schemas.admin import ExportDataResponse, SystemHealthResponse, SystemStatsResponse
+from app.schemas.admin import (
+    ExportDataResponse,
+    SystemHealthResponse,
+    SystemStatsResponse,
+)
 
 router = APIRouter(prefix="/admin/system", tags=["admin-system"])
 
@@ -140,7 +144,11 @@ async def export_system_data(
 
     # Create export job
     export_id = str(uuid.uuid4())
-    export_jobs[export_id] = {"status": "pending", "download_url": None, "error_message": None}
+    export_jobs[export_id] = {
+        "status": "pending",
+        "download_url": None,
+        "error_message": None,
+    }
 
     # Start background export task
     background_tasks.add_task(perform_export, export_id, start_date, end_date, include_messages, db)
@@ -169,7 +177,11 @@ async def get_export_status(
 
 
 async def perform_export(
-    export_id: str, start_date: datetime, end_date: datetime, include_messages: bool, db: Session
+    export_id: str,
+    start_date: datetime,
+    end_date: datetime,
+    include_messages: bool,
+    db: Session,
 ) -> None:
     """Perform the actual data export (background task)."""
     try:
@@ -200,8 +212,8 @@ async def perform_export(
                     "display_name": user.display_name,
                     "first_name": user.first_name,
                     "last_name": user.last_name,
-                    "first_seen": user.first_seen.isoformat() if user.first_seen else None,
-                    "last_active": user.last_active.isoformat() if user.last_active else None,
+                    "first_seen": (user.first_seen.isoformat() if user.first_seen else None),
+                    "last_active": (user.last_active.isoformat() if user.last_active else None),
                     "is_active": user.is_active,
                     "is_admin": user.is_admin,
                 }

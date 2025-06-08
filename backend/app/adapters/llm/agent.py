@@ -168,7 +168,10 @@ class ZapaAgent:
 
 
 def create_agent(
-    provider: str = "openai", api_key: str | None = None, model: str | None = None, **kwargs: Any
+    provider: str = "openai",
+    api_key: str | None = None,
+    model: str | None = None,
+    **kwargs: Any,
 ) -> ZapaAgent:
     """
     Factory function to create agents for different providers.

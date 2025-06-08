@@ -5,7 +5,12 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from app.schemas.message import ConversationStats, MessageDirection, MessageResponse, MessageType
+from app.schemas.message import (
+    ConversationStats,
+    MessageDirection,
+    MessageResponse,
+    MessageType,
+)
 from app.services.llm_tools import LLMTools
 
 

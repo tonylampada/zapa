@@ -257,11 +257,16 @@ class MessageService:
         return self._message_to_response(message, user.phone_number)
 
     def get_user_messages(
-        self, db: Session, user_id: int, skip: int = 0, limit: int = 50, search: str = None
+        self,
+        db: Session,
+        user_id: int,
+        skip: int = 0,
+        limit: int = 50,
+        search: str = None,
     ) -> list[MessageResponse]:
         """Get user's messages with pagination and optional search."""
         query = db.query(Message).filter(Message.user_id == user_id)
-        
+
         if search:
             search_pattern = f"%{search}%"
             query = query.filter(
@@ -270,37 +275,16 @@ class MessageService:
                     Message.caption.ilike(search_pattern),
                 )
             )
-        
-        messages = (
-            query.order_by(desc(Message.timestamp))
-            .offset(skip)
-            .limit(limit)
-            .all()
-        )
-        
+
+        messages = query.order_by(desc(Message.timestamp)).offset(skip).limit(limit).all()
+
         # Get user phone for direction determination
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
             return []
-            
+
         return [self._message_to_response(msg, user.phone_number) for msg in messages]
 
-    def get_recent_messages(self, db: Session, user_id: int, count: int = 10) -> list[MessageResponse]:
-        """Get user's most recent messages."""
-        messages = (
-            db.query(Message)
-            .filter(Message.user_id == user_id)
-            .order_by(desc(Message.timestamp))
-            .limit(count)
-            .all()
-        )
-        
-        # Get user phone for direction determination
-        user = db.query(User).filter(User.id == user_id).first()
-        if not user:
-            return []
-            
-        return [self._message_to_response(msg, user.phone_number) for msg in messages]
 
     def search_user_messages(
         self, db: Session, user_id: int, query: str, skip: int = 0, limit: int = 20
@@ -308,7 +292,7 @@ class MessageService:
         """Search user's messages by content."""
         if not query.strip():
             return []
-            
+
         search_pattern = f"%{query}%"
         messages = (
             db.query(Message)
@@ -324,12 +308,12 @@ class MessageService:
             .limit(limit)
             .all()
         )
-        
+
         # Get user phone for direction determination
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
             return []
-            
+
         return [self._message_to_response(msg, user.phone_number) for msg in messages]
 
     def get_user_message_stats(self, db: Session, user_id: int) -> ConversationStats:
@@ -413,45 +397,51 @@ class MessageService:
     def export_user_messages(self, db: Session, user_id: int, format: str = "json"):
         """Export user's messages in specified format."""
         messages = (
-            db.query(Message)
-            .filter(Message.user_id == user_id)
-            .order_by(Message.timestamp)
-            .all()
+            db.query(Message).filter(Message.user_id == user_id).order_by(Message.timestamp).all()
         )
-        
+
         # Get user phone for direction determination
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
             return [] if format == "json" else ""
-            
+
         message_responses = [self._message_to_response(msg, user.phone_number) for msg in messages]
-        
+
         if format == "json":
             return [msg.model_dump() for msg in message_responses]
         elif format == "csv":
             # Create CSV content
             import csv
             import io
-            
+
             output = io.StringIO()
             writer = csv.writer(output)
-            
+
             # Write header
-            writer.writerow([
-                "id", "timestamp", "direction", "content", "message_type", "whatsapp_id"
-            ])
-            
+            writer.writerow(
+                [
+                    "id",
+                    "timestamp",
+                    "direction",
+                    "content",
+                    "message_type",
+                    "whatsapp_id",
+                ]
+            )
+
             # Write data
             for msg in message_responses:
-                writer.writerow([
-                    msg.id,
-                    msg.created_at.isoformat(),
-                    msg.direction,
-                    msg.content,
-                    msg.message_type,
-                    msg.whatsapp_message_id or ""
-                ])
-            
+                writer.writerow(
+                    [
+                        msg.id,
+                        msg.created_at.isoformat(),
+                        msg.direction,
+                        msg.content,
+                        msg.message_type,
+                        msg.whatsapp_message_id or "",
+                    ]
+                )
+
             return output.getvalue()
         else:
             raise ValueError(f"Unsupported export format: {format}")

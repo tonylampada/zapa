@@ -1,12 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import authApi from '@/api/auth'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(localStorage.getItem('auth_token'))
   const user = ref(null)
-  const router = useRouter()
   
   const isAuthenticated = computed(() => !!token.value)
   
@@ -53,7 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = null
     localStorage.removeItem('auth_token')
     authApi.clearAuthToken()
-    router.push('/login')
+    // Router navigation will be handled by the component calling logout
   }
   
   // Initialize auth if token exists

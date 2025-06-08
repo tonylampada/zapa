@@ -24,7 +24,11 @@ class TestRetryHandler:
         """Test function retries on failure and eventually succeeds."""
         mock_func = AsyncMock()
         # Fail twice, then succeed
-        mock_func.side_effect = [Exception("First failure"), Exception("Second failure"), "success"]
+        mock_func.side_effect = [
+            Exception("First failure"),
+            Exception("Second failure"),
+            "success",
+        ]
 
         with patch("asyncio.sleep") as mock_sleep:
             result = await RetryHandler.with_retry(mock_func, max_retries=3, delay=1.0, backoff=2.0)

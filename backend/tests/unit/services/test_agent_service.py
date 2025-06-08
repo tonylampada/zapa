@@ -244,7 +244,11 @@ class TestAgentService:
 
         # Create tool calls
         tool_calls = [
-            ToolCall(id="call_1", function_name="search_messages", arguments={"query": "test"}),
+            ToolCall(
+                id="call_1",
+                function_name="search_messages",
+                arguments={"query": "test"},
+            ),
             ToolCall(id="call_2", function_name="get_conversation_stats", arguments={}),
         ]
 
@@ -267,7 +271,11 @@ class TestAgentService:
 
         # Create tool call
         tool_calls = [
-            ToolCall(id="call_1", function_name="search_messages", arguments={"query": "test"})
+            ToolCall(
+                id="call_1",
+                function_name="search_messages",
+                arguments={"query": "test"},
+            )
         ]
 
         # Act

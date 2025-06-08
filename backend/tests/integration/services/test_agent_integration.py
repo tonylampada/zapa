@@ -107,10 +107,26 @@ class TestAgentIntegration:
         """Seed database with test messages."""
         messages_data = [
             ("Hello, I need help", "incoming", datetime.now() - timedelta(hours=2)),
-            ("Hi! How can I assist you?", "outgoing", datetime.now() - timedelta(hours=2)),
-            ("Can you remind me about my tasks?", "incoming", datetime.now() - timedelta(hours=1)),
-            ("Sure! Let me help you with that.", "outgoing", datetime.now() - timedelta(hours=1)),
-            ("What's the weather like?", "incoming", datetime.now() - timedelta(minutes=30)),
+            (
+                "Hi! How can I assist you?",
+                "outgoing",
+                datetime.now() - timedelta(hours=2),
+            ),
+            (
+                "Can you remind me about my tasks?",
+                "incoming",
+                datetime.now() - timedelta(hours=1),
+            ),
+            (
+                "Sure! Let me help you with that.",
+                "outgoing",
+                datetime.now() - timedelta(hours=1),
+            ),
+            (
+                "What's the weather like?",
+                "incoming",
+                datetime.now() - timedelta(minutes=30),
+            ),
             (
                 "I don't have weather information.",
                 "outgoing",

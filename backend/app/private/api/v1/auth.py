@@ -45,7 +45,8 @@ async def admin_login(login_data: AdminLogin, db: Session = Depends(get_db)) -> 
                 user = admin_user
             else:
                 raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid credentials",
                 )
         else:
             raise HTTPException(

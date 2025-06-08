@@ -208,7 +208,13 @@ async def test_retry_exceeds_max_retries(message_queue_service, mock_redis):
 async def test_get_queue_stats(message_queue_service, mock_redis):
     """Test getting queue statistics."""
     # Mock queue lengths
-    mock_redis.llen.side_effect = [5, 10, 2, 3, 1]  # high, normal, low, processing, failed
+    mock_redis.llen.side_effect = [
+        5,
+        10,
+        2,
+        3,
+        1,
+    ]  # high, normal, low, processing, failed
 
     # Get stats
     stats = await message_queue_service.get_queue_stats()

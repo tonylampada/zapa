@@ -58,7 +58,9 @@ async def get_available_providers(
 
 @router.get("/{user_id}", response_model=LLMConfigResponse)
 async def get_user_llm_config(
-    user_id: int, db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin)
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin),
 ) -> LLMConfigResponse:
     """Get LLM configuration for a user."""
     # Check if user exists
@@ -71,7 +73,8 @@ async def get_user_llm_config(
 
     if not config:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="No LLM configuration found for this user"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No LLM configuration found for this user",
         )
 
     # Don't expose the actual API key
@@ -114,7 +117,11 @@ async def create_user_llm_config(
 
     # Set default model if not specified
     if "model" not in model_settings:
-        default_models = {"openai": "gpt-4", "anthropic": "claude-3-sonnet", "google": "gemini-pro"}
+        default_models = {
+            "openai": "gpt-4",
+            "anthropic": "claude-3-sonnet",
+            "google": "gemini-pro",
+        }
         model_settings["model"] = default_models.get(config_data.provider, "gpt-4")
 
     # Create new config
@@ -200,7 +207,9 @@ async def update_user_llm_config(
 
 @router.post("/{user_id}/test", response_model=LLMConfigTestResponse)
 async def test_user_llm_config(
-    user_id: int, db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin)
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin),
 ) -> LLMConfigTestResponse:
     """Test if the user's LLM configuration is working."""
     # Get user and config
@@ -228,7 +237,10 @@ async def test_user_llm_config(
 
         # Create agent with decrypted settings
         agent = create_agent(
-            provider=config.provider, model_settings=decrypted_settings, user=user, db=db
+            provider=config.provider,
+            model_settings=decrypted_settings,
+            user=user,
+            db=db,
         )
 
         # Make a simple test call

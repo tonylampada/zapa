@@ -5,7 +5,10 @@ class LLMError(Exception):
     """Base exception for LLM operations."""
 
     def __init__(
-        self, message: str, provider: str = "unknown", original_error: Exception | None = None
+        self,
+        message: str,
+        provider: str = "unknown",
+        original_error: Exception | None = None,
     ):
         self.provider = provider
         self.original_error = original_error

@@ -120,7 +120,11 @@ class MessageQueueService:
     ) -> QueuedMessage | None:
         """Get the next message from the queue."""
         if priorities is None:
-            priorities = [MessagePriority.HIGH, MessagePriority.NORMAL, MessagePriority.LOW]
+            priorities = [
+                MessagePriority.HIGH,
+                MessagePriority.NORMAL,
+                MessagePriority.LOW,
+            ]
 
         async with self._get_redis() as r:
             # Try each priority queue in order
